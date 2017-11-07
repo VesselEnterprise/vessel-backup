@@ -35,6 +35,7 @@
 			<Add directory="../../lib/zlib-1.2.11/" />
 		</Compiler>
 		<Linker>
+			<Add library="../../lib/zlib-1.2.11/lib/libz.dll.a" />
 			<Add directory="../../lib/zlib-1.2.11/lib" />
 		</Linker>
 		<Unit filename="compress.cpp" />

@@ -4,75 +4,154 @@ using namespace Backup::Compression;
 
 Compressor::Compressor()
 {
-    std::cout << "Test123" << std::endl;
+
 }
 
 Compressor::~Compressor()
 {
-    std::cout << "Test123" << std::endl;
+
 }
 
-std::string Compressor::deflate_s(const std::string& s, int level)
+std::string Compressor::compress(const std::string& s, int level)
 {
-    //Stream
-    std::stringstream ss(s);
 
-    //Compressed output
-    std::istringstream zos;
+    //Stream
+    std::istringstream iss(s);
+    std::ostringstream ss;
 
     int ret, flush;
     unsigned have;
-    z_stream strm;
-    unsigned char in[CHUNK];
-    unsigned char out[CHUNK];
+
+    //IO Buffers
+    unsigned char in[Z_CHUNK];
+    unsigned char out[Z_CHUNK];
 
     /* allocate deflate state */
-    strm.zalloc = Z_NULL;
-    strm.zfree = Z_NULL;
-    strm.opaque = Z_NULL;
-    ret = deflateInit(&strm, level);
+
+    m_strm.zalloc = Z_NULL;
+    m_strm.zfree = Z_NULL;
+    m_strm.opaque = Z_NULL;
+    m_strm.avail_in = s.size();
+    ret = deflateInit(&m_strm, level);
     if (ret != Z_OK)
-        return zos.str();
+        return ss.str();
 
-    /* compress until end of file */
-    do {
+    //Compress contents
+    while ( !iss.eof() ) {
 
-        strm.avail_in = ss.read(in, CHUNK);
-        if (ss.fail()) {
-            (void)deflateEnd(&strm);
-            return zos.str();
-        }
+        iss.read((char*)in, Z_CHUNK);
 
-        flush = ss.eof() ? Z_FINISH : Z_NO_FLUSH;
-        strm.next_in = in;
-
-        /* run deflate() on input until output buffer not full, finish
-           compression if all of source has been read in */
         do {
-            strm.avail_out = CHUNK;
-            strm.next_out = out;
-            ret = deflate(&strm, flush);    /* no bad return value */
-            assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
-            have = CHUNK - strm.avail_out;
 
-            //Write to stream
-            zos >> out;
+            flush = iss.eof() ? Z_FINISH : Z_NO_FLUSH;
+            m_strm.next_in = in;
 
-            if (ss.eof() || ss.fail() ) {
-                (void)deflateEnd(&strm);
-                return zos.str();
-            }
+            /* run deflate() on input until output buffer not full, finish compression if all of source has been read in */
+            do {
+                m_strm.avail_out = Z_CHUNK;
+                m_strm.next_out = out;
+                ret = deflate(&m_strm, flush);    /* no bad return value */
+                assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
+                have = Z_CHUNK - m_strm.avail_out;
 
-        } while (strm.avail_out == 0);
-        assert(strm.avail_in == 0);     /* all input will be used */
+                //Write to output buffer
+                ss << (char*)out;
 
-        /* done when last data in file processed */
-    } while (flush != Z_FINISH);
-    assert(ret == Z_STREAM_END);        /* stream will be complete */
+                if ( ss.tellp() != have || ss.bad() ) {
+                    (void)deflateEnd(&m_strm);
+                    return ss.str();
+                }
+            } while (m_strm.avail_out == 0);
+            assert(m_strm.avail_in == 0);     /* all input will be used */
+
+            /* done when last data in file processed */
+        }
+        while (flush != Z_FINISH);
+
+        assert(ret == Z_STREAM_END);        /* stream will be complete */
+
+    }
 
     /* clean up and return */
-    (void)deflateEnd(&strm);
+    (void)deflateEnd(&m_strm);
+    return ss.str();
 
-    return zos.str();
+}
+
+std::string Compressor::decompress( const std::string& s )
+{
+
+    //Stream
+    std::istringstream iss(s);
+    std::ostringstream ss;
+
+    int ret;
+    unsigned have;
+    unsigned char in[Z_CHUNK];
+    unsigned char out[Z_CHUNK];
+
+    /* allocate inflate state */
+    m_strm.zalloc = Z_NULL;
+    m_strm.zfree = Z_NULL;
+    m_strm.opaque = Z_NULL;
+    m_strm.avail_in = s.size();
+    m_strm.next_in = Z_NULL;
+    ret = inflateInit(&m_strm);
+    if (ret != Z_OK)
+        return ss.str();
+
+    //Decompress contents
+    while ( !iss.eof() ) {
+
+        iss.read( (char*)in, Z_CHUNK );
+
+        do {
+
+            if (iss.bad()) {
+                (void)inflateEnd(&m_strm);
+                return ss.str();
+            }
+
+            if (m_strm.avail_in == 0)
+                break;
+
+            m_strm.next_in = in;
+
+            /* run inflate() on input until output buffer not full */
+            do {
+                m_strm.avail_out = Z_CHUNK;
+                m_strm.next_out = out;
+                ret = inflate(&m_strm, Z_NO_FLUSH);
+                assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
+                switch (ret) {
+                    case Z_NEED_DICT:
+                        ret = Z_DATA_ERROR;     /* and fall through */
+                    case Z_DATA_ERROR:
+                    case Z_MEM_ERROR:
+                        (void)inflateEnd(&m_strm);
+                        return ss.str();
+                }
+                have = Z_CHUNK - m_strm.avail_out;
+
+                ss << (char*)out;
+
+                if ( ss.tellp() != have || ss.bad() ) {
+                    (void)inflateEnd(&m_strm);
+                    return ss.str();
+                }
+            } while (m_strm.avail_out == 0);
+
+            /* done when inflate() says it's done */
+        }
+        while (ret != Z_STREAM_END);
+
+    }
+
+    /* clean up and return */
+    (void)inflateEnd(&m_strm);
+
+    return ss.str();
+
+    //return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
 
 }

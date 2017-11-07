@@ -2,6 +2,7 @@
 #define COMPRESS_H
 
 #include <iostream>
+#include <assert.h>
 #include <fstream>
 #include <sstream>
 #include <string.h>
@@ -15,8 +16,8 @@
 #  define SET_BINARY_MODE(file)
 #endif
 
-#define COMP_LEVEL 6
-#define CHUNK 16384
+#define Z_COMP_LEVEL 6
+#define Z_CHUNK 16384
 
 namespace Backup {
     namespace Compression {
@@ -27,10 +28,13 @@ namespace Backup {
                 Compressor();
                 ~Compressor();
 
-                std::string deflate_s(const std::string& s, int c = Z_DEFAULT_COMPRESSION );
-                std::string inflate_s(const std::string& s);
+                std::operator<<()
+
+                std::string compress(const std::string& s, int z_level = Z_COMP_LEVEL ); //Z_DEFAULT_COMPRESSION
+                std::string decompress(const std::string& s);
 
             private:
+                z_stream m_strm;
 
 
 
