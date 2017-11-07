@@ -33,10 +33,14 @@
 			<Add option="-std=c++14" />
 			<Add option="-fexceptions" />
 			<Add directory="../../lib/zlib-1.2.11/" />
+			<Add directory="../../lib/boost_1_65_1" />
 		</Compiler>
 		<Linker>
+			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+			<Add option="-lboost_system-mgw72-mt-1_65_1" />
 			<Add library="../../lib/zlib-1.2.11/lib/libz.dll.a" />
 			<Add directory="../../lib/zlib-1.2.11/lib" />
+			<Add directory="../../lib/boost_1_65_1/stage/lib" />
 		</Linker>
 		<Unit filename="compress.cpp" />
 		<Unit filename="compress.hpp" />

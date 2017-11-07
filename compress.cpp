@@ -2,7 +2,7 @@
 
 using namespace Backup::Compression;
 
-Compressor::Compressor()
+Compressor::Compressor() : m_z_level(Z_COMP_LEVEL)
 {
 
 }
@@ -12,146 +12,154 @@ Compressor::~Compressor()
 
 }
 
-std::string Compressor::compress(const std::string& s, int level)
+void Compressor::set_z_level(int level)
+{
+    m_z_level = level;
+}
+
+//Compress data
+std::string Compressor::operator<<(const std::string & s)
 {
 
-    //Stream
-    std::istringstream iss(s);
-    std::ostringstream ss;
+    //Buffer
+    std::string out_s;
 
-    int ret, flush;
-    unsigned have;
+    //Return code
+    int ret;
 
-    //IO Buffers
-    unsigned char in[Z_CHUNK];
-    unsigned char out[Z_CHUNK];
+    //Output Buffer
+    char out[Z_CHUNK];
 
     /* allocate deflate state */
+    z_stream zs = {0};
 
-    m_strm.zalloc = Z_NULL;
-    m_strm.zfree = Z_NULL;
-    m_strm.opaque = Z_NULL;
-    m_strm.avail_in = s.size();
-    ret = deflateInit(&m_strm, level);
+    /*
+    zs.zalloc = Z_NULL;
+    zs.zfree = Z_NULL;
+    zs.opaque = Z_NULL;
+    */
+
+    ret = deflateInit2(&zs, m_z_level, Z_DEFLATED, 16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
+
     if (ret != Z_OK)
-        return ss.str();
+        return out_s;
+
+    zs.next_in = (unsigned char*)s.data();
+    zs.avail_in = s.size();
 
     //Compress contents
-    while ( !iss.eof() ) {
+    do
+    {
 
-        iss.read((char*)in, Z_CHUNK);
+        zs.next_out = reinterpret_cast<unsigned char*>(out);
+        zs.avail_out = sizeof(out);
 
-        do {
+        ret = deflate(&zs, Z_NO_FLUSH );
 
-            flush = iss.eof() ? Z_FINISH : Z_NO_FLUSH;
-            m_strm.next_in = in;
-
-            /* run deflate() on input until output buffer not full, finish compression if all of source has been read in */
-            do {
-                m_strm.avail_out = Z_CHUNK;
-                m_strm.next_out = out;
-                ret = deflate(&m_strm, flush);    /* no bad return value */
-                assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
-                have = Z_CHUNK - m_strm.avail_out;
-
-                //Write to output buffer
-                ss << (char*)out;
-
-                if ( ss.tellp() != have || ss.bad() ) {
-                    (void)deflateEnd(&m_strm);
-                    return ss.str();
-                }
-            } while (m_strm.avail_out == 0);
-            assert(m_strm.avail_in == 0);     /* all input will be used */
-
-            /* done when last data in file processed */
+        //Write to output buffer
+        if ( out_s.size() < zs.total_out )
+        {
+            out_s.append(out, zs.total_out - out_s.size() );
         }
-        while (flush != Z_FINISH);
-
-        assert(ret == Z_STREAM_END);        /* stream will be complete */
 
     }
+    while (ret == Z_OK);
 
-    /* clean up and return */
-    (void)deflateEnd(&m_strm);
-    return ss.str();
+    deflateEnd(&zs);
+
+    return out_s;
 
 }
 
-std::string Compressor::decompress( const std::string& s )
+//Decompress data
+std::string Compressor::operator>>(const std::string & s)
 {
 
-    //Stream
-    std::istringstream iss(s);
-    std::ostringstream ss;
+    //Output string
+    std::string out_s;
 
+    //Return code
     int ret;
-    unsigned have;
-    unsigned char in[Z_CHUNK];
-    unsigned char out[Z_CHUNK];
+
+    //Output Buffer
+    char out[Z_CHUNK];
 
     /* allocate inflate state */
-    m_strm.zalloc = Z_NULL;
-    m_strm.zfree = Z_NULL;
-    m_strm.opaque = Z_NULL;
-    m_strm.avail_in = s.size();
-    m_strm.next_in = Z_NULL;
-    ret = inflateInit(&m_strm);
+    z_stream zs = {0};
+
+    /*
+    zs.zalloc = Z_NULL;
+    zs.zfree = Z_NULL;
+    zs.opaque = Z_NULL;
+    zs.avail_in = 0;
+    zs.next_in = Z_NULL;
+    */
+
+    ret = inflateInit2(&zs, 16 + MAX_WBITS);
+
     if (ret != Z_OK)
-        return ss.str();
+        return out_s;
+
+    zs.next_in = (unsigned char*)s.data();
+    zs.avail_in = s.size();
 
     //Decompress contents
-    while ( !iss.eof() ) {
+    do
+    {
 
-        iss.read( (char*)in, Z_CHUNK );
+        zs.next_out = reinterpret_cast<unsigned char*>(out);
+        zs.avail_out = sizeof(out);
 
-        do {
+        ret = inflate(&zs, Z_NO_FLUSH );
 
-            if (iss.bad()) {
-                (void)inflateEnd(&m_strm);
-                return ss.str();
-            }
-
-            if (m_strm.avail_in == 0)
-                break;
-
-            m_strm.next_in = in;
-
-            /* run inflate() on input until output buffer not full */
-            do {
-                m_strm.avail_out = Z_CHUNK;
-                m_strm.next_out = out;
-                ret = inflate(&m_strm, Z_NO_FLUSH);
-                assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
-                switch (ret) {
-                    case Z_NEED_DICT:
-                        ret = Z_DATA_ERROR;     /* and fall through */
-                    case Z_DATA_ERROR:
-                    case Z_MEM_ERROR:
-                        (void)inflateEnd(&m_strm);
-                        return ss.str();
-                }
-                have = Z_CHUNK - m_strm.avail_out;
-
-                ss << (char*)out;
-
-                if ( ss.tellp() != have || ss.bad() ) {
-                    (void)inflateEnd(&m_strm);
-                    return ss.str();
-                }
-            } while (m_strm.avail_out == 0);
-
-            /* done when inflate() says it's done */
+        if ( out_s.size() < zs.total_out )
+        {
+            out_s.append( out, zs.total_out - out_s.size() );
         }
-        while (ret != Z_STREAM_END);
+
+    }
+    while (ret == Z_OK);
+
+    inflateEnd(&zs);
+
+    return out_s;
+
+}
+
+void Compressor::compress_file( const std::string & in, const std::string & out )
+{
+
+    std::ifstream infile( in, std::ifstream::in | std::ifstream::binary );
+    if ( !infile.is_open() )
+        return;
+
+    std::ofstream outfile( out, std::ofstream::out );
+    if ( !outfile.is_open() )
+        return;
+
+    unsigned int fs = boost::filesystem::file_size(in);
+
+    while ( !infile.eof() && infile.good() )
+    {
+
+        char* buffer = new char[Z_CHUNK];
+
+        infile.read(buffer, Z_CHUNK );
+
+        //Compress the block of data and save it to out file
+        std::string ds = *this << buffer;
+
+        outfile << ds;
+
+        unsigned int bytes_read = infile.tellg();
+
+        std::cout << bytes_read << " / " << fs << " bytes compressed" << " (" << (((double)bytes_read / fs)*100) << "%)" << std::endl;
+
+        delete[] buffer;
 
     }
 
-    /* clean up and return */
-    (void)inflateEnd(&m_strm);
-
-    return ss.str();
-
-    //return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
+    infile.close();
+    outfile.close();
 
 }

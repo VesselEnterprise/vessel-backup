@@ -6,7 +6,10 @@
 #include <fstream>
 #include <sstream>
 #include <string.h>
+#include <math.h>
+#include <iomanip>
 #include <zlib.h>
+#include <boost/filesystem.hpp>
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>
@@ -17,7 +20,7 @@
 #endif
 
 #define Z_COMP_LEVEL 6
-#define Z_CHUNK 16384
+#define Z_CHUNK 32768
 
 namespace Backup {
     namespace Compression {
@@ -25,18 +28,25 @@ namespace Backup {
         class Compressor {
 
             public:
+
                 Compressor();
                 ~Compressor();
 
-                std::operator<<()
+                //Compression operator
+                std::string operator << ( const std::string& s );
 
-                std::string compress(const std::string& s, int z_level = Z_COMP_LEVEL ); //Z_DEFAULT_COMPRESSION
-                std::string decompress(const std::string& s);
+                //Decompression operator
+                std::string operator >> ( const std::string& s );
+
+                //Compress file and save to temp file
+                void compress_file( const std::string & in, const std::string & out );
+
+                //Set compression level
+                void set_z_level ( int level );
 
             private:
-                z_stream m_strm;
 
-
+                int m_z_level; //Compression level
 
         };
 
