@@ -28,10 +28,53 @@ std::string Compressor::operator<<(const std::string & s)
     int ret;
 
     //Output Buffer
-    char out[Z_CHUNK];
+    unsigned char out[Z_CHUNK];
 
     /* allocate deflate state */
     z_stream zs = {0};
+    /*
+    zs.zalloc = Z_NULL;
+    zs.zfree = Z_NULL;
+    zs.opaque = Z_NULL;
+    */
+
+    ret = deflateInit2(&zs, m_z_level, Z_DEFLATED, MAX_WBITS | GZIP_ENCODING, 8, Z_DEFAULT_STRATEGY);
+
+    if (ret != Z_OK)
+        return out_s;
+
+    zs.next_in = (unsigned char*)s.c_str();
+    zs.avail_in = s.size();
+
+    //Compress contents
+    do
+    {
+
+        zs.next_out = out;
+        zs.avail_out = sizeof(out);
+
+        ret = deflate(&zs, Z_FINISH );
+
+        assert(ret != Z_STREAM_ERROR);
+
+        //Write to output buffer
+        out_s.append((char*)out, (Z_CHUNK - zs.avail_out) );
+
+    }
+    while (zs.avail_out == 0);
+
+    assert(zs.avail_in == 0); //All input should be used
+
+    deflateEnd(&zs);
+
+    return out_s;
+
+}
+
+int Compressor::start_decompression(size_t len)
+{
+    /* allocate inflate state */
+    m_zs_decomp = {0};
 
     /*
     zs.zalloc = Z_NULL;
@@ -39,36 +82,15 @@ std::string Compressor::operator<<(const std::string & s)
     zs.opaque = Z_NULL;
     */
 
-    ret = deflateInit2(&zs, m_z_level, Z_DEFLATED, 16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
+    m_zs_decomp.avail_in = len;
 
-    if (ret != Z_OK)
-        return out_s;
+    return inflateInit2(&m_zs_decomp, MAX_WBITS | GZIP_ENCODING );
 
-    zs.next_in = (unsigned char*)s.data();
-    zs.avail_in = s.size();
+}
 
-    //Compress contents
-    do
-    {
-
-        zs.next_out = reinterpret_cast<unsigned char*>(out);
-        zs.avail_out = sizeof(out);
-
-        ret = deflate(&zs, Z_NO_FLUSH );
-
-        //Write to output buffer
-        if ( out_s.size() < zs.total_out )
-        {
-            out_s.append(out, zs.total_out - out_s.size() );
-        }
-
-    }
-    while (ret == Z_OK);
-
-    deflateEnd(&zs);
-
-    return out_s;
-
+void Compressor::end_decompression()
+{
+    inflateEnd(&m_zs_decomp); //Cleanup
 }
 
 //Decompress data
@@ -82,45 +104,27 @@ std::string Compressor::operator>>(const std::string & s)
     int ret;
 
     //Output Buffer
-    char out[Z_CHUNK];
+    unsigned char out[Z_CHUNK];
 
-    /* allocate inflate state */
-    z_stream zs = {0};
-
-    /*
-    zs.zalloc = Z_NULL;
-    zs.zfree = Z_NULL;
-    zs.opaque = Z_NULL;
-    zs.avail_in = 0;
-    zs.next_in = Z_NULL;
-    */
-
-    ret = inflateInit2(&zs, 16 + MAX_WBITS);
-
-    if (ret != Z_OK)
-        return out_s;
-
-    zs.next_in = (unsigned char*)s.data();
-    zs.avail_in = s.size();
+    m_zs_decomp.next_in = (unsigned char*)s.c_str();
 
     //Decompress contents
     do
     {
 
-        zs.next_out = reinterpret_cast<unsigned char*>(out);
-        zs.avail_out = sizeof(out);
+        m_zs_decomp.next_out = out;
+        m_zs_decomp.avail_out = sizeof(out);
 
-        ret = inflate(&zs, Z_NO_FLUSH );
+        ret = inflate(&m_zs_decomp, Z_NO_FLUSH );
 
-        if ( out_s.size() < zs.total_out )
-        {
-            out_s.append( out, zs.total_out - out_s.size() );
-        }
+        assert(ret != Z_STREAM_ERROR);
+
+        std::cout << "AVAILOUT: " << m_zs_decomp.avail_out << std::endl;
+
+        out_s.append( (char*)out, (Z_CHUNK - m_zs_decomp.avail_out) );
 
     }
-    while (ret == Z_OK);
-
-    inflateEnd(&zs);
+    while (m_zs_decomp.avail_out == 0);
 
     return out_s;
 
@@ -133,11 +137,12 @@ void Compressor::compress_file( const std::string & in, const std::string & out 
     if ( !infile.is_open() )
         return;
 
-    std::ofstream outfile( out, std::ofstream::out );
+    std::ofstream outfile( out, std::ofstream::out | std::ofstream::binary );
     if ( !outfile.is_open() )
         return;
 
-    unsigned int fs = boost::filesystem::file_size(in);
+    size_t fs = boost::filesystem::file_size(in);
+    size_t bytes_read=0;
 
     while ( !infile.eof() && infile.good() )
     {
@@ -146,18 +151,69 @@ void Compressor::compress_file( const std::string & in, const std::string & out 
 
         infile.read(buffer, Z_CHUNK );
 
-        //Compress the block of data and save it to out file
-        std::string ds = *this << buffer;
+        //Save buffer to string
+        std::string ts(buffer, infile.gcount() );
 
+        //Compress the block of data and save it to out file
+        std::string ds = *this << ts;
+
+        //Write to outfile
         outfile << ds;
 
-        unsigned int bytes_read = infile.tellg();
+        bytes_read += infile.gcount();
 
         std::cout << bytes_read << " / " << fs << " bytes compressed" << " (" << (((double)bytes_read / fs)*100) << "%)" << std::endl;
 
         delete[] buffer;
 
     }
+
+    infile.close();
+    outfile.close();
+
+}
+
+void Compressor::decompress_file( const std::string & in, const std::string & out )
+{
+
+    std::ifstream infile( in, std::ifstream::in | std::ifstream::binary );
+    if ( !infile.is_open() )
+        return;
+
+    std::ofstream outfile( out, std::ofstream::out | std::ofstream::binary );
+    if ( !outfile.is_open() )
+        return;
+
+    size_t fs = boost::filesystem::file_size(in);
+    size_t bytes_read=0;
+
+    this->start_decompression(fs);
+
+    while ( !infile.eof() && infile.good() )
+    {
+
+        char* buffer = new char[Z_CHUNK];
+
+        infile.read(buffer, Z_CHUNK );
+
+        //Save buffer to string
+        std::string ts(buffer, infile.gcount() );
+
+        //Decompress the block of data and save it to out file
+        std::string ds = *this >> ts;
+
+        //Write to outfile
+        outfile << ds;
+
+        bytes_read += infile.gcount();
+
+        std::cout << bytes_read << " / " << fs << " bytes decompressed" << " (" << (((double)bytes_read / fs)*100) << "%)" << std::endl;
+
+        delete[] buffer;
+
+    }
+
+    this->end_decompression();
 
     infile.close();
     outfile.close();

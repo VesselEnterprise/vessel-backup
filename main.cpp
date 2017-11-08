@@ -63,7 +63,14 @@ int main()
     */
 
     c->set_z_level(Z_BEST_COMPRESSION);
-    c->compress_file("C:\\Users\\kett.ky\\Documents\\Outlook Files\\archive.pst", "C:\\Users\\kett.ky\\Documents\\Outlook Files\\archive.pst.gz" );
+    int i=0;
+    while ( i < 10000 )
+    {
+        c->compress_file("C:\\Users\\Kyle\\Documents\\InsuranceIDCard.pdf", "C:\\Users\\Kyle\\Documents\\InsuranceIDCard.pdf.gz" );
+        c->decompress_file("C:\\Users\\Kyle\\Documents\\InsuranceIDCard.pdf.gz", "C:\\Users\\Kyle\\Documents\\InsuranceIDCard_decompressed.pdf" );
+
+        i++;
+    }
 
     delete c;
 
