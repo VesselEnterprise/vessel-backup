@@ -34,6 +34,7 @@
 			<Add option="-fexceptions" />
 			<Add directory="../../lib/zlib-1.2.11/" />
 			<Add directory="../../lib/boost_1_65_1" />
+			<Add directory="../../lib/libarchive/libarchive" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
@@ -45,6 +46,8 @@
 		<Unit filename="compress.cpp" />
 		<Unit filename="compress.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="tarball.cpp" />
+		<Unit filename="tarball.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

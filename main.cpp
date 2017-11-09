@@ -2,6 +2,7 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
 #include "compress.hpp"
+#include "tarball.hpp"
 
 using namespace std;
 using namespace Backup::Compression;
