@@ -20,7 +20,7 @@
 #endif
 
 #define Z_COMP_LEVEL 6
-#define Z_CHUNK 131072 //32768
+#define Z_CHUNK 32768
 #define GZIP_ENCODING 16
 
 namespace Backup {
