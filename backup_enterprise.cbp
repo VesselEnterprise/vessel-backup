@@ -5,6 +5,7 @@
 		<Option title="backup_enterprise" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option virtualFolders="Tests\;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/backup_enterprise" prefix_auto="1" extension_auto="1" />
@@ -27,6 +28,19 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
+			<Target title="compress_test">
+				<Option output="tests/compression/compress_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="tests/compression" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+			</Target>
+			<Target title="tarball_test">
+				<Option output="tests/tarball/tarball_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="tests/tarball" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -35,19 +49,33 @@
 			<Add directory="../../lib/zlib-1.2.11/" />
 			<Add directory="../../lib/boost_1_65_1" />
 			<Add directory="../../lib/libarchive/libarchive" />
+			<Add directory="C:/projects/bv-backup/" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
 			<Add option="-lboost_system-mgw72-mt-1_65_1" />
+			<Add option="-larchive.dll" />
 			<Add library="../../lib/zlib-1.2.11/lib/libz.dll.a" />
 			<Add directory="../../lib/zlib-1.2.11/lib" />
 			<Add directory="../../lib/boost_1_65_1/stage/lib" />
+			<Add directory="../../lib/libarchive/lib/libarchive" />
 		</Linker>
 		<Unit filename="compress.cpp" />
 		<Unit filename="compress.hpp" />
-		<Unit filename="main.cpp" />
+		<Unit filename="main.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="tarball.cpp" />
 		<Unit filename="tarball.hpp" />
+		<Unit filename="tests/compression/compress_test.cpp">
+			<Option virtualFolder="Tests/" />
+			<Option target="compress_test" />
+		</Unit>
+		<Unit filename="tests/tarball/tarball_test.cpp">
+			<Option virtualFolder="Tests/" />
+			<Option target="tarball_test" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />
