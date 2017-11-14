@@ -33,12 +33,17 @@
 				<Option working_dir="tests/compression" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 			</Target>
 			<Target title="tarball_test">
 				<Option output="tests/tarball/tarball_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="tests/tarball" />
-				<Option type="0" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
+			<Target title="db_test">
+				<Option output="tests/db/db_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="tests/db" />
+				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 		</Build>
@@ -50,27 +55,64 @@
 			<Add directory="../../lib/boost_1_65_1" />
 			<Add directory="../../lib/libarchive/libarchive" />
 			<Add directory="C:/projects/bv-backup/" />
+			<Add directory="../../lib/sqlite-3.21.0" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
 			<Add option="-lboost_system-mgw72-mt-1_65_1" />
 			<Add option="-larchive.dll" />
+			<Add option="-lsqlite3_dll" />
 			<Add library="../../lib/zlib-1.2.11/lib/libz.dll.a" />
 			<Add directory="../../lib/zlib-1.2.11/lib" />
 			<Add directory="../../lib/boost_1_65_1/stage/lib" />
 			<Add directory="../../lib/libarchive/lib/libarchive" />
+			<Add directory="../../lib/sqlite-3.21.0" />
 		</Linker>
-		<Unit filename="compress.cpp" />
-		<Unit filename="compress.hpp" />
+		<Unit filename="compress.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="compress_test" />
+			<Option target="tarball_test" />
+		</Unit>
+		<Unit filename="compress.hpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="compress_test" />
+			<Option target="tarball_test" />
+		</Unit>
+		<Unit filename="local_db.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="db_test" />
+		</Unit>
+		<Unit filename="local_db.hpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="db_test" />
+		</Unit>
 		<Unit filename="main.cpp">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="tarball.cpp" />
-		<Unit filename="tarball.hpp" />
+		<Unit filename="tarball.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="compress_test" />
+			<Option target="tarball_test" />
+		</Unit>
+		<Unit filename="tarball.hpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="compress_test" />
+			<Option target="tarball_test" />
+		</Unit>
 		<Unit filename="tests/compression/compress_test.cpp">
 			<Option virtualFolder="Tests/" />
 			<Option target="compress_test" />
+		</Unit>
+		<Unit filename="tests/db/db_test.cpp">
+			<Option virtualFolder="Tests/" />
+			<Option target="db_test" />
 		</Unit>
 		<Unit filename="tests/tarball/tarball_test.cpp">
 			<Option virtualFolder="Tests/" />
