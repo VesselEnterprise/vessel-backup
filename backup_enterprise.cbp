@@ -46,6 +46,12 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="file_test">
+				<Option output="tests/file_iterator/file_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="tests/file_iterator" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -56,17 +62,21 @@
 			<Add directory="../../lib/libarchive/libarchive" />
 			<Add directory="C:/projects/bv-backup/" />
 			<Add directory="../../lib/sqlite-3.21.0" />
+			<Add directory="../../lib/cryptopp565" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
 			<Add option="-lboost_system-mgw72-mt-1_65_1" />
 			<Add option="-larchive.dll" />
 			<Add option="-lsqlite3_dll" />
+			<Add option="-lcryptopp" />
+			<Add option="-lws2_32" />
 			<Add library="../../lib/zlib-1.2.11/lib/libz.dll.a" />
 			<Add directory="../../lib/zlib-1.2.11/lib" />
 			<Add directory="../../lib/boost_1_65_1/stage/lib" />
 			<Add directory="../../lib/libarchive/lib/libarchive" />
 			<Add directory="../../lib/sqlite-3.21.0" />
+			<Add directory="../../lib/cryptopp565" />
 		</Linker>
 		<Unit filename="compress.cpp">
 			<Option target="Debug" />
@@ -80,15 +90,27 @@
 			<Option target="compress_test" />
 			<Option target="tarball_test" />
 		</Unit>
+		<Unit filename="file_iterator.cpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="file_test" />
+		</Unit>
+		<Unit filename="file_iterator.hpp">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="file_test" />
+		</Unit>
 		<Unit filename="local_db.cpp">
 			<Option target="Debug" />
 			<Option target="Release" />
 			<Option target="db_test" />
+			<Option target="file_test" />
 		</Unit>
 		<Unit filename="local_db.hpp">
 			<Option target="Debug" />
 			<Option target="Release" />
 			<Option target="db_test" />
+			<Option target="file_test" />
 		</Unit>
 		<Unit filename="main.cpp">
 			<Option target="Debug" />
@@ -113,6 +135,10 @@
 		<Unit filename="tests/db/db_test.cpp">
 			<Option virtualFolder="Tests/" />
 			<Option target="db_test" />
+		</Unit>
+		<Unit filename="tests/file_iterator/file_test.cpp">
+			<Option virtualFolder="Tests/" />
+			<Option target="file_test" />
 		</Unit>
 		<Unit filename="tests/tarball/tarball_test.cpp">
 			<Option virtualFolder="Tests/" />

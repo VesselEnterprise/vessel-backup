@@ -16,13 +16,17 @@ namespace Backup{
                 LocalDatabase(const std::string& filename);
                 ~LocalDatabase();
 
+                bool is_ignore_dir(const std::string& dir_name, int level);
                 bool is_ignore_ext(const std::string& ext);
 
                 std::string get_setting_str(const std::string& s);
                 int get_setting_int(const std::string&s );
 
+                template <typename T>
+                bool update_setting(const std::string& key, const T& val );
+
                 //Update file extension count
-                void update_ext_count( const std::string& ext, int total );
+                bool update_ext_count( const std::string& ext, int total );
 
                 std::string get_last_err();
 
