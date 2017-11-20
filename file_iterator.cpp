@@ -13,8 +13,10 @@ FileIterator::FileIterator(const std::string& path) : m_base_path(path), m_skip_
     }
     catch( const fs::filesystem_error& e )
     {
-
+        cout << e.what() << '\n';
     }
+
+    m_current_dir.path = path;
 
 }
 
@@ -31,23 +33,11 @@ std::string FileIterator::get_base_path()
 void FileIterator::scan()
 {
 
-    cout << "Check 1" << '\n';
-
-    try
+    if ( !fs::exists(m_current_dir.path) )
     {
-
-        if ( !fs::exists(m_itr->path()) ) {
-            cout << "Error: Could not scan " <<  m_itr->path().string() << ". Directory does not exist" << '\n';
-            return;
-        }
-
+        cout << "Error: Scan failed. " << m_current_dir.path << " does not exist" << '\n';
+        return;
     }
-    catch(const fs::filesystem_error& e)
-    {
-
-    }
-
-    cout << "Check 2" << '\n';
 
     try
     {
@@ -60,22 +50,62 @@ void FileIterator::scan()
             cout << "Filename:" << m_itr->path().filename() << '\n';
             cout << "Stem:" << m_itr->path().stem() << '\n';
             cout << "Extension:" << m_itr->path().extension() << '\n';
+            cout << "Generic Path:" << m_itr->path().generic_path() << '\n';
+            cout << "Relative Path:" << m_itr->path().relative_path() << '\n';
+            cout << "Root Path:" << m_itr->path().root_path() << '\n';
+            cout << "Parent Path:" << m_itr->path().parent_path() << '\n';
 
             if ( fs::is_regular_file(*m_itr) )
-                cout << *m_itr << " size is " << fs::file_size(*m_itr) << '\n';
+            {
+                Types::file_data fd;
+                fd.filename = m_itr->path().filename().string();
+                fd.file_ext = m_itr->path().extension().string();
+                fd.filesize = fs::file_size(*m_itr);
+                fd.parent_path = m_itr->path().parent_path().string();
+                fd.directory_id = m_current_dir.directory_id;
 
+                //Sometimes last_write_time can result in an access denied error
+                try
+                {
+                    fd.last_modified = fs::last_write_time(*m_itr);
+                }
+                catch (const fs::filesystem_error & e ) { cout << "Error: Could not get last write time" << '\n'; }
+
+                m_ldb->add_file( &fd );
+
+                cout << "Last error: " << m_ldb->get_last_err() << '\n';
+
+            }
             else if ( fs::is_directory(*m_itr) )
             {
-
-                cout << *m_itr << " is a directory" << '\n';
 
                 if ( this->skip_dir(m_itr->path().filename().string(), m_itr.level() ) )
                 {
                     cout << "Skipped directory exception: " << *m_itr << '\n';
                     m_itr.no_push();
-                    system("PAUSE");
+                    //system("PAUSE");
                 }
 
+                //Update current directory information
+                if ( m_itr->path().string() != m_current_dir.path )
+                {
+                    m_current_dir.folder_name = m_itr->path().filename().string();
+                    m_current_dir.path = m_itr->path().string();
+
+                    //Sometimes last_write_time can result in an access denied error
+                    try
+                    {
+                        m_current_dir.last_modified = fs::last_write_time( *m_itr );
+                    }
+                    catch (const fs::filesystem_error & e ) { cout << "Error: Could not get last write time" << '\n'; }
+
+                    m_ldb->add_directory(&m_current_dir);
+
+                    cout << "Directory ID: " << m_current_dir.directory_id << '\n';
+
+                }
+
+                cout << *m_itr << " is a directory" << '\n';
 
             }
             else
@@ -89,7 +119,7 @@ void FileIterator::scan()
         //ERROR LOGGING HERE
         cout << ex.what() << '\n';
         ++m_itr;
-        system("PAUSE");
+        //system("PAUSE");
         this->scan();
         return;
 
@@ -107,8 +137,6 @@ void FileIterator::set_local_db(Database::LocalDatabase* db)
 
 bool FileIterator::skip_dir(const std::string& path, int level)
 {
-
-    std::cout << "Skip periods: " << m_skip_dir_periods << std::endl;
 
     if ( m_skip_dir_periods && path[0] == '.' )
         return true;

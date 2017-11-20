@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sqlite3.h>
 #include <boost/lexical_cast.hpp>
+#include "types.hpp"
 
 namespace Backup{
     namespace Database {
@@ -27,6 +28,9 @@ namespace Backup{
 
                 //Update file extension count
                 bool update_ext_count( const std::string& ext, int total );
+
+                unsigned int add_file( Backup::Types::file_data* fd );
+                unsigned int add_directory( Backup::Types::file_directory* fd );
 
                 std::string get_last_err();
 

@@ -65,8 +65,12 @@
 			<Add directory="../../lib/cryptopp565" />
 		</Compiler>
 		<Linker>
-			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
 			<Add option="-lboost_system-mgw72-mt-1_65_1" />
+			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+			<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+			<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+			<Add option="-lboost_log-mgw72-mt-1_65_1" />
+			<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
 			<Add option="-larchive.dll" />
 			<Add option="-lsqlite3_dll" />
 			<Add option="-lcryptopp" />
@@ -112,6 +116,8 @@
 			<Option target="db_test" />
 			<Option target="file_test" />
 		</Unit>
+		<Unit filename="log.cpp" />
+		<Unit filename="log.hpp" />
 		<Unit filename="main.cpp">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -144,6 +150,7 @@
 			<Option virtualFolder="Tests/" />
 			<Option target="tarball_test" />
 		</Unit>
+		<Unit filename="types.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

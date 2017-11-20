@@ -164,3 +164,52 @@ bool LocalDatabase::is_ignore_ext(const std::string& ext )
     return true;
 
 }
+
+unsigned int LocalDatabase::add_file( Backup::Types::file_data* fd )
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "INSERT OR REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified) VALUES((SELECT file_id FROM backup_file WHERE filename=?1 AND directory_id=?3),?1,?5,?2,?3,?4)";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return false;
+
+    sqlite3_bind_text(stmt, 1, fd->filename.c_str(), fd->filename.size(), 0 );
+    sqlite3_bind_int(stmt, 2, fd->filesize );
+    sqlite3_bind_int(stmt, 3, fd->directory_id );
+    sqlite3_bind_int(stmt, 4, fd->last_modified );
+    sqlite3_bind_text(stmt, 1, fd->file_ext.c_str(), fd->file_ext.size(), 0 );
+
+    int rc = sqlite3_step(stmt);
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    fd->file_id = sqlite3_last_insert_rowid(m_db);
+
+    return fd->file_id;
+
+}
+
+unsigned int LocalDatabase::add_directory( Backup::Types::file_directory* fd )
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "INSERT OR REPLACE INTO backup_directory (directory_id,path,last_modified) VALUES((SELECT directory_id FROM backup_directory WHERE path=?1),?1,?2)";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return false;
+
+    sqlite3_bind_text(stmt, 1, fd->path.c_str(), fd->path.size(), 0 );
+    sqlite3_bind_int(stmt, 2, fd->last_modified );
+
+    int rc = sqlite3_step(stmt);
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    fd->directory_id = sqlite3_last_insert_rowid(m_db);
+
+    return fd->directory_id;
+
+}

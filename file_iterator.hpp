@@ -5,6 +5,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include "local_db.hpp"
+#include "types.hpp"
 
 namespace fs = boost::filesystem;
 using namespace Backup::Database;
@@ -13,6 +14,7 @@ namespace Backup {
 
     class FileIterator
     {
+
         public:
             FileIterator(const std::string& path);
             ~FileIterator();
@@ -25,6 +27,7 @@ namespace Backup {
 
         private:
             fs::path m_base_path;
+            Backup::Types::file_directory m_current_dir;
             fs::recursive_directory_iterator m_itr;
             fs::recursive_directory_iterator m_itr_end; //Never changes
             LocalDatabase* m_ldb;
