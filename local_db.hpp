@@ -5,8 +5,10 @@
 #include <string>
 #include <fstream>
 #include <sqlite3.h>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include "types.hpp"
+#include "log.hpp"
 
 namespace Backup{
     namespace Database {
@@ -17,7 +19,7 @@ namespace Backup{
                 LocalDatabase(const std::string& filename);
                 ~LocalDatabase();
 
-                bool is_ignore_dir(const std::string& dir_name, int level);
+                bool is_ignore_dir(const boost::filesystem::path& p, int level);
                 bool is_ignore_ext(const std::string& ext);
 
                 std::string get_setting_str(const std::string& s);
@@ -34,6 +36,9 @@ namespace Backup{
 
                 std::string get_last_err();
 
+                //Scans backup_file table and checks if files exist and mark for deletion if necessary
+                void clean();
+
             private:
 
                 int open_db(const std::string& filename);
@@ -41,6 +46,7 @@ namespace Backup{
 
                 sqlite3* m_db;
                 int m_err_code;
+                Backup::Logging::Log* m_log;
         };
 
     }

@@ -8,7 +8,7 @@ using namespace Backup;
 int main()
 {
 
-    Logging::Log* log = new Logging::Log("output.log");
+    Logging::Log* log = new Logging::Log("output");
     Database::LocalDatabase* ldb = new Database::LocalDatabase("local.db");
 
     FileIterator* fi = new FileIterator( ldb->get_setting_str("home_folder") );
@@ -16,7 +16,8 @@ int main()
 
     cout << fi->get_base_path() << std::endl;
 
-    //fi->scan();
+    fi->scan();
+    ldb->clean();
 
     log->set_level( Logging::info );
     log->add_message("This is some test text", "File Backup");
@@ -25,4 +26,5 @@ int main()
     delete log;
 
     return 0;
+
 }

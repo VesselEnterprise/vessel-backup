@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include "local_db.hpp"
 #include "types.hpp"
+#include "log.hpp"
 
 namespace fs = boost::filesystem;
 using namespace Backup::Database;
@@ -32,8 +33,10 @@ namespace Backup {
             fs::recursive_directory_iterator m_itr_end; //Never changes
             LocalDatabase* m_ldb;
             bool m_skip_dir_periods; //Directories that start with a period
+            Backup::Logging::Log* m_log;
 
-            bool skip_dir(const std::string& path, int level);
+            bool skip_dir(const fs::path& p, int level);
+            unsigned long get_last_write_t( const fs::path& p );
 
     };
 

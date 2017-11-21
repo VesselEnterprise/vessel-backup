@@ -3267,16 +3267,18 @@
 	<boost/config/abi_prefix.hpp>
 	<boost/config/abi_suffix.hpp>
 
-1511013920 source:c:\projects\bv-backup\local_db.cpp
+1511198897 source:c:\projects\bv-backup\local_db.cpp
 	"local_db.hpp"
 
-1510955081 c:\projects\bv-backup\local_db.hpp
+1511192907 c:\projects\bv-backup\local_db.hpp
 	<iostream>
 	<string>
 	<fstream>
 	<sqlite3.h>
+	<boost/filesystem.hpp>
 	<boost/lexical_cast.hpp>
 	"types.hpp"
+	"log.hpp"
 
 1508873160 c:\lib\sqlite-3.21.0\sqlite3.h
 	<stdarg.h>
@@ -4903,44 +4905,48 @@
 	<iostream>
 	"local_db.hpp"
 
-1510955081 c:\projects\bv-backup\\local_db.hpp
+1511192907 c:\projects\bv-backup\\local_db.hpp
 	<iostream>
 	<string>
 	<fstream>
 	<sqlite3.h>
+	<boost/filesystem.hpp>
 	<boost/lexical_cast.hpp>
 	"types.hpp"
+	"log.hpp"
 
-1511013939 source:c:\projects\bv-backup\file_iterator.cpp
+1511199816 source:c:\projects\bv-backup\file_iterator.cpp
 	"file_iterator.hpp"
 
-1510949307 c:\projects\bv-backup\file_iterator.hpp
+1511184833 c:\projects\bv-backup\file_iterator.hpp
 	<iostream>
 	<string>
 	<boost/filesystem.hpp>
 	"local_db.hpp"
 	"types.hpp"
+	"log.hpp"
 
-1511120300 source:c:\projects\bv-backup\tests\file_iterator\file_test.cpp
+1511194697 source:c:\projects\bv-backup\tests\file_iterator\file_test.cpp
 	"local_db.hpp"
 	"file_iterator.hpp"
 	"log.hpp"
 
-1510949307 c:\projects\bv-backup\\file_iterator.hpp
+1511184833 c:\projects\bv-backup\\file_iterator.hpp
 	<iostream>
 	<string>
 	<boost/filesystem.hpp>
 	"local_db.hpp"
 	"types.hpp"
+	"log.hpp"
 
 1511013843 c:\projects\bv-backup\types.hpp
 	<string>
 	<vector>
 
-1511120173 source:c:\projects\bv-backup\log.cpp
+1511200083 source:c:\projects\bv-backup\log.cpp
 	"log.hpp"
 
-1511121119 c:\projects\bv-backup\log.hpp
+1511194511 c:\projects\bv-backup\log.hpp
 	<boost/log/core.hpp>
 	<boost/log/trivial.hpp>
 	<boost/log/expressions.hpp>
@@ -4951,6 +4957,7 @@
 	<boost/log/utility/manipulators/add_value.hpp>
 	<boost/log/sources/severity_logger.hpp>
 	<boost/log/sources/record_ostream.hpp>
+	<boost/log/sources/severity_channel_logger.hpp>
 
 1504346172 c:\lib\boost_1_65_1\boost\log\core.hpp
 	<boost/log/detail/config.hpp>
@@ -13224,7 +13231,7 @@
 	<string>
 	<vector>
 
-1511121119 c:\projects\bv-backup\\log.hpp
+1511194511 c:\projects\bv-backup\\log.hpp
 	<boost/log/core.hpp>
 	<boost/log/trivial.hpp>
 	<boost/log/expressions.hpp>
@@ -13235,4 +13242,50 @@
 	<boost/log/utility/manipulators/add_value.hpp>
 	<boost/log/sources/severity_logger.hpp>
 	<boost/log/sources/record_ostream.hpp>
+	<boost/log/sources/severity_channel_logger.hpp>
+
+1504346172 c:\lib\boost_1_65_1\boost\log\sources\severity_channel_logger.hpp
+	<string>
+	<boost/log/detail/config.hpp>
+	<boost/log/detail/light_rw_mutex.hpp>
+	<boost/log/sources/features.hpp>
+	<boost/log/sources/basic_logger.hpp>
+	<boost/log/sources/threading_models.hpp>
+	<boost/log/sources/severity_feature.hpp>
+	<boost/log/sources/channel_feature.hpp>
+	<boost/log/detail/header.hpp>
+	<boost/log/detail/footer.hpp>
+
+1504346172 c:\lib\boost_1_65_1\boost\log\sources\channel_feature.hpp
+	<string>
+	<boost/move/core.hpp>
+	<boost/move/utility_core.hpp>
+	<boost/log/detail/config.hpp>
+	<boost/log/detail/locks.hpp>
+	<boost/log/detail/default_attribute_names.hpp>
+	<boost/log/keywords/channel.hpp>
+	<boost/log/attributes/mutable_constant.hpp>
+	<boost/log/utility/strictest_lock.hpp>
+	<boost/log/core/record.hpp>
+	<boost/log/detail/header.hpp>
+	<boost/log/detail/footer.hpp>
+
+1504346172 c:\lib\boost_1_65_1\boost\log\keywords\channel.hpp
+	<boost/parameter/keyword.hpp>
+	<boost/log/detail/config.hpp>
+
+1504346172 c:\lib\boost_1_65_1\boost\log\attributes\mutable_constant.hpp
+	<boost/static_assert.hpp>
+	<boost/smart_ptr/intrusive_ptr.hpp>
+	<boost/mpl/if.hpp>
+	<boost/move/core.hpp>
+	<boost/move/utility_core.hpp>
+	<boost/type_traits/is_void.hpp>
+	<boost/log/detail/config.hpp>
+	<boost/log/detail/locks.hpp>
+	<boost/log/attributes/attribute.hpp>
+	<boost/log/attributes/attribute_cast.hpp>
+	<boost/log/attributes/attribute_value_impl.hpp>
+	<boost/log/detail/header.hpp>
+	<boost/log/detail/footer.hpp>
 

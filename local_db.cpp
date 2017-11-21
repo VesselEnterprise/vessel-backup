@@ -10,6 +10,8 @@ LocalDatabase::LocalDatabase(const std::string& filename)
     if ( m_err_code )
         this->close_db();
 
+    m_log = new Backup::Logging::Log("db");
+
 }
 
 LocalDatabase::~LocalDatabase()
@@ -36,31 +38,43 @@ std::string LocalDatabase::get_setting_str(const std::string & s )
 {
 
     sqlite3_stmt* stmt;
-    std::string query = "SELECT value FROM backup_setting WHERE name='" + s + "'";
+    std::string query = "SELECT value FROM backup_setting WHERE name=?1";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
-        return NULL;
+        return "";
+
+    sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
 
     sqlite3_step(stmt);
 
-    std::string val = (char*)sqlite3_column_text(stmt, 0);
+    const char* val = (char*)sqlite3_column_text(stmt, 0);
 
     //Cleanup
     sqlite3_finalize(stmt);
 
-    return val;
+    return val ? val : "";
 
 }
 
 int LocalDatabase::get_setting_int(const std::string & s )
 {
 
-    try {
-        return boost::lexical_cast<int>(this->get_setting_str(s));
-    }
-    catch ( boost::bad_lexical_cast::exception & e ) {
+    sqlite3_stmt* stmt;
+    std::string query = "SELECT value FROM backup_setting WHERE name=?1";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return -1;
-    }
+
+    sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
+
+    sqlite3_step(stmt);
+
+    int val = sqlite3_column_int(stmt, 0);
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    return val;
 
 }
 
@@ -118,8 +132,10 @@ bool LocalDatabase::update_ext_count(const std::string& ext, int total )
 
 }
 
-bool LocalDatabase::is_ignore_dir(const std::string& dir_name, int level )
+bool LocalDatabase::is_ignore_dir(const boost::filesystem::path& p, int level )
 {
+
+    std::string folder_name = p.filename().string();
 
     sqlite3_stmt* stmt;
     std::string query = "SELECT ignore_id FROM backup_ignore_dir WHERE name=?1 AND level=?2";
@@ -127,7 +143,7 @@ bool LocalDatabase::is_ignore_dir(const std::string& dir_name, int level )
     if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return false;
 
-    sqlite3_bind_text(stmt, 1, dir_name.c_str(), dir_name.size(), 0 );
+    sqlite3_bind_text(stmt, 1, folder_name.c_str(), folder_name.size(), 0 );
     sqlite3_bind_int(stmt, 2, level );
 
     int rc = sqlite3_step(stmt);
@@ -169,7 +185,7 @@ unsigned int LocalDatabase::add_file( Backup::Types::file_data* fd )
 {
 
     sqlite3_stmt* stmt;
-    std::string query = "INSERT OR REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified) VALUES((SELECT file_id FROM backup_file WHERE filename=?1 AND directory_id=?3),?1,?5,?2,?3,?4)";
+    std::string query = "INSERT OR REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified,deleted) VALUES((SELECT file_id FROM backup_file WHERE filename=?1 AND directory_id=?3),?1,?5,?2,?3,?4,0)";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return false;
@@ -178,7 +194,7 @@ unsigned int LocalDatabase::add_file( Backup::Types::file_data* fd )
     sqlite3_bind_int(stmt, 2, fd->filesize );
     sqlite3_bind_int(stmt, 3, fd->directory_id );
     sqlite3_bind_int(stmt, 4, fd->last_modified );
-    sqlite3_bind_text(stmt, 1, fd->file_ext.c_str(), fd->file_ext.size(), 0 );
+    sqlite3_bind_text(stmt, 5, fd->file_ext.c_str(), fd->file_ext.size(), 0 );
 
     int rc = sqlite3_step(stmt);
 
@@ -211,5 +227,30 @@ unsigned int LocalDatabase::add_directory( Backup::Types::file_directory* fd )
     fd->directory_id = sqlite3_last_insert_rowid(m_db);
 
     return fd->directory_id;
+
+}
+
+void LocalDatabase::clean()
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "SELECT bd.path,bf.filename FROM backup_file AS bf LEFT JOIN backup_directory AS bd ON bf.directory_id = bd.directory_id";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return;
+
+    while ( sqlite3_step(stmt) == SQLITE_ROW )
+    {
+
+        std::string dir = (char*)sqlite3_column_text(stmt, 0);
+        std::string filename = (char*)sqlite3_column_text(stmt, 1);
+
+        if ( !boost::filesystem::exists(dir + "\\" + filename) )
+            m_log->add_message("File no longer exists: " + dir + "\\" + filename + " (Marked for deletion)", "Database Cleaner");
+
+    }
+
+    //Cleanup
+    sqlite3_finalize(stmt);
 
 }
