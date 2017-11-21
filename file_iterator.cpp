@@ -14,10 +14,13 @@ FileIterator::FileIterator(const std::string& path) : m_base_path(path), m_skip_
     if ( path.empty() )
     {
         //Update user home folder
-        std::string home_drive = std::getenv("HOMEDRIVE");
-        std::string home_path = std::getenv("HOMEPATH");
 
-        m_base_path = home_drive + home_path;
+        /*HOMEDRIVE/HOMEPATH sometimes yield incorrect results */
+        //std::string home_drive = std::getenv("HOMEDRIVE");
+        //std::string home_path = std::getenv("HOMEPATH");
+
+        m_base_path = std::getenv("USERPROFILE");
+
     }
 
     try
@@ -65,6 +68,9 @@ void FileIterator::scan()
         for ( ; m_itr != m_itr_end; ++m_itr )
         {
 
+            const fs::path& p = m_itr->path();
+
+            /*
             cout << "Testing: " << *m_itr << '\n';
             cout << "Level: " << m_itr.level() << '\n';
             cout << "Filename:" << m_itr->path().filename() << '\n';
@@ -74,6 +80,9 @@ void FileIterator::scan()
             cout << "Relative Path:" << m_itr->path().relative_path() << '\n';
             cout << "Root Path:" << m_itr->path().root_path() << '\n';
             cout << "Parent Path:" << m_itr->path().parent_path() << '\n';
+            */
+
+            cout << "Scanning " << *m_itr << "..." << std::endl;
 
             if ( fs::is_directory(*m_itr) )
             {
@@ -81,62 +90,70 @@ void FileIterator::scan()
                 //Check if this directory needs to be skipped
                 if ( this->skip_dir(*m_itr, m_itr.level() ) )
                 {
-                    m_log->add_message("Skipped directory exception: " + m_itr->path().string(), "File Scanner");
+                    m_log->add_message("Skipped directory exception: " + p.string(), "File Scanner");
                     m_itr.no_push();
                     continue;
                 }
 
                 //Update current directory information
-                if ( (m_itr->path().string() != m_current_dir.path) || m_current_dir.directory_id < 0 )
+                if ( (p.string() != m_current_dir.path) || m_current_dir.directory_id < 0 )
                 {
 
-                    cout << "New path is: " << m_itr->path().string() << '\n';
-                    cout << "Old path is: " << m_current_dir.path << '\n';
-
-                    m_current_dir.folder_name = m_itr->path().filename().string();
-                    m_current_dir.path = m_itr->path().string();
+                    m_current_dir.folder_name = p.filename().string();
+                    m_current_dir.path = p.string();
                     m_current_dir.last_modified = get_last_write_t( *m_itr );
 
                     m_ldb->add_directory(&m_current_dir);
 
-                    cout << "Directory ID is: " << m_current_dir.directory_id << '\n';
-
+                    //cout << "Directory ID is: " << m_current_dir.directory_id << '\n';
                     //system("PAUSE");
 
                 }
 
-                cout << *m_itr << " is a directory" << '\n';
+                cout << "Added directory " << p.filename().string() << "..." << std::endl;
 
             }
             else if ( fs::is_regular_file(*m_itr) )
             {
 
-                //Make sure we are in the right directory
-                if ( m_current_dir.path != m_itr->path().parent_path().string() )
+                std::string file_ext = p.extension().string();
+
+                //Check if we should ignore the file
+                if ( m_ldb->is_ignore_ext( file_ext ) )
                 {
-                    m_current_dir.folder_name = m_itr->path().parent_path().filename().string();
-                    m_current_dir.path = m_itr->path().parent_path().string();
+                    m_log->add_message("Skipped file. File extension is excluded: " + p.string(), "File Scanner");
+                    continue;
+                }
+
+                //Make sure we are in the right directory
+                if ( m_current_dir.path != p.parent_path().string() )
+                {
+                    m_current_dir.folder_name = p.parent_path().filename().string();
+                    m_current_dir.path = p.parent_path().string();
                     m_current_dir.last_modified = get_last_write_t(*m_itr);
                     m_ldb->add_directory(&m_current_dir);
                 }
 
                 Types::file_data fd;
-                fd.filename = m_itr->path().filename().string();
-                fd.file_ext = m_itr->path().extension().string();
+                fd.filename = p.filename().string();
+                fd.file_ext = file_ext;
                 fd.filesize = fs::file_size(*m_itr);
-                fd.parent_path = m_itr->path().parent_path().string();
+                fd.parent_path = p.parent_path().string();
                 fd.directory_id = m_current_dir.directory_id;
                 fd.last_modified = get_last_write_t(*m_itr);
 
-                cout << "Directory ID is: " << fd.directory_id << '\n';
-
+                //cout << "Directory ID is: " << fd.directory_id << '\n';
                 //system("PAUSE");
 
                 m_ldb->add_file( &fd );
 
+                cout << "Added file " << p.filename().string() << "..." << std::endl;
+
             }
             else
-                cout << *m_itr << " exists, but is not a regular file or directory\n";
+            {
+                m_log->add_message( p.string() + " exists , but is not a regular file or directory", "File Scanner");
+            }
 
         }
 

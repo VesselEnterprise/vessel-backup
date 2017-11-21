@@ -45,14 +45,17 @@ std::string LocalDatabase::get_setting_str(const std::string & s )
 
     sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
 
-    sqlite3_step(stmt);
+    std::string val="";
 
-    const char* val = (char*)sqlite3_column_text(stmt, 0);
+    if ( sqlite3_step(stmt) == SQLITE_ROW )
+    {
+        val = (char*)sqlite3_column_text(stmt,0);
+    }
 
     //Cleanup
     sqlite3_finalize(stmt);
 
-    return val ? val : "";
+    return val;
 
 }
 
@@ -232,9 +235,63 @@ unsigned int LocalDatabase::add_directory( Backup::Types::file_directory* fd )
 
 void LocalDatabase::clean()
 {
+    this->clean_dirs();
+    this->clean_files();
+}
+
+void LocalDatabase::clean_dirs()
+{
+    //Cleanup Files from database
 
     sqlite3_stmt* stmt;
-    std::string query = "SELECT bd.path,bf.filename FROM backup_file AS bf LEFT JOIN backup_directory AS bd ON bf.directory_id = bd.directory_id";
+    std::string query = "SELECT directory_id,path FROM backup_directory";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return;
+
+    while ( sqlite3_step(stmt) == SQLITE_ROW )
+    {
+
+        int directory_id = sqlite3_column_int(stmt,0);
+        std::string dir = (char*)sqlite3_column_text(stmt, 1);
+
+        if ( !boost::filesystem::exists(dir) )
+        {
+
+            sqlite3_stmt* st;
+
+            //Mark file as deleted
+            std::string q = "UPDATE backup_directory SET deleted=1 WHERE directory_id=?1";
+
+            if ( sqlite3_prepare_v2(m_db, q.c_str(), q.size(), &st, NULL ) != SQLITE_OK )
+                return;
+
+            sqlite3_bind_int(st, 1, directory_id );
+
+            if ( sqlite3_step(st) != SQLITE_DONE )
+                m_log->add_message("Failed to mark directory deleted: " + dir, "Database Cleaner");
+            else
+                m_log->add_message("File no longer exists: " + dir + " (Marked for deletion)", "Database Cleaner");
+
+            //Cleanup
+            sqlite3_finalize(st);
+
+        }
+
+
+    }
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+}
+
+void LocalDatabase::clean_files()
+{
+
+    //Cleanup Files from database
+
+    sqlite3_stmt* stmt;
+    std::string query = "SELECT bd.path,bf.filename,bf.file_id FROM backup_file AS bf LEFT JOIN backup_directory AS bd ON bf.directory_id = bd.directory_id WHERE bf.deleted=0";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return;
@@ -244,9 +301,31 @@ void LocalDatabase::clean()
 
         std::string dir = (char*)sqlite3_column_text(stmt, 0);
         std::string filename = (char*)sqlite3_column_text(stmt, 1);
+        int file_id = sqlite3_column_int(stmt,2);
 
         if ( !boost::filesystem::exists(dir + "\\" + filename) )
-            m_log->add_message("File no longer exists: " + dir + "\\" + filename + " (Marked for deletion)", "Database Cleaner");
+        {
+
+            sqlite3_stmt* st;
+
+            //Mark file as deleted
+            std::string q = "UPDATE backup_file SET deleted=1 WHERE file_id=?1";
+
+            if ( sqlite3_prepare_v2(m_db, q.c_str(), q.size(), &st, NULL ) != SQLITE_OK )
+                return;
+
+            sqlite3_bind_int(st, 1, file_id );
+
+            if ( sqlite3_step(st) != SQLITE_DONE )
+                m_log->add_message("Failed to mark file deleted: " + dir + "\\" + filename, "Database Cleaner");
+            else
+                m_log->add_message("File no longer exists: " + dir + "\\" + filename + " (Marked for deletion)", "Database Cleaner");
+
+            //Cleanup
+            sqlite3_finalize(st);
+
+        }
+
 
     }
 

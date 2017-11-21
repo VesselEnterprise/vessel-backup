@@ -43,6 +43,8 @@ namespace Backup{
 
                 int open_db(const std::string& filename);
                 void close_db();
+                void clean_dirs();
+                void clean_files();
 
                 sqlite3* m_db;
                 int m_err_code;
