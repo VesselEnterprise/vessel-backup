@@ -7,7 +7,7 @@ using namespace Backup::Networking;
 int main()
 {
 
-    std::string host = "http://10.1.10.208/phpmyadmin/index.php";
+    std::string host = "http://10.1.226.71/phpmyadmin/index.php";
 
     Client* c = new Client(host);
     c->set_timeout( boost::posix_time::seconds(5) );
@@ -25,7 +25,7 @@ int main()
     Backup::Types::http_request r;
     r.content_type = "text/plain";
     r.data = "Hello World!";
-    r.request_type = Backup::Types::http::POST;
+    r.request_type = Backup::Types::http::HTTP_POST;
     r.uri = "/backup/test.php";
 
     c->http_request(r);

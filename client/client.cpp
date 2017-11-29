@@ -262,6 +262,8 @@ void Client::handle_write( const boost::system::error_code& e )
 void Client::handle_response( const boost::system::error_code& e )
 {
 
+    std::cout << "Handled response.." << '\n';
+
     if (!e)
     {
         // Check that response is OK.
@@ -305,7 +307,7 @@ void Client::handle_response( const boost::system::error_code& e )
             std::cout << "Request is being redirected to: " << new_location << '\n';
 
             //Close Open Socket
-            //this->disconnect();
+            this->disconnect();
 
             //Try to reconnect to new host
             this->parse_url(new_location.c_str());
@@ -443,7 +445,7 @@ void Client::http_request( const Backup::Types::http_request& r )
 
     //If POST or PUT, send content length and type headers
     bool do_send_data=false;
-    if ( r.request_type == Backup::Types::http::POST || r.request_type == Backup::Types::http::PUT )
+    if ( r.request_type == Backup::Types::http::HTTP_POST || r.request_type == Backup::Types::http::HTTP_PUT )
     {
         request_stream << "Content-Length: " << r.data.size() << "\r\n";
         request_stream << "Content-Type: " << r.content_type << "\r\n";

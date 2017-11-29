@@ -5,7 +5,7 @@
 		<Option title="backup_enterprise" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Tests/;" />
+		<Option virtualFolders="Tests\;" />
 		<Build>
 			<Target title="win64-client-debug">
 				<Option output="bin/Debug/win64/client/backup_client" prefix_auto="1" extension_auto="1" />
@@ -164,6 +164,8 @@
 					<Add directory="client" />
 				</Compiler>
 				<Linker>
+					<Add option="-lssl" />
+					<Add option="-lcrypto" />
 					<Add option="-lboost_system-mgw72-mt-1_65_1" />
 					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
 					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
@@ -260,6 +262,7 @@
 			<Add directory="/usr/local/include" />
 			<Add directory="/home/kyle/cpp/bv-backup/" />
 			<Add directory="core" />
+			<Add directory="../../lib/openssl-1.1.0e/include" />
 		</Compiler>
 		<Linker>
 			<Add directory="../../lib/zlib-1.2.11/lib" />
@@ -268,6 +271,7 @@
 			<Add directory="../../lib/sqlite-3.21.0" />
 			<Add directory="../../lib/cryptopp565" />
 			<Add directory="/usr/local/lib" />
+			<Add directory="../../lib/openssl-1.1.0e/lib" />
 		</Linker>
 		<Unit filename="client/client.cpp">
 			<Option target="win64-client-debug" />
