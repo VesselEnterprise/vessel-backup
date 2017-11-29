@@ -28,6 +28,17 @@ namespace Backup {
             unsigned int file_id;
         };
 
+        typedef enum { GET, POST, PUT, DELETE } http;
+
+        struct http_request
+        {
+            http request_type;
+            std::string uri;
+            std::string content_type;
+            std::string data;
+            std::string auth_token;
+        };
+
     }
 }
 

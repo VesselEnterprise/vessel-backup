@@ -5,63 +5,246 @@
 		<Option title="backup_enterprise" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Tests\;" />
+		<Option virtualFolders="Tests/;" />
 		<Build>
-			<Target title="Debug">
-				<Option output="bin/Debug/backup_enterprise" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Debug/" />
+			<Target title="win64-client-debug">
+				<Option output="bin/Debug/win64/client/backup_client" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="client" />
 				</Compiler>
+				<Linker>
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
 			</Target>
-			<Target title="Release">
-				<Option output="bin/Release/backup_enterprise" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Release/" />
+			<Target title="win64-client">
+				<Option output="bin/win64/client/backup_client" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="client" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
 				</Linker>
 			</Target>
-			<Target title="compress_test">
-				<Option output="tests/compression/compress_test" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="tests/compression" />
+			<Target title="win64-compress_test">
+				<Option output="bin/tests/win64/compression/compress_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
 			</Target>
-			<Target title="tarball_test">
-				<Option output="tests/tarball/tarball_test" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="tests/tarball" />
+			<Target title="win64-tarball_test">
+				<Option output="bin/tests/win64/tarball/tarball_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
 			</Target>
-			<Target title="db_test">
-				<Option output="tests/db/db_test" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="tests/db" />
+			<Target title="win64-db_test">
+				<Option output="bin/tests/win64/db/db_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
 			</Target>
-			<Target title="file_test">
-				<Option output="tests/file_iterator/file_test" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="tests/file_iterator" />
+			<Target title="win64-file_test">
+				<Option output="bin/tests/win64/file_iterator/file_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
 			</Target>
-			<Target title="Server">
-				<Option output="backup_server" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="server" />
+			<Target title="win64-server">
+				<Option output="bin/win64/server/backup_server" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
 			</Target>
-			<Target title="client_test">
-				<Option output="client_test" prefix_auto="1" extension_auto="1" />
+			<Target title="win64-client_test">
+				<Option output="bin/tests/win64/client/client_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="client" />
+				</Compiler>
+				<Linker>
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
+			</Target>
+			<Target title="linux-server">
+				<Option output="bin/linux/server/backup_server" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-lboost_system" />
+					<Add option="-lboost_filesystem" />
+					<Add option="-lboost_date_time" />
+					<Add option="-lboost_thread" />
+					<Add option="-lboost_log" />
+					<Add option="-lboost_log_setup" />
+					<Add option="-larchive" />
+					<Add option="-lsqlite3" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz" />
+				</Linker>
+			</Target>
+			<Target title="linux-client_test">
+				<Option output="bin/tests/linux/client/client_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="client" />
+				</Compiler>
+				<Linker>
+					<Add option="-lssl" />
+					<Add option="-lcrypto" />
+					<Add option="-ldl" />
+					<Add option="-lboost_system" />
+					<Add option="-lboost_filesystem" />
+					<Add option="-lboost_date_time" />
+					<Add option="-lboost_thread" />
+					<Add option="-lboost_log" />
+					<Add option="-lboost_log_setup" />
+					<Add option="-larchive" />
+					<Add option="-lsqlite3" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz" />
+					<Add option="-lpthread" />
+				</Linker>
+			</Target>
+			<Target title="linux-client">
+				<Option output="bin/linux/client/backup_client" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="client" />
+				</Compiler>
+				<Linker>
+					<Add option="-lssl" />
+					<Add option="-lcrypto" />
+					<Add option="-ldl" />
+					<Add option="-lboost_system" />
+					<Add option="-lboost_filesystem" />
+					<Add option="-lboost_date_time" />
+					<Add option="-lboost_thread" />
+					<Add option="-lboost_log" />
+					<Add option="-lboost_log_setup" />
+					<Add option="-larchive" />
+					<Add option="-lsqlite3" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz" />
+					<Add option="-lpthread" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
@@ -74,143 +257,68 @@
 			<Add directory="C:/projects/bv-backup/" />
 			<Add directory="../../lib/sqlite-3.21.0" />
 			<Add directory="../../lib/cryptopp565" />
+			<Add directory="/usr/local/include" />
+			<Add directory="/home/kyle/cpp/bv-backup/" />
+			<Add directory="core" />
 		</Compiler>
 		<Linker>
-			<Add option="-lboost_system-mgw72-mt-1_65_1" />
-			<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
-			<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
-			<Add option="-lboost_thread-mgw72-mt-1_65_1" />
-			<Add option="-lboost_log-mgw72-mt-1_65_1" />
-			<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
-			<Add option="-larchive.dll" />
-			<Add option="-lsqlite3_dll" />
-			<Add option="-lcryptopp" />
-			<Add option="-lws2_32" />
-			<Add option="-lwsock32" />
-			<Add library="../../lib/zlib-1.2.11/lib/libz.dll.a" />
 			<Add directory="../../lib/zlib-1.2.11/lib" />
 			<Add directory="../../lib/boost_1_65_1/stage/lib" />
 			<Add directory="../../lib/libarchive/lib/libarchive" />
 			<Add directory="../../lib/sqlite-3.21.0" />
 			<Add directory="../../lib/cryptopp565" />
+			<Add directory="/usr/local/lib" />
 		</Linker>
-		<Unit filename="client.cpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="client_test" />
+		<Unit filename="client/client.cpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-client_test" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
 		</Unit>
-		<Unit filename="client.hpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="client_test" />
+		<Unit filename="client/client.hpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-client_test" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
 		</Unit>
-		<Unit filename="compress.cpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="compress_test" />
-			<Option target="tarball_test" />
+		<Unit filename="client/main.cpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="linux-client" />
 		</Unit>
-		<Unit filename="compress.hpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="compress_test" />
-			<Option target="tarball_test" />
-		</Unit>
-		<Unit filename="file_iterator.cpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="file_test" />
-		</Unit>
-		<Unit filename="file_iterator.hpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="file_test" />
-		</Unit>
-		<Unit filename="local_db.cpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="db_test" />
-			<Option target="file_test" />
-		</Unit>
-		<Unit filename="local_db.hpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="db_test" />
-			<Option target="file_test" />
-		</Unit>
-		<Unit filename="log.cpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="compress_test" />
-			<Option target="tarball_test" />
-			<Option target="db_test" />
-			<Option target="file_test" />
-		</Unit>
-		<Unit filename="log.hpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="compress_test" />
-			<Option target="tarball_test" />
-			<Option target="db_test" />
-			<Option target="file_test" />
-		</Unit>
-		<Unit filename="main.cpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="server/connection.cpp">
-			<Option target="Server" />
-		</Unit>
-		<Unit filename="server/connection.hpp">
-			<Option target="Server" />
-		</Unit>
-		<Unit filename="server/main.cpp">
-			<Option target="Server" />
-		</Unit>
-		<Unit filename="server/server.cpp">
-			<Option target="Server" />
-		</Unit>
-		<Unit filename="server/server.hpp">
-			<Option target="Server" />
-		</Unit>
-		<Unit filename="tarball.cpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="compress_test" />
-			<Option target="tarball_test" />
-		</Unit>
-		<Unit filename="tarball.hpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="compress_test" />
-			<Option target="tarball_test" />
-		</Unit>
+		<Unit filename="core/compress.cpp" />
+		<Unit filename="core/compress.hpp" />
+		<Unit filename="core/file_iterator.cpp" />
+		<Unit filename="core/file_iterator.hpp" />
+		<Unit filename="core/local_db.cpp" />
+		<Unit filename="core/local_db.hpp" />
+		<Unit filename="core/log.cpp" />
+		<Unit filename="core/log.hpp" />
+		<Unit filename="core/tarball.cpp" />
+		<Unit filename="core/tarball.hpp" />
+		<Unit filename="core/types.hpp" />
 		<Unit filename="tests/client/client_test.cpp">
-			<Option target="client_test" />
+			<Option target="win64-client_test" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
 		</Unit>
 		<Unit filename="tests/compression/compress_test.cpp">
 			<Option virtualFolder="Tests/" />
-			<Option target="compress_test" />
+			<Option target="win64-compress_test" />
 		</Unit>
 		<Unit filename="tests/db/db_test.cpp">
 			<Option virtualFolder="Tests/" />
-			<Option target="db_test" />
+			<Option target="win64-db_test" />
 		</Unit>
 		<Unit filename="tests/file_iterator/file_test.cpp">
 			<Option virtualFolder="Tests/" />
-			<Option target="file_test" />
+			<Option target="win64-file_test" />
 		</Unit>
 		<Unit filename="tests/tarball/tarball_test.cpp">
 			<Option virtualFolder="Tests/" />
-			<Option target="tarball_test" />
-		</Unit>
-		<Unit filename="types.hpp">
-			<Option target="Debug" />
-			<Option target="Release" />
-			<Option target="compress_test" />
-			<Option target="tarball_test" />
-			<Option target="db_test" />
-			<Option target="file_test" />
+			<Option target="win64-tarball_test" />
 		</Unit>
 		<Extensions>
 			<code_completion />
