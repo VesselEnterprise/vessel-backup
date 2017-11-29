@@ -10,8 +10,11 @@
 #include <boost/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/algorithm/string.hpp>
+#include <rapidjson/document.h>
 
 #include "types.hpp"
+#include "local_db.hpp"
+#include "compress.hpp"
 
 //#define BOOST_NETWORK_ENABLE_HTTPS 1
 
@@ -39,9 +42,6 @@ namespace Backup {
 
                 bool send_file();
 
-                 //Write data to socket
-                void send_data( const std::string& data );
-
                 void http_request( const Backup::Types::http_request& r );
 
                 bool resume_transfer();
@@ -68,7 +68,7 @@ namespace Backup {
 
                 void parse_url(const std::string& host );
 
-                //Async function which persitently checks if the connection should timeout
+                //Async function which persistently checks if the connection should timeout
                 void check_deadline();
 
                 void handle_connect( const boost::system::error_code& e );

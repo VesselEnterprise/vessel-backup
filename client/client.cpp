@@ -222,24 +222,10 @@ void Client::handle_handshake(const boost::system::error_code& e )
 
 }
 
-void Client::send_data(const std::string& data)
-{
-
-    //Clear status code before sending new data
-    m_response_ec.clear();
-
-    if ( !m_use_ssl )
-        boost::asio::async_write(m_socket, boost::asio::buffer(data.c_str(), data.size()), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
-    else
-        boost::asio::async_write(m_ssl_socket, boost::asio::buffer(data.c_str(), data.size()), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
-
-    //Run the handlers until the response sets the status code or EOF
-    do { m_io_service.run_one(); } while ( !m_response_ec);
-
-}
-
 void Client::handle_write( const boost::system::error_code& e )
 {
+
+    std::cout << "Handle write..." << '\n';
 
     if (!e)
     {
@@ -262,6 +248,8 @@ void Client::handle_write( const boost::system::error_code& e )
 void Client::handle_response( const boost::system::error_code& e )
 {
 
+    m_response_ec = e; //Update error code
+
     std::cout << "Handled response.." << '\n';
 
     if (!e)
@@ -278,6 +266,7 @@ void Client::handle_response( const boost::system::error_code& e )
         if (!response_stream || http_version.substr(0, 5) != "HTTP/")
         {
             std::cout << "Invalid response\n";
+            m_response_ec = boost::asio::error::operation_aborted; //Handle statis error
             return;
         }
 
@@ -319,6 +308,7 @@ void Client::handle_response( const boost::system::error_code& e )
         {
             std::cout << "Response returned with status code ";
             std::cout << status_code << "\n";
+            m_response_ec = boost::asio::error::operation_aborted; //Set static error
             return;
         }
 
@@ -338,6 +328,8 @@ void Client::handle_response( const boost::system::error_code& e )
 
 void Client::handle_read_headers( const boost::system::error_code& e )
 {
+
+    std::cout << "Handle read headers..." << '\n';
 
     if (!e)
     {
@@ -365,17 +357,19 @@ void Client::handle_read_headers( const boost::system::error_code& e )
         std::cout << "Error: " << e << "\n";
     }
 
+    m_response_ec = e;
+
 }
 
 void Client::handle_read_content( const boost::system::error_code& e )
 {
 
+    std::cout << "Read some content" << '\n';
+
     if (!e)
     {
         // Write all of the data that has been read so far.
         std::cout << &m_response;
-
-        std::cout << "Read some content" << '\n';
 
         // Continue reading remaining data until EOF.
         if ( !m_use_ssl )
@@ -404,11 +398,7 @@ void Client::check_deadline()
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled. This allows the blocked
         // connect(), read_line() or write_line() functions to return.
-        boost::system::error_code ignored_ec;
-        if ( !m_use_ssl )
-            m_socket.close(ignored_ec);
-        else
-            m_ssl_socket.lowest_layer().close(ignored_ec);
+        this->disconnect();
 
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
@@ -436,6 +426,8 @@ void Client::disconnect()
 
 void Client::http_request( const Backup::Types::http_request& r )
 {
+
+    m_deadline_timer.expires_from_now(boost::posix_time::seconds(15));
 
     //Build the HTTP Request
     std::ostringstream request_stream;
@@ -466,7 +458,7 @@ void Client::http_request( const Backup::Types::http_request& r )
         boost::asio::async_write(m_ssl_socket, boost::asio::buffer(request_stream.str().c_str(), request_stream.str().size()), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
 
     //Run the handlers until the response sets the status code or EOF
-    do { m_io_service.run_one(); } while ( !m_response_ec);
+    do { m_io_service.run_one(); std::cout << "..." << '\n'; } while ( !m_response_ec );
 
 }
 

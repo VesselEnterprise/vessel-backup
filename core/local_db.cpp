@@ -333,3 +333,39 @@ void LocalDatabase::clean_files()
     sqlite3_finalize(stmt);
 
 }
+
+void LocalDatabase::update_global_settings()
+{
+
+    //Update user home folder
+    #ifdef _WIN32
+        std::string home_drive = std::getenv("HOMEDRIVE");
+        std::string home_path = std::getenv("HOMEPATH");
+        this->update_setting("home_folder", home_drive.append(home_path) );
+    #elif __unix
+        this->update_setting("home_folder", std::getenv("HOME") );
+    #endif
+
+    //Update host name
+    char hbuf[128];
+    gethostname( hbuf,sizeof(hbuf) );
+
+    std::string hostname(hbuf);
+
+    this->update_setting("hostname", hostname );
+
+    //Update username
+    char username_buf[257];
+
+    #ifdef _WIN32
+        GetUserName(&username, sizeof(username) );
+        std::string username(username_buf);
+    #elif __unix
+        struct passwd *pws;
+        pws = getpwuid(geteuid());
+        std::string username = pws->pw_name;
+    #endif
+
+    this->update_setting("username", username);
+
+}

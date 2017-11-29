@@ -10,6 +10,12 @@
 #include "types.hpp"
 #include "log.hpp"
 
+#ifdef __unix
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+#endif
+
 namespace Backup{
     namespace Database {
 
@@ -35,6 +41,8 @@ namespace Backup{
                 unsigned int add_directory( Backup::Types::file_directory* fd );
 
                 std::string get_last_err();
+
+                void update_global_settings();
 
                 //Scans backup_file table and checks if files exist and mark for deletion if necessary
                 void clean();
