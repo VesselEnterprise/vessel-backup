@@ -355,10 +355,11 @@ void LocalDatabase::update_global_settings()
     this->update_setting("hostname", hostname );
 
     //Update username
-    char username_buf[257];
 
     #ifdef _WIN32
-        GetUserName(&username, sizeof(username) );
+        char username_buf[257];
+        unsigned long userlen = sizeof(username_buf);
+        GetUserName(username_buf, static_cast<unsigned long*>(&userlen) );
         std::string username(username_buf);
     #elif __unix
         struct passwd *pws;

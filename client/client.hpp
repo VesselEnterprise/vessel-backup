@@ -10,7 +10,14 @@
 #include <boost/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/algorithm/string.hpp>
+
 #include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
+#ifdef _WIN32
+    #include <winsock2.h>
+#endif // _WIN32
 
 #include "types.hpp"
 #include "local_db.hpp"
@@ -40,9 +47,10 @@ namespace Backup {
                 void set_timeout( boost::posix_time::time_duration t );
                 void set_ssl(bool f);
 
-                bool send_file();
-
                 void http_request( const Backup::Types::http_request& r );
+
+                bool upload_file_single( const Backup::Types::http_upload_file& f);
+                bool upload_file_part ( const Backup::Types::http_upload_file& f );
 
                 bool resume_transfer();
 
@@ -77,6 +85,9 @@ namespace Backup {
                 void handle_write( const boost::system::error_code& e );
                 void handle_read_content( const boost::system::error_code& e );
                 void handle_read_headers( const boost::system::error_code& e );
+
+                //POST a new file upload
+                std::string make_upload_json();
 
         };
 

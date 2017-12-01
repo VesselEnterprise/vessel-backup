@@ -462,3 +462,36 @@ void Client::http_request( const Backup::Types::http_request& r )
 
 }
 
+bool Client::upload_file_single( const Backup::Types::http_upload_file& f )
+{
+
+    std::string request = make_upload_json(f);
+
+}
+
+std::string Client::make_upload_json( const Backup::Types::http_upload_file& f )
+{
+
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+
+    doc.AddMember("file_name", f.fd.filename, allocator );
+    doc.AddMember("file_size", f.fd.filesize, allocator );
+    doc.AddMember("last_modified", f.fd.last_modified, allocator );
+    doc.AddMember("parent_path", f.fd.parent_path, allocator );
+    doc.AddMember("file_name", f.fd.filename, allocator );
+    doc.AddMember("file_name", f.fd.filename, allocator );
+    doc.AddMember("file_name", f.fd.filename, allocator );
+    doc.AddMember("file_name", f.fd.filename, allocator );
+    doc.AddMember("file_name", f.fd.filename, allocator );
+    doc.AddMember("file_name", f.fd.filename, allocator );
+
+    rapidjson::StringBuffer strbuf;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
+
+    doc.Accept(writer);
+
+    std::cout << "Example JSON:\n" << doc.GetString() << '\n';
+
+}

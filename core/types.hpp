@@ -16,7 +16,7 @@ namespace Backup {
             size_t filesize;
         };
 
-        struct file_data
+        struct file_data //Used with FileIterator
         {
             std::string filename;
             std::string file_ext;
@@ -37,6 +37,17 @@ namespace Backup {
             std::string content_type;
             std::string data;
             std::string auth_token;
+        };
+
+        struct http_upload_file
+        {
+            file_data fd;
+            std::string file_hash;
+            std::string file_data;
+            int part;
+            int upload_id; //from REST API
+            bool multi_part;
+            bool compressed;
         };
 
     }

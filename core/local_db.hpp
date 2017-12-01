@@ -10,7 +10,9 @@
 #include "types.hpp"
 #include "log.hpp"
 
-#ifdef __unix
+#ifdef _WIN32
+    #include <winsock2.h>
+#elif __unix
     #include <unistd.h>
     #include <sys/types.h>
     #include <pwd.h>
