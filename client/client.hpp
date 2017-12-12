@@ -87,7 +87,7 @@ namespace Backup {
                 void handle_read_headers( const boost::system::error_code& e );
 
                 //POST a new file upload
-                std::string make_upload_json();
+                std::string make_upload_json( const Backup::Types::http_upload_file& f );
 
         };
 

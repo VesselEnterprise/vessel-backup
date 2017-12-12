@@ -465,7 +465,18 @@ void Client::http_request( const Backup::Types::http_request& r )
 bool Client::upload_file_single( const Backup::Types::http_upload_file& f )
 {
 
+    //Create the raw JSON payload for the request
     std::string request = make_upload_json(f);
+
+    //Create a new HTTP request
+    Backup::Types::http_request r;
+    r.auth_token = "";
+    r.content_type = "application/json";
+    r.data = "";
+    r.request_type = Backup::Types::http::HTTP_PUT;
+    r.uri = "/api/upload";
+
+    this->http_request(r);
 
 }
 
@@ -474,24 +485,27 @@ std::string Client::make_upload_json( const Backup::Types::http_upload_file& f )
 
     rapidjson::Document doc;
     doc.SetObject();
-    rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+    rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
 
-    doc.AddMember("file_name", f.fd.filename, allocator );
-    doc.AddMember("file_size", f.fd.filesize, allocator );
-    doc.AddMember("last_modified", f.fd.last_modified, allocator );
-    doc.AddMember("parent_path", f.fd.parent_path, allocator );
-    doc.AddMember("file_name", f.fd.filename, allocator );
-    doc.AddMember("file_name", f.fd.filename, allocator );
-    doc.AddMember("file_name", f.fd.filename, allocator );
-    doc.AddMember("file_name", f.fd.filename, allocator );
-    doc.AddMember("file_name", f.fd.filename, allocator );
-    doc.AddMember("file_name", f.fd.filename, allocator );
+    //Build backup_file object
+    rapidjson::Value backup_file(rapidjson::kObjectType);
+    {
+        backup_file.AddMember("file_name", "test", alloc );
+        backup_file.AddMember("file_size", 1000000, alloc );
+        backup_file.AddMember("last_modified", 10000000, alloc );
+        backup_file.AddMember("parent_path", "test", alloc );
+    }
+
+    //Add backup_file object to JSON
+    doc.AddMember("backup_file", backup_file, alloc );
 
     rapidjson::StringBuffer strbuf;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
 
     doc.Accept(writer);
 
-    std::cout << "Example JSON:\n" << doc.GetString() << '\n';
+    std::cout << "Example JSON:\n" << strbuf.GetString() << '\n';
+
+    return strbuf.GetString();
 
 }
