@@ -59,21 +59,21 @@ abstract class API
         }
 
         switch($this->method) {
-        case 'DELETE':
-        case 'POST':
-            $this->request = $this->_cleanInputs($_POST);
-			$this->rawData = file_get_contents("php://input");
-            break;
-        case 'GET':
-            $this->request = $this->_cleanInputs($_GET);
-            break;
-        case 'PUT':
-            $this->request = $this->_cleanInputs($_GET);
-            $this->rawData = file_get_contents("php://input");
-            break;
-        default:
-            $this->_response('Invalid Method', 405);
-            break;
+			case 'DELETE':
+			case 'POST':
+				$this->request = $this->_cleanInputs($_POST);
+				$this->rawData = file_get_contents("php://input");
+				break;
+			case 'GET':
+				$this->request = $this->_cleanInputs($_GET);
+				break;
+			case 'PUT':
+				$this->request = $this->_cleanInputs($_GET);
+				$this->rawData = file_get_contents("php://input");
+				break;
+			default:
+				$this->_response('Invalid Method', 405);
+				break;
         }
     }
 	
@@ -102,14 +102,21 @@ abstract class API
     }
 
     private function _requestStatus($code) {
+		
         $status = array(  
             200 => 'OK',
             404 => 'Not Found',   
             405 => 'Method Not Allowed',
             500 => 'Internal Server Error',
-        ); 
+        );
+		
         return ($status[$code])?$status[$code]:$status[500]; 
+		
     }
+	
+	private function test() {
+		echo "Hit me";
+	}
 }
 
 ?>

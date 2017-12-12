@@ -7,7 +7,7 @@ using namespace Backup::Networking;
 int main()
 {
 
-    std::string host = "http://10.1.10.208/phpmyadmin/index.php";
+    std::string host = "http://10.1.226.69/phpmyadmin/index.php";
 
     Client* c = new Client(host);
     c->set_timeout( boost::posix_time::seconds(5) );
