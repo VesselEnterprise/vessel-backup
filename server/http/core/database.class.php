@@ -6,6 +6,9 @@ class BackupDatabase
 	private static $factory; //For connections across multiple objects
 	private $dbConn = Null;
 	
+	/*
+	Enter MySQL / MariaDB details here
+	*/
 	private $dbUser = 'root';
 	private $dbPwd = 'root';
 	private $dbName = 'backup';
@@ -41,7 +44,7 @@ class BackupDatabase
 		
 	}
 	
-	public static function getFactory()
+	public static function getDatabase()
 	{
 		if (!self::$factory)
 			self::$factory = new BackupDatabase();
@@ -55,6 +58,29 @@ class BackupDatabase
 			$this->connect();
 		
 		return $this->dbConn;
+	}
+	
+	public function getSetting($name) {
+		
+		$val = '';
+		
+		if ( $result = mysqli_query($this->dbConn, "SELECT value FROM backup_setting WHERE name='" . $name . "'") ) {
+			
+			if ( $row = $result->fetch_row() ) {
+				$val = $row[0];
+			}
+			
+			$result->close();
+			
+		}
+		else {
+		
+			echo "Error: Could not retrieve setting (" . mysqli_error($this->_dbConn) . ")";
+		
+		}
+		
+		return $val;
+		
 	}
 
 }

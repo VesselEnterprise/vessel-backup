@@ -10,11 +10,12 @@ class BackupSession
 	private static $factory;
 	private $_userID;
 	private $_dbconn;
+	private $_loginSuccess;
 	
 	public function __construct() {
 		
 		//Get Database Connection
-		$this->dbconn = BackupDatabase::getFactory()->getConnection();
+		$this->dbconn = BackupDatabase::getDatabase()->getConnection();
 		
 		//Get User
 		
@@ -24,6 +25,8 @@ class BackupSession
 	
 	function __destruct() {
 		
+		//Clear User ID
+		$this->_userID = '';		
 		
 		session_destroy();
 		
@@ -54,6 +57,11 @@ class BackupSession
 					//Password is correct, login successful
 					$this->_updateLastLogin();
 					
+					$this->_loginSuccess=true;
+					
+				}
+				else {
+					$this->_loginSuccess=false;
 				}
 				
 			}
@@ -61,7 +69,13 @@ class BackupSession
 			$stmt->close();
 			
 		}
+		
+		return $this->_loginSuccess;
 
+	}
+	
+	public function isLoggedIn() {
+		return $this->_loginSuccess;
 	}
 	
 	public function logout() {

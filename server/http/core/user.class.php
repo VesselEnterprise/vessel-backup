@@ -16,7 +16,7 @@ class BackupUser
 		$this->_user_id = $userID;
 		
 		//Get database connection
-		$this->_dbconn = BackupDatabase::getFactory()->getConnection();
+		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
 		
 		//Get Log Object
 		$this->_log = BackupLog::getLog();
