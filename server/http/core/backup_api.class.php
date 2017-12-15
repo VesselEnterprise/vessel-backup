@@ -2,7 +2,7 @@
 
 require_once 'API.class.php';
 
-class SecureAPI extends API
+class BackupAPI extends API
 {
 	
 	private $_origin = '';

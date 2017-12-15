@@ -1,5 +1,7 @@
 <?php
 
+require_once 'database.class.php';
+
 class ldap
 {
 	
@@ -9,7 +11,16 @@ class ldap
 	private $_userdn;
 	private $_pwd;
 	
+	private $_dbconn;
+	private $_log;
+	
 	public function __construct( $host, $port, $userdn, $pwd ) {
+		
+		//Connect to MySQL database
+		$this->_dbconn = BackupDatabase::getFactory()->getConnection();
+		
+		//Create new log object
+		$this->_log = BackupLog::getLog();
 		
 		$this->_host = $host;
 		$this->_port = $port;

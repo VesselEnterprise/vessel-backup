@@ -9,7 +9,7 @@ spl_autoload_register(function ($class_name) {
 
 $conn = Database::getFactory()->getConnection();
 
-$api = new SecureAPI( $_REQUEST['request'] );
+$api = new BackupAPI( $_REQUEST['request'] );
 $api->processAPI();
 
 echo $globals;

@@ -1,6 +1,6 @@
 <?php
 
-class Database
+class BackupDatabase
 {
 	
 	private static $factory; //For connections across multiple objects
@@ -44,7 +44,7 @@ class Database
 	public static function getFactory()
 	{
 		if (!self::$factory)
-			self::$factory = new Database();
+			self::$factory = new BackupDatabase();
 		
 		return self::$factory;
 	}
