@@ -9,18 +9,13 @@ class BackupLog
 	private static $factory;
 	private $_dbconn;
 	private $_session;
-	private $_flush = TRUE;
-	private $_userID;
+	private $_flush = false;
+	private $_userID = -1;
 	
 	public function __construct() {
 		
 		//Connect to SQL database
 		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
-		
-		//Get User Session
-		$this->_session = BackupSession::getSession();		
-		
-		$this->_userID = $this->_session->getUserID();
 		
 	}
 	
@@ -36,11 +31,17 @@ class BackupLog
 		return self::$factory;
 	}
 	
-	public function addMessage($msg, $type='Info', $priority=0) {
+	public function setOutput($flag) {
+		$this->_flush = $flag;
+	}
+	
+	public function addMessage($msg, $type='Info', $priority=0, $output=false) {
+		
+		$userID = BackupSession::getSession()->getUserID();
 		
 		if ( $stmt = mysqli_prepare($this->_dbconn, "INSERT INTO backup_log (message,type,user_id,priority) VALUES(?,?,?,?)") ) {
 			
-			$stmt->bind_param('ssii', $msg, $type, $this->_userID, $priority );
+			$stmt->bind_param('ssii', $msg, $type, $userID, $priority );
 			
 			$stmt->execute();
 			$stmt->close();
@@ -51,7 +52,7 @@ class BackupLog
 		}
 		
 		//Output to client?
-		if ( $this->_flush ) {
+		if ( $this->_flush || $output ) {
 			echo $msg . "<br/>";
 			flush();
 		}

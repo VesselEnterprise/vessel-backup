@@ -37,7 +37,7 @@ class BackupUser
 	
 	public function setPassword($pwd) {
 		
-		$hash = password_hash( $pwd );
+		$hash = password_hash( $pwd, PASSWORD_DEFAULT );
 		
 		//Update user password
 		if ( $stmt = mysqli_prepare("UPDATE backup_user SET password=?,password_set=NOW() WHERE userID=?") ) {
