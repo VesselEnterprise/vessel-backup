@@ -11,7 +11,7 @@ class BackupUser
 	private $_dbconn;
 	private $_log;
 	
-	public function __construct($userID) {
+	public function __construct($userID=-1) {
 		
 		$this->_user_id = $userID;
 		
@@ -49,6 +49,48 @@ class BackupUser
 			$this->_log->addMessage("User (User ID = " . $this->_userID . ") changed their password");
 			
 		}		
+		
+	}
+	
+	public function generateAccessToken() {
+		return bin2hex(random_bytes(32));
+	}
+	
+	public function activateUser($userName, $activationCode) {
+		
+		$accessToken = '';
+		
+		$query = "SELECT user_id FROM backup_user_activation AS a LEFT JOIN backup_user AS b ON a.user_id=b.user_id WHERE b.user_name = ? AND a.activation_code=?";
+		
+		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
+			
+			$stmt->bind_param('ss', $userName, $activationCode );
+			
+			if ( $stmt->execute() ) {
+				
+				$result = $stmt->get_result();
+				if ( $result->num_rows > 0 ) {
+					
+					//User is activated
+					$accessToken = $this->generateAccessToken();
+					
+					//Set the user's access key
+					if ( @mysqli_query($this->_dbconn, "UPDATE backup_user SET access_token = '" . $accessToken . "'") ) {
+						$this->_log->addMessage("Successfully activated user " . $userName, "User Activation");
+					}				
+					
+				}
+				else {
+					$this->_log->addMessage("Failed to activate user " . $userName, "User Activation");
+				}
+				
+			}
+			
+			$stmt->close();
+			
+		}
+		
+		return $accessToken;
 		
 	}
 

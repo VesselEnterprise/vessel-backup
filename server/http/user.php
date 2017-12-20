@@ -17,6 +17,7 @@ if ( isset($_GET['action']) && $_GET['action'] == 'login' ) {
 	echo "<input type=\"text\" size=\"35\" name=\"password\" id=\"password\"></div>";
 	echo "<div><input type=\"submit\" value=\"Login\"></div>";
 	echo "<input type=\"hidden\" name=\"action\" value=\"login\">";
+	echo "<input type=\"hidden\" name=\"http_referer\" value=\"" . $common['session']->getRefererURL() . "\">";
 	echo "</form>";
 	echo "</div>";
 	
@@ -39,7 +40,16 @@ if ( isset($_POST['action']) && $_POST['action'] == "login" ) {
 	//Get Session Obj
 	$s = BackupSession::getSession();
 	if ( $s->login($user_name,$password) ) {
-		echo "Login was successful!";
+		
+		echo "Login was successful!<br/>";
+		
+		if ( !empty($_POST['http_referer']) ) {
+			
+			echo "You will now be redirected in 3 seconds...";
+		
+			echo "<script>setTimeout(function() { window.location = \"" . $_POST['http_referer'] . "\"; }, 3000 );</script>";
+			
+		}
 	}
 	else {
 		die("Error: Failed to authenticate. Please check your username or password.");
@@ -84,6 +94,7 @@ if ( isset($_GET['action']) && $_GET['action'] == 'register' ) {
 	echo "<input type=\"text\" size=\"35\" name=\"zip\" id=\"zip\"></div>";
 	echo "<div><input type=\"submit\" value=\"Register\"></div>";
 	echo "<input type=\"hidden\" name=\"action\" value=\"register\">";
+	echo "<input type=\"hidden\" name=\"http_referer\" value=\"" . $common['session']->getRefererURL() . "\">";
 	echo "</form>";
 	echo "</div>";
 	
@@ -97,8 +108,6 @@ if ( isset($_POST['action']) && $_POST['action'] == "register" ) {
 	else if ( !isset($_POST['password']) || $_POST['password'] == "" ) {
 		die("Error: No password was provided");
 	}
-	
-	echo "Started user registration";
 	
 	if ( strlen($_POST['user_name']) < 3 ){ 
 		die("Username must be at least 3 chars");
@@ -143,7 +152,7 @@ if ( isset($_POST['action']) && $_POST['action'] == "register" ) {
 		);
 		
 		if ( $stmt->execute() ) {
-			BackupLog::getLog()->addMessage("User " . $username . " has been registered");
+			BackupLog::getLog()->addMessage("User " . $username . " has been registered", "User Registration", 0, true);
 		}
 		
 		$stmt->close();

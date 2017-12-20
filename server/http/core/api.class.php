@@ -1,5 +1,8 @@
 <?php
 
+require_once 'common.inc.php';
+require_once 'user.class.php';
+
 abstract class API
 {
     /**
@@ -30,12 +33,16 @@ abstract class API
      * Stores raw data from a POST or PUT
      */
      protected $rawData = Null;
+	 
+	 private $_db;
 
     /**
      * Constructor: __construct
      * Allow for CORS, assemble and pre-process the data
      */
     public function __construct($request) {
+		
+		$this->_db = BackupDatabase::getDatabase();
 		
         header("Access-Control-Allow-Orgin: *");
         header("Access-Control-Allow-Methods: *");
@@ -86,7 +93,8 @@ abstract class API
 
     private function _response($data, $status = 200) {
         header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
-        return json_encode($data);
+		header("Content-Type: application/json");
+        return json_encode( array( 'response' => $data ), JSON_PRETTY_PRINT );
     }
 
     private function _cleanInputs($data) {
@@ -110,12 +118,94 @@ abstract class API
             500 => 'Internal Server Error',
         );
 		
-        return ($status[$code])?$status[$code]:$status[500]; 
+        return ($status[$code]) ? $status[$code] : $status[500]; 
 		
     }
 	
 	private function test() {
-		echo "Hit me";
+		echo $this->_response("Hello World");
+	}
+	
+	private function activate() {
+		
+		if ( $this->verb != "POST" ) {
+			echo $this->_response("Error: This HTTP method is not supported");
+			return;
+		}
+		
+		//Verify that the activation code is correct
+		$request = json_decode($this->rawData, true );
+		
+		if ( empty($request['activation_code']) ) {
+			echo $this->_response("Error: Activation code is missing");
+			return;
+		}
+		
+		if ( empty($request['user_name']) ) {
+			echo $this->_response("Error: Username is missing");
+			return;
+		}
+		
+		$userName = trim($request['user_name']);
+		$activationCode = trim($request['activation_code']);
+		
+		$user = new BackupUser();
+		$accessToken = $user->activateUser($userName, $activationCode);
+
+	}
+	
+	private function authenticate() {
+		
+		//Verify that the provided access token and user name are correct
+		$request = json_decode($this->rawData, true );
+		
+		if ( empty($request['user_name']) ) {
+			echo $this->_request("Error: Username is missing");
+			return;
+		}
+		
+		if ( empty($request['access_token']) ) {
+			echo $this->_request("Error: Access token is missing");
+			return;
+		}
+		
+		$query = "SELECT user_id,access_token FROM backup_user WHERE user_name=? AND access_token=?";
+		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+			
+			$username = $request['user_name'];
+			$access_token = $request['access_token'];
+			
+			$stmt->bind_param('ss', $username, $access_token );
+			
+			if ( $stmt->execute() ) {
+				$result = $stmt->get_result();
+				if ( $result->num_rows > 0 ) {
+					
+					//Check if access token is empty, if so then generate a new one
+					if ( $result[1] == "" ) {
+						$access_token = bin2hex(random_bytes(32));
+					}
+					
+				}
+				
+			}
+			
+			$stmt->close();
+			
+		}
+		
+	}
+	
+	private function user() {
+		
+		
+	}
+	
+	private function file() {
+		
+		echo $this->_response( array( 'file_id' => 100 ) );
+		
+		
 	}
 }
 

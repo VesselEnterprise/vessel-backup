@@ -190,9 +190,6 @@ class BackupSession
 				}
 				
 			}
-			else {
-				echo "Session could not be found";
-			}
 			
 			$result->close();
 			
@@ -303,6 +300,16 @@ class BackupSession
 			"UPDATE backup_user_session SET last_accessed=NOW(),ip_address='" . $this->getIPAddr() ."' WHERE session_hash='" . $this->_sessionHash . "'"
 		);
 		
+	}
+	
+	public function printLoginMsg() {
+		
+		echo "Error: You must be authenticated to use this feature. Please <a href=\"user.php?action=login\">login</a> to continue";
+		
+	}
+	
+	public function getRefererURL() {
+		return !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "index.php";
 	}
 	
 }
