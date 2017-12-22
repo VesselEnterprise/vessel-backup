@@ -128,7 +128,7 @@ abstract class API
 	
 	private function activate() {
 		
-		if ( $this->verb != "POST" ) {
+		if ( $this->method != "POST" ) {
 			echo $this->_response("Error: This HTTP method is not supported");
 			return;
 		}
@@ -149,8 +149,23 @@ abstract class API
 		$userName = trim($request['user_name']);
 		$activationCode = trim($request['activation_code']);
 		
-		$user = new BackupUser();
-		$accessToken = $user->activateUser($userName, $activationCode);
+		$user = new BackupUser($userName);
+		$accessToken = $user->activateUser($activationCode);
+		
+		$msg = '';
+		if ( !$accessToken ) {
+			$msg = "Error: User could not be activated";
+		}
+		else {
+			$msg = "User has been successfully activated";
+		}
+		
+		echo $this->_response( array( 
+			"user_name" => $userName,
+			"access_token" => $accessToken,
+			"activation_code" => $activationCode,
+			"message" => $msg 
+		) );
 
 	}
 	

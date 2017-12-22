@@ -1,6 +1,6 @@
 <?php
 
-require_once 'database.class.php';
+require_once 'common.inc.php';
 
 class BackupLDAP
 {
@@ -105,6 +105,9 @@ class BackupLDAP
 		$pageSize = 1000;
 		$ldapCookie = '';
 		
+		$userSrc = "LDAP";
+		$ldapActivateCode = $this->_db->getSetting("ldap_activate_code");
+		
 		do {
 		
 			ldap_control_paged_result($this->_lc, $pageSize, true, $ldapCookie);
@@ -121,11 +124,10 @@ class BackupLDAP
 			
 			//Log LDAP Import User Count
 			$this->_log->addMessage( $userTotal ." entries returned", 'LDAP');
-			
-			$userSrc = "LDAP";
-			
+
 			$query = 
-				"INSERT INTO backup_user (user_name,first_name,last_name,email,address,city,state,zip,title,office,mobile,source) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE user_name = ?";
+				"INSERT INTO backup_user (user_name,first_name,last_name,email,address,city,state,zip,title,office,mobile,source) " .
+				"VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE user_name=?,email=?,address=?,city=?,state=?,zip=?,title=?,office=?,mobile=?,user_id=LAST_INSERT_ID(user_id)";
 				
 			if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
@@ -135,7 +137,7 @@ class BackupLDAP
 					//var_dump($entries[$i]);
 						
 					$stmt->bind_param(
-						'sssssssssssss', //Last entry should always be user_name (pkey)
+						'sssssssssssssssssssss', //Last entry should always be user_name (pkey)
 						$entries[$i]['samaccountname'][0],
 						$entries[$i]['givenname'][0],
 						$entries[$i]['sn'][0],
@@ -148,12 +150,33 @@ class BackupLDAP
 						$entries[$i]['physicaldeliveryofficename'][0],
 						$entries[$i]['mobile'][0],
 						$userSrc,
-						$entries[$i]['samaccountname'][0]
+						$entries[$i]['samaccountname'][0],
+						$entries[$i]['mail'][0],
+						$entries[$i]['streetaddress'][0],
+						$entries[$i]['l'][0],
+						$entries[$i]['st'][0],
+						$entries[$i]['postalcode'][0],
+						$entries[$i]['title'][0],
+						$entries[$i]['physicaldeliveryofficename'][0],
+						$entries[$i]['mobile'][0]
 					);
 					
 					if ( $stmt->execute() ) {
 						echo "User " . $entries[$i]['samaccountname'][0] . " has been added to database<br/>";
 						flush();
+						
+						$userID = mysqli_insert_id($this->_dbconn);
+						
+						//Create new user activation record?
+						
+						//Get user object
+						$user = BackupUser::getUser($userID);
+						
+						//If user has no access token, create a new activation record
+						if ( !$user->getUserData('access_token') ) {
+							$user->createUserActivation( $ldapActivateCode );
+						}
+						
 					}
 					else {
 						$this->_log->addMessage( "Failed to add user to database: " . mysqli_error($this->_dbconn), "LDAP" );

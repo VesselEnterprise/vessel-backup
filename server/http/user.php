@@ -129,6 +129,11 @@ if ( isset($_POST['action']) && $_POST['action'] == "register" ) {
 	$state = $_POST['state'];
 	$zip = $_POST['zip'];
 	
+	//Check if the user already exists
+	if ( BackupUser::userExists($username) ) {
+		die("Error: This username already exists");
+	}
+	
 	//Insert a new user
 	$dbconn = BackupDatabase::getDatabase()->getConnection();
 	
@@ -152,6 +157,13 @@ if ( isset($_POST['action']) && $_POST['action'] == "register" ) {
 		);
 		
 		if ( $stmt->execute() ) {
+			
+			//Add new user activation
+			$userID = mysqli_insert_id($dbconn);
+			
+			$user = new BackupUser($userID);
+			$user->createUserActivation();
+			
 			BackupLog::getLog()->addMessage("User " . $username . " has been registered", "User Registration", 0, true);
 		}
 		

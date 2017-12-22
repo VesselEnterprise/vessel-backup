@@ -30,9 +30,9 @@ class BackupDatabase
 	
 	private function connect() {
 		
-		$this->dbConn = mysqli_connect( $this->dbServer, $this->dbUser, $this->dbPwd, $this->dbName );
+		$this->dbConn = @mysqli_connect( $this->dbServer, $this->dbUser, $this->dbPwd, $this->dbName );
 		if ( !$this->dbConn ) {
-			die( 'Could not connect: ' . mysqli_error() );
+			die( 'Failed to connect to database: ' . @mysqli_error($this->dbConn) );
 		}
 		//echo 'Connected successfully';
 
@@ -40,7 +40,7 @@ class BackupDatabase
 	
 	public function disconnect() {
 		
-		mysqli_close($this->dbConn);
+		@mysqli_close($this->dbConn);
 		
 	}
 	

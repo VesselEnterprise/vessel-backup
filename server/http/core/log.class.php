@@ -35,13 +35,19 @@ class BackupLog
 		$this->_flush = $flag;
 	}
 	
-	public function addMessage($msg, $type='Info', $priority=0, $output=false) {
+	public function addError($msg, $type='Info', $priority=0, $output=false ) {
+		
+		$this->addMessage( $msg, $type, $priority, $output, 1 );
+		
+	}
+	
+	public function addMessage($msg, $type='Info', $priority=0, $output=false, $error=0) {
 		
 		$userID = BackupSession::getSession()->getUserID();
 		
-		if ( $stmt = mysqli_prepare($this->_dbconn, "INSERT INTO backup_log (message,type,user_id,priority) VALUES(?,?,?,?)") ) {
+		if ( $stmt = mysqli_prepare($this->_dbconn, "INSERT INTO backup_log (message,type,user_id,priority,error) VALUES(?,?,?,?,?)") ) {
 			
-			$stmt->bind_param('ssii', $msg, $type, $userID, $priority );
+			$stmt->bind_param('ssiii', $msg, $type, $userID, $priority, $error );
 			
 			$stmt->execute();
 			$stmt->close();
