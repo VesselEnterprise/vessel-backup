@@ -8,7 +8,6 @@ class BackupAPI extends API
 	
 	private $_db;
 	private $_origin = '';
-	private $_authenticated = false;
 	
 	public function __construct($request) {
 		
@@ -17,8 +16,6 @@ class BackupAPI extends API
 		$this->_db = BackupDatabase::getDatabase();
 		
 		$this->_setOrigin();
-		
-		$this->_authenticate();
 	
 	}
 	
@@ -33,45 +30,6 @@ class BackupAPI extends API
 			$_origin = $_SERVER['REMOTE_ADDR'];
 		}
 		
-	}
-	
-	private function _authenticate() {
-		
-		//Reset
-		$this->_authenticated = false;
-		
-		//Get Authorization Header
-		$headers = apache_request_headers();
-		
-		if ( !isset($headers['Authorization'] ) ) {
-			$this->_authenticated = false;
-			return;
-		}
-		
-		$access_token = $headers['Authorization'];
-		
-		//Validate access token
-		$query = "SELECT user_id FROM backup_user WHERE access_token=?";
-		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query ) ) {
-			
-			$stmt->bind_param('s', $access_token );
-			if ( $stmt->execute() ) {
-				
-				$result = $stmt->get_result();
-				
-				if ( $result->num_rows > 0 )
-					$this->_authenticated = true;
-				
-			}
-			
-			$stmt->close();
-			
-		}
-		
-	}
-	
-	public function isAuthenticated() {
-		return $this->_authenticated;
 	}
 	
 }

@@ -14,15 +14,17 @@ class BackupLDAP
 	private $_db;
 	private $_dbconn;
 	private $_log;
+	private $_session;
 	
 	public function __construct() {
 		
 		//Connect to MySQL database
 		$this->_db = BackupDatabase::getDatabase();
 		$this->_dbconn = $this->_db->getConnection();
+		$this->_session = BackupSession::getSession();
 		
 		//Create new log object
-		$this->_log = BackupLog::getLog();
+		$this->_log = BackupLog::getLog( $this->_session->getUserID() );
 		
 		$this->_host = $this->_db->getSetting('ldap_server');
 		$this->_port = $this->_db->getSetting('ldap_port');

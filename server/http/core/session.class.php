@@ -22,16 +22,14 @@ class BackupSession
 		//Set remote IP
 		$this->_ip_address = $_SERVER['REMOTE_ADDR'];
 		
-		//Get Log Obj
-		$this->_log = BackupLog::getLog();
-		
 		//Get Database Connection
 		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
 		
-		//Get or Create User Session
-		session_start();
+		//Get Log Obj
+		$this->_log = BackupLog::getLog( $this->_userID );
 		
-		$this->_initSession();	
+		//Get or Create User Session		
+		$this->_initSession();
 		
 	}
 	
@@ -228,6 +226,8 @@ class BackupSession
 	
 	private function _initSession() {
 		
+		session_start();
+		
 		//Check if the user has an existing sessionID
 		if ( !empty($_COOKIE['session_key'] ) ) {
 			
@@ -235,6 +235,7 @@ class BackupSession
 			
 			if ( !empty($_COOKIE['user_id'] ) ) {
 				$this->_userID = $_COOKIE['user_id'];
+				$this->_log->setUserID( $this->_userID );
 			}
 			
 			//Validate session

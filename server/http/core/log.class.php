@@ -12,10 +12,12 @@ class BackupLog
 	private $_flush = false;
 	private $_userID = -1;
 	
-	public function __construct() {
+	public function __construct($userID) {
 		
 		//Connect to SQL database
 		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
+		
+		$this->_userID = $userID;
 		
 	}
 	
@@ -23,12 +25,16 @@ class BackupLog
 		
 	}
 	
-	public static function getLog()
+	public static function getLog($userID)
 	{
 		if (!self::$factory)
-			self::$factory = new BackupLog();
+			self::$factory = new BackupLog($userID);
 		
 		return self::$factory;
+	}
+	
+	public function setUserID($userID) {
+		$this->_userID = $userID;
 	}
 	
 	public function setOutput($flag) {
@@ -42,8 +48,6 @@ class BackupLog
 	}
 	
 	public function addMessage($msg, $type='Info', $priority=0, $output=false, $error=0) {
-		
-		$userID = BackupSession::getSession()->getUserID();
 		
 		if ( $stmt = mysqli_prepare($this->_dbconn, "INSERT INTO backup_log (message,type,user_id,priority,error) VALUES(?,?,?,?,?)") ) {
 			

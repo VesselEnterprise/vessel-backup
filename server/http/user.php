@@ -164,7 +164,7 @@ if ( isset($_POST['action']) && $_POST['action'] == "register" ) {
 			$user = new BackupUser($userID);
 			$user->createUserActivation();
 			
-			BackupLog::getLog()->addMessage("User " . $username . " has been registered", "User Registration", 0, true);
+			BackupLog::getLog($userID)->addMessage("User " . $username . " has been registered", "User Registration", 0, true);
 		}
 		
 		$stmt->close();

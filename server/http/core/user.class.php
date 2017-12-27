@@ -20,7 +20,7 @@ class BackupUser
 		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
 		
 		//Get Log Object
-		$this->_log = BackupLog::getLog();
+		$this->_log = BackupLog::getLog($userID);
 		
 		$this->_userRow = $this->_getUserRow($userID);
 		
@@ -130,10 +130,11 @@ class BackupUser
 					
 					//User is now activated
 					$accessToken = $this->generateAccessToken();
+					$accessTokenHashed = sha1( $accessToken );
 					
 					//Set the user's access key
 					if ( $s2 = mysqli_prepare($this->_dbconn, "UPDATE backup_user SET access_token=? WHERE user_id=?") ) {
-						$s2->bind_param('si', $accessToken, $this->_userID);
+						$s2->bind_param('si', $accessTokenHashed, $this->_userID);
 						if ( $s2->execute() ) {
 							$this->_log->addMessage("Successfully activated user (user_id=" . $this->_userID . ")", "User Activation");
 						}
