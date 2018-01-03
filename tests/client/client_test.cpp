@@ -18,7 +18,7 @@ int main()
     LocalDatabase *ldb = &LocalDatabase::getDatabase();
     ldb->update_global_settings();
 
-    std::string host = "http://10.1.10.208";
+    std::string host = "http://10.1.226.69";
 
     Client* c = new Client(host);
     c->set_timeout( boost::posix_time::seconds(5) );
@@ -38,7 +38,7 @@ int main()
     **/
     c->heartbeat();
 
-    c->disconnect();
+    //c->disconnect();
 
     /*
 

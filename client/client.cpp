@@ -514,15 +514,28 @@ std::string Client::make_upload_json( const Backup::Types::http_upload_file& f )
 bool Client::heartbeat()
 {
 
+    using namespace Backup::Database;
+
     //Create JSON for client heartbeat
     rapidjson::Document doc;
     doc.SetObject();
     rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
 
-    //doc.AddMember("host_name", , alloc );
-    //doc.AddMember("os", , alloc );
-    //doc.AddMember("client_version", , alloc );
-    //doc.AddMember("domain", , alloc );
+    LocalDatabase* ldb = &LocalDatabase::getDatabase();
+
+    std::map<std::string,std::string> jmap;
+    jmap.insert( std::pair<std::string,std::string>("hostname", ldb->get_setting_str("hostname")) );
+    jmap.insert( std::pair<std::string,std::string>("os", ldb->get_setting_str("host_os")) );
+    jmap.insert( std::pair<std::string,std::string>("client_version", ldb->get_setting_str("client_version")) );
+    jmap.insert( std::pair<std::string,std::string>("domain", ldb->get_setting_str("host_domain")) );
+
+    for ( auto &kv : jmap )
+    {
+        rapidjson::Value key(kv.first, alloc);
+        rapidjson::Value value(kv.second, alloc);
+
+        doc.AddMember(key, value, alloc );
+    }
 
     rapidjson::StringBuffer strbuf;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
@@ -534,6 +547,8 @@ bool Client::heartbeat()
     r.set_method("POST");
     r.set_uri("/api/v1/heartbeat");
     r.set_body( strbuf.GetString() );
+
+    this->send_request(r);
 
     return true;
 }

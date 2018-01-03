@@ -372,6 +372,64 @@ void LocalDatabase::update_global_settings()
     //Update OS Version
     #ifdef _WIN32
 
+        char domain_buf[257];
+        unsigned long domainlen = sizeof(domain_buf);
+
+        GetComputerNameEx( ComputerNameDnsDomain, domain_buf, static_cast<unsigned long*>(&domainlen) );
+
+        std::string domain(domain_buf);
+        std::string os;
+        OSVERSIONINFOEXA os_bits;
+        memset(&os_bits, 0, sizeof(OSVERSIONINFOEXA));
+        os_bits.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
+
+        if ( GetVersionEx((POSVERSIONINFOA)&os_bits) != 0 )
+        {
+            std::cout << "Success" << std::endl;
+            switch (os_bits.dwMajorVersion)
+            {
+                case 10:
+                    if ( os_bits.wProductType == VER_NT_WORKSTATION )
+                        os = "Windows 10";
+                    else
+                        os = "Windows Server 2016";
+                    break;
+                case 6:
+                    switch ( os_bits.dwMinorVersion )
+                    {
+                        case 3:
+                            if ( os_bits.wProductType == VER_NT_WORKSTATION)
+                                os = "Windows 8.1";
+                            else
+                                os = "Windows Server 2012 RC2";
+                            break;
+                        case 2:
+                            if ( os_bits.wProductType == VER_NT_WORKSTATION)
+                                os = "Windows 8";
+                            else
+                                os = "Windows Server 2012";
+                            break;
+                        case 1:
+                            if ( os_bits.wProductType == VER_NT_WORKSTATION)
+                                os = "Windows 7";
+                            else
+                                os = "Windows 2008 R2";
+                            break;
+                        default:
+                            os = "Windows NT";
+                            break;
+                    }
+                    break;
+                default:
+                    os = "Windows NT";
+                    break;
+            }
+        }
+
+        std::cout << "Major version: " << os_bits.dwMajorVersion << std::endl;
+        std::cout << "Minor version: " << os_bits.dwMinorVersion << std::endl;
+        std::cout << "OS: " << os << std::endl;
+
     #elif __unix
         utsname os_bits;
         uname(&os_bits);
