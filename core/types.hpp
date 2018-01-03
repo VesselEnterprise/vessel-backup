@@ -43,7 +43,7 @@ namespace Backup {
         {
             file_data fd;
             std::string file_hash;
-            std::string file_data;
+            std::string content;
             int part;
             int upload_id; //from REST API
             bool multi_part;

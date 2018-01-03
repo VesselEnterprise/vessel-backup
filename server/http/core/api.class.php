@@ -302,6 +302,89 @@ abstract class API
 		}
 
 	}
+	
+	private function heartbeat() {
+		
+		if ( !$this->_session->isAuthenticated() ) {
+			echo $this->_error("You are not authorized to perform this action", 401 );
+			return;			
+		}
+		
+		if ( $this->method != "POST" ) {
+			echo $this->_error("Invalid request method", 400 );
+			return;		
+		}
+		
+		$payload = json_decode( $this->rawData, true );
+		
+		if ( json_last_error() != JSON_ERROR_NONE ) {
+			echo $this->_error("JSON payload is invalid", 400 );
+			return;		
+		}
+		
+		$requiredFields = array(
+			'host_name',
+			'os',
+			'client_version',
+			'domain'
+		);
+		
+		foreach ( $requiredFields as $key => $val ) {
+			
+			if ( !isset($payload[$val]) ) {
+				echo $this->_error($val . " is missing from JSON payload", 400 );
+				return;	
+			}
+			
+		}
+		
+		$ts = time();
+		$ip = $_SERVER['REMOTE_ADDR'];
+		
+		//Create or Update Client Machine
+		$machineID = -1;
+		$query = "INSERT INTO backup_machine (name,os,dns_name,ip_address,domain,client_version,last_check_in) VALUES(?,?,?,?,?,?,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE machine_id=LAST_INSERT_ID(machine_id),ip_address=?,domain=?,client_version=?";
+		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+			
+			$stmt->bind_param(
+				'ssssssisss',
+				$payload['host_name'],
+				$payload['os'],
+				$payload['host_name'],
+				$ip,
+				$payload['domain'],
+				$payload['client_version'],
+				$ts,
+				$ip,
+				$payload['domain'],
+				$payload['client_version']
+			);
+			
+			if ( $stmt->execute() ) {
+				
+				$machineID = mysqli_insert_id($this->_db->getConnection());
+				
+			}
+			
+			$stmt->close();
+			
+		}
+		
+		$userID = $this->_session->getUserID();
+		
+		//Add or update user => machine association
+		$query = "INSERT INTO backup_user_machine (machine_id,user_id,last_check_in) VALUES (?,?,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE last_check_in=FROM_UNIXTIME(?)";
+		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+			
+			$stmt->bind_param('iiii', $machineID, $userID, $ts, $ts);
+			$stmt->execute();		
+			$stmt->close();
+		}
+		
+		echo $this->_response( array("machine_id" => $machineID, "last_check_in" => $ts ) );
+		
+	}
+	
 }
 
 ?>

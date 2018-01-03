@@ -9,6 +9,7 @@
 #include <boost/lexical_cast.hpp>
 #include "types.hpp"
 #include "log.hpp"
+#include "version.hpp"
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -16,7 +17,10 @@
     #include <unistd.h>
     #include <sys/types.h>
     #include <pwd.h>
+    #include <sys/utsname.h>
 #endif
+
+#define DB_FILENAME "local.db"
 
 namespace Backup{
     namespace Database {
@@ -24,8 +28,15 @@ namespace Backup{
         class LocalDatabase
         {
             public:
-                LocalDatabase(const std::string& filename);
-                ~LocalDatabase();
+
+                static LocalDatabase& getDatabase()
+                {
+                    static LocalDatabase instance;
+                    return instance;
+                }
+
+                LocalDatabase(LocalDatabase const&) = delete;
+                void operator=(LocalDatabase const&) = delete;
 
                 bool is_ignore_dir(const boost::filesystem::path& p, int level);
                 bool is_ignore_ext(const std::string& ext);
@@ -51,6 +62,8 @@ namespace Backup{
 
             private:
 
+                LocalDatabase();
+
                 int open_db(const std::string& filename);
                 void close_db();
                 void clean_dirs();
@@ -59,6 +72,9 @@ namespace Backup{
                 sqlite3* m_db;
                 int m_err_code;
                 Backup::Logging::Log* m_log;
+
+            protected:
+                ~LocalDatabase();
         };
 
     }

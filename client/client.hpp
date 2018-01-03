@@ -22,6 +22,7 @@
 #include "types.hpp"
 #include "local_db.hpp"
 #include "compress.hpp"
+#include "http_request.hpp"
 
 //#define BOOST_NETWORK_ENABLE_HTTPS 1
 
@@ -47,10 +48,11 @@ namespace Backup {
                 void set_timeout( boost::posix_time::time_duration t );
                 void set_ssl(bool f);
 
-                void http_request( const Backup::Types::http_request& r );
+                void send_request( const Backup::Networking::HttpRequest& r );
 
                 bool upload_file_single( const Backup::Types::http_upload_file& f);
                 bool upload_file_part ( const Backup::Types::http_upload_file& f );
+                bool heartbeat();
 
                 bool resume_transfer();
 

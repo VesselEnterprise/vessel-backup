@@ -424,30 +424,31 @@ void Client::disconnect()
 
 }
 
-void Client::http_request( const Backup::Types::http_request& r )
+void Client::send_request( const Backup::Networking::HttpRequest& r )
 {
 
     m_deadline_timer.expires_from_now(boost::posix_time::seconds(15));
 
     //Build the HTTP Request
     std::ostringstream request_stream;
-    request_stream << r.request_type << " " << r.uri << " HTTP/1.1\r\n";
+    request_stream << r.get_method() << " " << r.get_uri() << " HTTP/1.1\r\n";
     request_stream << "Host: " << m_hostname << "\r\n";
     request_stream << "Accept: */*\r\n";
 
     //If POST or PUT, send content length and type headers
+    std::string http_method = r.get_method();
     bool do_send_data=false;
-    if ( r.request_type == Backup::Types::http::HTTP_POST || r.request_type == Backup::Types::http::HTTP_PUT )
+    if ( http_method == "POST" || http_method == "PUT" )
     {
-        request_stream << "Content-Length: " << r.data.size() << "\r\n";
-        request_stream << "Content-Type: " << r.content_type << "\r\n";
+        request_stream << "Content-Length: " << r.get_body_length() << "\r\n";
+        request_stream << "Content-Type: " << r.get_content_type() << "\r\n";
         do_send_data=true;
     }
 
     request_stream << "Connection: close\r\n\r\n";
 
     if ( do_send_data )
-        request_stream << r.data.c_str();
+        request_stream << r.get_body().c_str();
 
     //Clear status code before sending new data
     m_response_ec.clear();
@@ -469,14 +470,14 @@ bool Client::upload_file_single( const Backup::Types::http_upload_file& f )
     std::string request = make_upload_json(f);
 
     //Create a new HTTP request
-    Backup::Types::http_request r;
-    r.auth_token = "";
-    r.content_type = "application/json";
-    r.data = "";
-    r.request_type = Backup::Types::http::HTTP_PUT;
-    r.uri = "/api/upload";
+    HttpRequest r;
+    r.set_content_type("application/json");
+    r.set_body("");
+    r.set_method("POST");
+    r.set_uri("/api/v1/file");
+    //r.add_header("");
 
-    this->http_request(r);
+    this->send_request(r);
 
 }
 
@@ -508,4 +509,31 @@ std::string Client::make_upload_json( const Backup::Types::http_upload_file& f )
 
     return strbuf.GetString();
 
+}
+
+bool Client::heartbeat()
+{
+
+    //Create JSON for client heartbeat
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
+
+    //doc.AddMember("host_name", , alloc );
+    //doc.AddMember("os", , alloc );
+    //doc.AddMember("client_version", , alloc );
+    //doc.AddMember("domain", , alloc );
+
+    rapidjson::StringBuffer strbuf;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
+
+    doc.Accept(writer);
+
+    HttpRequest r;
+    r.set_content_type("application/json");
+    r.set_method("POST");
+    r.set_uri("/api/v1/heartbeat");
+    r.set_body( strbuf.GetString() );
+
+    return true;
 }

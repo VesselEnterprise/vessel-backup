@@ -1,13 +1,24 @@
+#include "local_db.hpp"
 #include "client.hpp"
+#include "version.hpp"
 
 #include <sstream>
 
 using namespace Backup::Networking;
+using namespace Backup::Database;
 
 int main()
 {
 
-    std::string host = "http://10.1.226.69/phpmyadmin/index.php";
+    #ifdef _WIN32
+        WSADATA wsadata;
+        WSAStartup( MAKEWORD(2, 2), &wsadata );
+    #endif
+
+    LocalDatabase *ldb = &LocalDatabase::getDatabase();
+    ldb->update_global_settings();
+
+    std::string host = "http://10.1.10.208";
 
     Client* c = new Client(host);
     c->set_timeout( boost::posix_time::seconds(5) );
@@ -22,17 +33,14 @@ int main()
 //    request_stream << "Accept: */*\r\n";
 //    request_stream << "Connection: close\r\n\r\n";
 
-    Backup::Types::http_request r;
-    r.content_type = "text/plain";
-    r.data = "Hello World!";
-    r.request_type = Backup::Types::http::HTTP_POST;
-    r.uri = "/backup/test.php";
-
-    c->http_request(r);
+    /**
+    ** Test Heartbeat API
+    **/
+    c->heartbeat();
 
     c->disconnect();
 
-    c->connect();
+    /*
 
     //Sample file upload
     Backup::Types::file_data fd;
@@ -50,13 +58,19 @@ int main()
     f.part = 0;
     f.upload_id = 1000;
 
-    c->upload_file_single(f);
+    //c->upload_file_single(f);
 
-    c->disconnect();
+    //c->disconnect();
 
     std::cout << "Disconnected!" << '\n';
 
+    */
+
     delete c;
+
+    #ifdef _WIN32
+        WSACleanup();
+    #endif
 
     return 0;
 

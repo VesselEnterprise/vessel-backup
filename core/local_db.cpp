@@ -2,10 +2,10 @@
 
 using namespace Backup::Database;
 
-LocalDatabase::LocalDatabase(const std::string& filename)
+LocalDatabase::LocalDatabase()
 {
 
-    m_err_code = this->open_db(filename);
+    m_err_code = this->open_db(DB_FILENAME);
 
     if ( m_err_code )
         this->close_db();
@@ -368,5 +368,25 @@ void LocalDatabase::update_global_settings()
     #endif
 
     this->update_setting("username", username);
+
+    //Update OS Version
+    #ifdef _WIN32
+
+    #elif __unix
+        utsname os_bits;
+        uname(&os_bits);
+        std::string domain = os_bits.domainname;
+        std::string os = os_bits.sysname;
+        os += " ";
+        os += os_bits.machine;
+        os += " ";
+        os += os_bits.release;
+    #endif
+
+    this->update_setting("host_os", os);
+    this->update_setting("host_domain", domain);
+
+    //Update client application version
+    this->update_setting("client_version", Backup::Version::FULLVERSION_STRING);
 
 }
