@@ -25,6 +25,11 @@ Client::Client( const std::string& host ) :
     //Determine protocol, hostname, etc
     this->parse_url(host);
 
+    //Set auth token from local database
+    Backup::Database::LocalDatabase* ldb = &Backup::Database::LocalDatabase::get_database();
+
+    this->m_auth_token = ldb->get_setting_str("auth_token");
+
     //Timer should not expire until a connection attempt is made
     m_deadline_timer.expires_at(boost::posix_time::pos_infin);
     this->check_deadline();
@@ -435,6 +440,11 @@ void Client::send_request( const Backup::Networking::HttpRequest& r )
     request_stream << "Host: " << m_hostname << "\r\n";
     request_stream << "Accept: */*\r\n";
 
+    //Send Authorization Header
+    if ( this->m_auth_token != "" ) {
+        request_stream << "Authorization: " << this->m_auth_token << "\r\n";
+    }
+
     //If POST or PUT, send content length and type headers
     std::string http_method = r.get_method();
     bool do_send_data=false;
@@ -444,6 +454,11 @@ void Client::send_request( const Backup::Networking::HttpRequest& r )
         request_stream << "Content-Type: " << r.get_content_type() << "\r\n";
         do_send_data=true;
     }
+
+    //Add any custom headers
+    std::vector<std::string> headers = r.get_headers();
+    for ( std::vector<std::string>::iterator itr = headers.begin(); itr != headers.end(); ++itr )
+        request_stream << *itr << "\r\n";
 
     request_stream << "Connection: close\r\n\r\n";
 
@@ -521,19 +536,18 @@ bool Client::heartbeat()
     doc.SetObject();
     rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
 
-    LocalDatabase* ldb = &LocalDatabase::getDatabase();
+    LocalDatabase* ldb = &LocalDatabase::get_database();
 
     std::map<std::string,std::string> jmap;
-    jmap.insert( std::pair<std::string,std::string>("hostname", ldb->get_setting_str("hostname")) );
+    jmap.insert( std::pair<std::string,std::string>("host_name", ldb->get_setting_str("hostname")) );
     jmap.insert( std::pair<std::string,std::string>("os", ldb->get_setting_str("host_os")) );
     jmap.insert( std::pair<std::string,std::string>("client_version", ldb->get_setting_str("client_version")) );
     jmap.insert( std::pair<std::string,std::string>("domain", ldb->get_setting_str("host_domain")) );
 
     for ( auto &kv : jmap )
     {
-        rapidjson::Value key(kv.first, alloc);
-        rapidjson::Value value(kv.second, alloc);
-
+        rapidjson::Value key(kv.first.c_str(), alloc);
+        rapidjson::Value value(kv.second.c_str(), alloc);
         doc.AddMember(key, value, alloc );
     }
 
@@ -545,8 +559,10 @@ bool Client::heartbeat()
     HttpRequest r;
     r.set_content_type("application/json");
     r.set_method("POST");
-    r.set_uri("/api/v1/heartbeat");
+    r.set_uri("/backup/api/v1/heartbeat");
     r.set_body( strbuf.GetString() );
+
+    std::cout << strbuf.GetString() << std::endl;
 
     this->send_request(r);
 

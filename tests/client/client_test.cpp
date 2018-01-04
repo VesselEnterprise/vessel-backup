@@ -15,10 +15,10 @@ int main()
         WSAStartup( MAKEWORD(2, 2), &wsadata );
     #endif
 
-    LocalDatabase *ldb = &LocalDatabase::getDatabase();
+    LocalDatabase *ldb = &LocalDatabase::get_database();
     ldb->update_global_settings();
 
-    std::string host = "http://10.1.226.69";
+    std::string host = "http://10.1.10.208";
 
     Client* c = new Client(host);
     c->set_timeout( boost::posix_time::seconds(5) );

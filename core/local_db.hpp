@@ -29,7 +29,7 @@ namespace Backup{
         {
             public:
 
-                static LocalDatabase& getDatabase()
+                static LocalDatabase& get_database()
                 {
                     static LocalDatabase instance;
                     return instance;

@@ -92,6 +92,8 @@ namespace Backup {
                 //POST a new file upload
                 std::string make_upload_json( const Backup::Types::http_upload_file& f );
 
+                std::string m_auth_token;
+
         };
 
     }
