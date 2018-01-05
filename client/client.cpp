@@ -85,9 +85,11 @@ void Client::parse_url( const std::string& host )
     if ( m_hostname[hostlen-1] == '/' )
         m_hostname[hostlen-1] = 0; //terminate string
 
+    /*
     std::cout << "HTTP Protocol: " << m_protocol << '\n';
     std::cout << "Hostname: " << m_hostname << '\n';
     std::cout << "URI: " << m_uri << '\n';
+    */
 
 }
 
@@ -171,8 +173,6 @@ void Client::handle_connect(const boost::system::error_code& e)
 
     if ( !e )
     {
-        std::cout << "Connected to " << m_hostname << "!" << std::endl;
-        std::cout << "Error Msg: " << e.message() << std::endl;
 
         if ( !m_use_ssl )
         {
@@ -204,8 +204,10 @@ void Client::handle_handshake(const boost::system::error_code& e )
     if (!e)
     {
         m_ssl_good=true;
-        std::cout << "SSL Handshake successful" << "\n";
         m_conn_status = e;
+
+        std::cout << "SSL Handshake successful" << "\n";
+
         /*
         std::cout << "Enter message: ";
         std::cin.getline(request_, max_length);
@@ -234,13 +236,17 @@ void Client::handle_write( const boost::system::error_code& e )
 
     if (!e)
     {
+
+        //Set the deadline timer
+        m_deadline_timer.expires_from_now(boost::posix_time::seconds(10));
+
         // Read the response status line. The response_ streambuf will
         // automatically grow to accommodate the entire line. The growth may be
         // limited by passing a maximum size to the streambuf constructor.
         if ( !m_use_ssl )
-            boost::asio::async_read_until(m_socket, m_response, "\r\n", boost::bind(&Client::handle_response, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_socket, m_response_buffer, "\r\n", boost::bind(&Client::handle_response, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read_until(m_ssl_socket, m_response, "\r\n", boost::bind(&Client::handle_response, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_ssl_socket, m_response_buffer, "\r\n", boost::bind(&Client::handle_response, this, boost::asio::placeholders::error));
 
     }
     else
@@ -259,24 +265,30 @@ void Client::handle_response( const boost::system::error_code& e )
 
     if (!e)
     {
+
+        //Set the deadline timer
+        m_deadline_timer.expires_from_now(boost::posix_time::seconds(10));
+
+        //Reset HTTP Status
+        m_http_status = 0;
+
         // Check that response is OK.
-        std::istream response_stream(&m_response);
+        std::istream response_stream(&m_response_buffer);
         std::string http_version;
         response_stream >> http_version;
-        unsigned int status_code;
-        response_stream >> status_code;
+        response_stream >> m_http_status;
         std::string status_message;
         std::getline(response_stream, status_message);
 
         if (!response_stream || http_version.substr(0, 5) != "HTTP/")
         {
             std::cout << "Invalid response\n";
-            m_response_ec = boost::asio::error::operation_aborted; //Handle statis error
+            m_response_ec = boost::asio::error::operation_aborted; //Handle status error
             return;
         }
 
         //Handle a possible redirect
-        if ( status_code == 301 )
+        if ( m_http_status == 301 )
         {
             //std::cout << "Response: \n" << response_stream.rdbuf() << '\n';
 
@@ -309,19 +321,19 @@ void Client::handle_response( const boost::system::error_code& e )
 
             return;
         }
-        else if (status_code != 200)
+        else if (m_http_status != 200)
         {
             std::cout << "Response returned with status code ";
-            std::cout << status_code << "\n";
+            std::cout << m_http_status << "\n";
             m_response_ec = boost::asio::error::operation_aborted; //Set static error
             return;
         }
 
         // Read the response headers, which are terminated by a blank line.
         if ( !m_use_ssl )
-            boost::asio::async_read_until(m_socket, m_response, "\r\n\r\n", boost::bind(&Client::handle_read_headers, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_socket, m_response_buffer, "\r\n\r\n", boost::bind(&Client::handle_read_headers, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read_until(m_ssl_socket, m_response, "\r\n\r\n", boost::bind(&Client::handle_read_headers, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_ssl_socket, m_response_buffer, "\r\n\r\n", boost::bind(&Client::handle_read_headers, this, boost::asio::placeholders::error));
 
     }
     else
@@ -338,23 +350,23 @@ void Client::handle_read_headers( const boost::system::error_code& e )
 
     if (!e)
     {
-        // Process the response headers.
-        std::istream response_stream(&m_response);
+        //Read header data
+        std::istream response_stream(&m_response_buffer);
+        std::noskipws( response_stream ); //Don't skip white spaces
         std::string header;
         while (std::getline(response_stream, header) && header != "\r")
-            std::cout << header << "\n";
+            m_header_data += header.append("\n");
 
-        std::cout << "\n";
-
-        // Write whatever content we already have to output.
-        if (m_response.size() > 0)
-            std::cout << &m_response;
+        //There may be some data in the buffer to consume
+        if (m_response_buffer.size() > 0) {
+            m_response_data.append( std::istream_iterator<char>(response_stream), std::istream_iterator<char>() );
+        }
 
         // Start reading remaining data until EOF.
         if ( !m_use_ssl )
-            boost::asio::async_read( m_socket, m_response, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error) );
+            boost::asio::async_read( m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error) );
         else
-            boost::asio::async_read( m_ssl_socket, m_response, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error) );
+            boost::asio::async_read( m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error) );
 
     }
     else
@@ -373,14 +385,18 @@ void Client::handle_read_content( const boost::system::error_code& e )
 
     if (!e)
     {
-        // Write all of the data that has been read so far.
-        std::cout << &m_response;
+
+        //Read data from buffer into a stream
+        std::istream response_data(&m_response_buffer);
+        std::noskipws( response_data ); //Don't skip white spaces
+
+        m_response_data.append( std::string(std::istream_iterator<char>(response_data), std::istream_iterator<char>()) );
 
         // Continue reading remaining data until EOF.
         if ( !m_use_ssl )
-            boost::asio::async_read(m_socket, m_response, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error));
+            boost::asio::async_read(m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read(m_ssl_socket, m_response, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error));
+            boost::asio::async_read(m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error));
 
     }
     else if (e != boost::asio::error::eof)
@@ -417,20 +433,40 @@ void Client::check_deadline()
 
 void Client::disconnect()
 {
-    if ( m_socket.is_open() ) {
-        m_socket.shutdown( tcp::socket::shutdown_both );
-        m_socket.close();
+    try
+    {
+        if ( m_socket.is_open() ) {
+            //m_socket.shutdown( tcp::socket::shutdown_both );
+            m_socket.close();
+        }
+
+        if ( m_ssl_socket.lowest_layer().is_open() ) {
+            //m_ssl_socket.lowest_layer().shutdown( tcp::socket::shutdown_both );
+            m_ssl_socket.lowest_layer().close();
+        }
+    }
+    catch ( boost::system::system_error& ec )
+    {
+        std::cout << "There was some error" << std::endl;
     }
 
-    if ( m_ssl_socket.lowest_layer().is_open() ) {
-        m_ssl_socket.lowest_layer().shutdown( tcp::socket::shutdown_both );
-        m_ssl_socket.lowest_layer().close();
-    }
+    m_connected=false;
 
 }
 
 void Client::send_request( const Backup::Networking::HttpRequest& r )
 {
+
+    if ( !m_connected ) {
+        this->connect();
+    }
+
+    if ( !m_connected )
+        return;
+
+    //clear any existing data
+    m_response_data.clear();
+    m_header_data.clear();
 
     m_deadline_timer.expires_from_now(boost::posix_time::seconds(15));
 
@@ -475,6 +511,8 @@ void Client::send_request( const Backup::Networking::HttpRequest& r )
 
     //Run the handlers until the response sets the status code or EOF
     do { m_io_service.run_one(); std::cout << "..." << '\n'; } while ( !m_response_ec );
+
+    this->disconnect();
 
 }
 
@@ -529,6 +567,8 @@ std::string Client::make_upload_json( const Backup::Types::http_upload_file& f )
 bool Client::heartbeat()
 {
 
+    this->connect();
+
     using namespace Backup::Database;
 
     //Create JSON for client heartbeat
@@ -562,9 +602,117 @@ bool Client::heartbeat()
     r.set_uri("/backup/api/v1/heartbeat");
     r.set_body( strbuf.GetString() );
 
-    std::cout << strbuf.GetString() << std::endl;
-
     this->send_request(r);
 
     return true;
+
+}
+
+std::string Client::get_response()
+{
+    return m_response_data;
+}
+
+std::string Client::get_headers()
+{
+    return m_header_data;
+}
+
+std::string Client::get_client_settings()
+{
+
+    if ( m_auth_token == "" ) //Don't try to get settings if no auth token is present
+        return "{}";
+
+    HttpRequest r;
+    r.set_content_type("application/json");
+    r.set_method("GET");
+    r.set_uri("/backup/api/v1/settings");
+
+    this->send_request(r);
+
+    return this->get_response();
+
+}
+
+bool Client::activate()
+{
+
+    using namespace rapidjson;
+    using Backup::Database::LocalDatabase;
+
+    LocalDatabase* ldb = &LocalDatabase::get_database();
+
+    Document doc;
+    doc.SetObject();
+    Document::AllocatorType& alloc = doc.GetAllocator();
+
+    //Get Activation Code from DB
+    Value activation_code( ldb->get_setting_str("activation_code").c_str(), alloc );
+    Value user_name( ldb->get_setting_str("username").c_str(), alloc );
+
+    doc.AddMember("user_name", user_name, alloc );
+    doc.AddMember("activation_code", activation_code, alloc );
+
+    StringBuffer strbuf;
+    PrettyWriter<StringBuffer> writer(strbuf);
+
+    doc.Accept(writer);
+
+    HttpRequest r;
+    r.set_method("POST");
+    r.set_uri("/backup/api/v1/activate");
+    r.set_content_type("application/json");
+    r.set_body( strbuf.GetString() );
+
+    this->send_request( r );
+
+    std::cout << strbuf.GetString() << std::endl;
+
+    //Reset Document
+    doc.RemoveAllMembers();
+    writer.Reset(strbuf);
+
+    doc.Parse( m_response_data.c_str() );
+
+    doc.Accept(writer);
+
+    std::cout << strbuf.GetString() << std::endl;
+
+    //Check if access token is present
+    const Value& response = doc["response"];
+
+    if ( !response.HasMember("access_token") ) {
+        m_activated=false;
+        return false;
+    }
+
+    //Set auth token
+    std::string token = response["access_token"].GetString();
+
+    if ( token == "" && !response["is_activated"].GetBool() ) {
+        m_activated=false;
+        return false;
+    }
+
+    //Set Auth Token?
+    if ( token != "" ) {
+        ldb->update_setting("auth_token", token );
+        m_auth_token = token;
+    }
+
+    m_activated=true;
+
+    return true;
+
+}
+
+bool Client::is_activated()
+{
+    return m_activated;
+}
+
+unsigned int Client::get_http_status()
+{
+    return m_http_status;
 }

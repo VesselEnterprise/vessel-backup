@@ -2,79 +2,14 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="linux-client_test" />
-	<File name="core/local_db.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="11815" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="tests/file_iterator/file_test.cpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="347" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="client/client.hpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3127" topLine="72" />
-		</Cursor>
-	</File>
 	<File name="core/http_request.cpp" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="328" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="tests/client/client_test.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="core/local_db.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="370" topLine="11" />
-		</Cursor>
-	</File>
-	<File name="client/client.cpp" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="16691" topLine="537" />
-		</Cursor>
-	</File>
-	<File name="tests/db/db_test.cpp" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="801" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="core/log.cpp" open="0" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="283" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="core/http_request.hpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="237" topLine="6" />
-		</Cursor>
-	</File>
-	<File name="core/local_db.hpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="445" topLine="21" />
-		</Cursor>
-	</File>
-	<File name="core/version.hpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="417" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="core/log.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="522" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="core/types.hpp" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="696" topLine="14" />
-		</Cursor>
-	</File>
-	<File name="client/main.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="188" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="tests/compression/compress_test.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="58" topLine="0" />
+			<Cursor1 position="12476" topLine="445" />
 		</Cursor>
 	</File>
 	<File name="core/file_iterator.cpp" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -82,9 +17,74 @@
 			<Cursor1 position="222" topLine="0" />
 		</Cursor>
 	</File>
+	<File name="core/http_request.hpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="237" topLine="6" />
+		</Cursor>
+	</File>
+	<File name="client/client.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="20707" topLine="685" />
+		</Cursor>
+	</File>
+	<File name="core/version.hpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="417" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="client/client.hpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3563" topLine="79" />
+		</Cursor>
+	</File>
+	<File name="tests/db/db_test.cpp" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="801" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="tests/client/client_test.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="976" topLine="20" />
+		</Cursor>
+	</File>
+	<File name="core/log.cpp" open="0" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="283" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="tests/file_iterator/file_test.cpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="347" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="core/types.hpp" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="696" topLine="14" />
+		</Cursor>
+	</File>
 	<File name="tests/tarball/tarball_test.cpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="576" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="tests/compression/compress_test.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="58" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="client/main.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="188" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="core/log.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="522" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="core/local_db.hpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1773" topLine="45" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

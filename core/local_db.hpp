@@ -7,6 +7,11 @@
 #include <sqlite3.h>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
 #include "types.hpp"
 #include "log.hpp"
 #include "version.hpp"
@@ -56,6 +61,8 @@ namespace Backup{
                 std::string get_last_err();
 
                 void update_global_settings();
+
+                void update_client_settings( const std::string& s );
 
                 //Scans backup_file table and checks if files exist and mark for deletion if necessary
                 void clean();

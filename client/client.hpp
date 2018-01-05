@@ -54,6 +54,12 @@ namespace Backup {
                 bool upload_file_single( const Backup::Types::http_upload_file& f);
                 bool upload_file_part ( const Backup::Types::http_upload_file& f );
                 bool heartbeat();
+                std::string get_client_settings();
+                std::string get_response();
+                std::string get_headers();
+                unsigned int get_http_status();
+                bool activate();
+                bool is_activated();
 
                 bool resume_transfer();
 
@@ -71,8 +77,11 @@ namespace Backup {
                 tcp::socket m_socket;
                 boost::asio::ssl::stream<tcp::socket> m_ssl_socket;
                 deadline_timer m_deadline_timer;
-                boost::asio::streambuf m_response;
-                boost::asio::streambuf m_request;
+                boost::asio::streambuf m_response_buffer;
+                boost::asio::streambuf m_request_buffer;
+                unsigned int m_http_status;
+                std::string m_header_data;
+                std::string m_response_data;
                 boost::system::error_code m_conn_status;
                 bool m_ssl_good;
                 boost::system::error_code m_response_ec;
@@ -93,6 +102,7 @@ namespace Backup {
                 std::string make_upload_json( const Backup::Types::http_upload_file& f );
 
                 std::string m_auth_token;
+                bool m_activated;
 
         };
 

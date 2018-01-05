@@ -176,19 +176,29 @@ abstract class API
 		$activationCode = trim($request['activation_code']);
 		
 		$user = new BackupUser($userName);
-		$accessToken = $user->activateUser($activationCode);
+		$isActivated = $user->getUserData("access_token") ? true : false;
+		
+		if ( $accessToken = $user->activateUser($activationCode) ) {
+			$isActivated=true;	
+		}
 		
 		$msg = '';
-		if ( !$accessToken ) {
+		if ( !$accessToken && !$isActivated ) {
 			$msg = "Error: User could not be activated";
+		}
+		else if(!$accessToken && $isActivated) {
+			$msg = "User is already activated";
 		}
 		else {
 			$msg = "User has been successfully activated";
 		}
 		
+		
+		
 		echo $this->_response( array( 
 			"user_name" => $userName,
 			"access_token" => $accessToken,
+			"is_activated" => $isActivated,
 			"activation_code" => $activationCode,
 			"message" => $msg 
 		) );

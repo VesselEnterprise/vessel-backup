@@ -18,14 +18,10 @@ int main()
     LocalDatabase *ldb = &LocalDatabase::get_database();
     ldb->update_global_settings();
 
-    std::string host = "http://10.1.10.208";
+    std::string host = ldb->get_setting_str("master_server");
 
     Client* c = new Client(host);
     c->set_timeout( boost::posix_time::seconds(5) );
-    if ( c->connect() )
-        std::cout << "Connection was successful!" << '\n';
-    else
-        std::cout << "Error: Connection failed" << '\n';
 
 //    std::ostringstream request_stream;
 //    request_stream << "GET " << "/phpmyadmin" << " HTTP/1.1\r\n";
@@ -34,11 +30,29 @@ int main()
 //    request_stream << "Connection: close\r\n\r\n";
 
     /**
+    ** Test User Activation
+    **/
+    c->activate();
+
+    if ( !c->is_activated() ) {
+        std::cout << "Error: Client is not activated" << std::endl;
+        return 1;
+    }
+
+    /**
     ** Test Heartbeat API
     **/
     c->heartbeat();
 
-    //c->disconnect();
+    std::cout << c->get_response();
+
+    /**
+    ** Test Get Client Settings
+    **/
+    std::string client_settings = c->get_client_settings();
+
+    //Update Client Settings
+    ldb->update_client_settings( client_settings );
 
     /*
 

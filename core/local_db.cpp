@@ -448,3 +448,43 @@ void LocalDatabase::update_global_settings()
     this->update_setting("client_version", Backup::Version::FULLVERSION_STRING);
 
 }
+
+void LocalDatabase::update_client_settings(const std::string& s )
+{
+    using namespace rapidjson;
+
+    Document doc;
+    doc.Parse( s.c_str() );
+
+    if ( !doc.IsObject() )
+        return;
+
+    const Value& settings = doc["response"]["settings"];
+
+    if ( !settings.IsObject() )
+        return;
+
+    //Iterate and update settings
+    for (auto& v : settings.GetObject() )
+    {
+        const Value& obj = v.value;
+
+        if ( obj["value"].IsNull() )
+            continue;
+
+        //std::cout << v.name.GetString() << " => " << obj["value"].GetType() << std::endl;
+
+        if ( obj["value"].IsString() )
+            this->update_setting( v.name.GetString(), obj["value"].GetString() );
+        else if ( obj["value"].IsBool() ) {
+            if ( obj["value"].GetBool() )
+                this->update_setting( v.name.GetString(), "true" );
+            else
+                this->update_setting( v.name.GetString(), "false" );
+        }
+        else if ( obj["value"].IsNumber() )
+            this->update_setting( v.name.GetString(), obj["value"].GetInt() );
+
+    }
+
+}
