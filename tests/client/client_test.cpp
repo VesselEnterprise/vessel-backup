@@ -1,6 +1,7 @@
 #include "local_db.hpp"
 #include "client.hpp"
 #include "version.hpp"
+#include "file.hpp"
 
 #include <sstream>
 
@@ -22,12 +23,6 @@ int main()
 
     Client* c = new Client(host);
     c->set_timeout( boost::posix_time::seconds(5) );
-
-//    std::ostringstream request_stream;
-//    request_stream << "GET " << "/phpmyadmin" << " HTTP/1.1\r\n";
-//    request_stream << "Host: " << "10.1.10.208" << "\r\n";
-//    request_stream << "Accept: */*\r\n";
-//    request_stream << "Connection: close\r\n\r\n";
 
     /**
     ** Test User Activation

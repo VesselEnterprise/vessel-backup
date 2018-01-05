@@ -339,9 +339,12 @@ void LocalDatabase::update_global_settings()
 
     //Update user home folder
     #ifdef _WIN32
+        /* This sometimes returns incorrect results in Windows systems
         std::string home_drive = std::getenv("HOMEDRIVE");
         std::string home_path = std::getenv("HOMEPATH");
-        this->update_setting("home_folder", home_drive.append(home_path) );
+        */
+        std::string user_folder = std::getenv("USERPROFILE");
+        this->update_setting("home_folder", user_folder );
     #elif __unix
         this->update_setting("home_folder", std::getenv("HOME") );
     #endif
@@ -426,9 +429,11 @@ void LocalDatabase::update_global_settings()
             }
         }
 
+        /*
         std::cout << "Major version: " << os_bits.dwMajorVersion << std::endl;
         std::cout << "Minor version: " << os_bits.dwMinorVersion << std::endl;
         std::cout << "OS: " << os << std::endl;
+        */
 
     #elif __unix
         utsname os_bits;
@@ -465,9 +470,9 @@ void LocalDatabase::update_client_settings(const std::string& s )
         return;
 
     //Iterate and update settings
-    for (auto& v : settings.GetObject() )
+    for (Value::ConstMemberIterator itr = settings.MemberBegin(); itr != settings.MemberEnd(); ++itr )
     {
-        const Value& obj = v.value;
+        const Value& obj = itr->value;
 
         if ( obj["value"].IsNull() )
             continue;
@@ -475,15 +480,15 @@ void LocalDatabase::update_client_settings(const std::string& s )
         //std::cout << v.name.GetString() << " => " << obj["value"].GetType() << std::endl;
 
         if ( obj["value"].IsString() )
-            this->update_setting( v.name.GetString(), obj["value"].GetString() );
+            this->update_setting( itr->name.GetString(), obj["value"].GetString() );
         else if ( obj["value"].IsBool() ) {
             if ( obj["value"].GetBool() )
-                this->update_setting( v.name.GetString(), "true" );
+                this->update_setting( itr->name.GetString(), "true" );
             else
-                this->update_setting( v.name.GetString(), "false" );
+                this->update_setting( itr->name.GetString(), "false" );
         }
         else if ( obj["value"].IsNumber() )
-            this->update_setting( v.name.GetString(), obj["value"].GetInt() );
+            this->update_setting( itr->name.GetString(), obj["value"].GetInt() );
 
     }
 
