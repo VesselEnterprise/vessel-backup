@@ -1,0 +1,161 @@
+[2018-01-07 20:00:13.107559][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.yEd
+[2018-01-07 20:00:13.107727][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gvfs
+[2018-01-07 20:00:13.107768][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.smb
+[2018-01-07 20:00:13.116751][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.cmake
+[2018-01-07 20:00:13.116796][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gnome
+[2018-01-07 20:00:13.116824][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.kde
+[2018-01-07 20:00:13.138051][File Scanner][ERROR]: Skipped directory exception: /home/kyle/yEd/.install4j
+[2018-01-07 20:00:13.475225][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.pki
+[2018-01-07 20:00:13.475285][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gitkraken
+[2018-01-07 20:00:13.475310][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.java
+[2018-01-07 20:00:13.482449][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gimp-2.8
+[2018-01-07 20:00:13.482493][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.designer
+[2018-01-07 20:00:13.485083][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.nano
+[2018-01-07 20:00:13.485117][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.compiz
+[2018-01-07 20:00:13.485142][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gnome2_private
+[2018-01-07 20:00:13.487870][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/git/bv_hd_reporting/bootstrap.bat
+[2018-01-07 20:00:13.505326][File Scanner][ERROR]: Skipped directory exception: /home/kyle/git/bv_hd_reporting/.git
+[2018-01-07 20:00:13.542230][File Scanner][ERROR]: Skipped directory exception: /home/kyle/git/bv_cms_support/.git
+[2018-01-07 20:00:13.559935][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/git/CSVReader/bin/Debug/CSV_Reader.exe
+[2018-01-07 20:00:13.561943][File Scanner][ERROR]: Skipped directory exception: /home/kyle/git/CSVReader/.git
+[2018-01-07 20:00:13.570061][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.mplayer
+[2018-01-07 20:00:13.570102][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.macromedia
+[2018-01-07 20:00:13.573546][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gnupg
+[2018-01-07 20:00:13.576361][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.dbus
+[2018-01-07 20:00:14.715603][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/Postman-linux-x64-5.3.2/Postman/resources/app/node_modules/postman-sandbox/.github
+[2018-01-07 20:00:14.715657][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/Postman-linux-x64-5.3.2/Postman/resources/app/node_modules/postman-sandbox/.cache
+[2018-01-07 20:00:16.342921][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/Postman-linux-x64-5.3.2/Postman/resources/app/node_modules/uvm/.github
+[2018-01-07 20:00:16.878784][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/Postman-linux-x64-5.3.2/Postman/resources/app/node_modules/postman-runtime/.ci
+[2018-01-07 20:00:21.373017][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/cryptopp565/cryptest.exe
+[2018-01-07 20:00:21.373116][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/cryptopp565/rdrand-masm.cmd
+[2018-01-07 20:00:22.542951][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x64/SW_DVD5_Project_Pro_2016_64Bit_English_MLF_X20-42683.ISO
+[2018-01-07 20:00:22.543109][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x64/en_windows_10_enterprise_x64_dvd_6851151.iso
+[2018-01-07 20:00:22.543206][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x64/SW_DVD5_Visio_Pro_2016_64Bit_English_MLF_X20-42764.ISO
+[2018-01-07 20:00:22.544534][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x64/SW_DVD5_Office_Professional_Plus_2016_64Bit_English_MLF_X20-42432.ISO
+[2018-01-07 20:00:22.545720][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x86/SW_DVD5_Visio_Pro_2016_W32_English_MLF_X20-41585.ISO
+[2018-01-07 20:00:22.545803][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x86/SW_DVD5_Project_Pro_2016_W32_English_MLF_X20-41516.ISO
+[2018-01-07 20:00:22.545875][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x86/en_windows_10_enterprise_x86_dvd_6851156.iso
+[2018-01-07 20:00:22.546946][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/WINDOWS 10 ENTERPRISE + OFFICE 2016 PRO PLUS VISIO PROJECT PRO VL (x86-x64) [TechTools.net]/x86/SW_DVD5_Office_Professional_Plus_2016_W32_English_MLF_X20-41353.ISO
+[2018-01-07 20:00:22.566294][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Techsmith Snagit 12.4.1 Build 3036 RePack by KpoJIuK/TechSmith.SnagIt.v12.4.1.3036.exe
+[2018-01-07 20:00:22.566422][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Techsmith Snagit 12.4.1 Build 3036 RePack by KpoJIuK/Тихая установка (RUS).cmd
+[2018-01-07 20:00:22.566520][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Techsmith Snagit 12.4.1 Build 3036 RePack by KpoJIuK/Silent installation (ENG).cmd
+[2018-01-07 20:00:22.566606][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/artful-desktop-amd64.iso
+[2018-01-07 20:00:22.567620][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Alien.Contact.NASA.Exposed.2.2017.1080p.AMZN.WEBRip.DD2.0.x264-QOQ[EtHD]/Alien.Contact.NASA.Exposed.2.2017.1080p.Amazon.WEB-DL.DD2.0.H.264-QOQ[EtHD].mkv
+[2018-01-07 20:00:23.651190][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Windows Server 2016 Build 14393.970 en-US April 2017 {Gen2}/Rufus USB-tool/Rufus 2.14.exe
+[2018-01-07 20:00:23.651302][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Windows Server 2016 Build 14393.970 en-US April 2017 {Gen2}/SVR2016.ENU.APR2017.iso
+[2018-01-07 20:00:24.569712][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/[TechTools.net] Microsoft Windows 10 5in1 November (x64)/[TechTools.net] Microsoft Windows 10 5in1 November (x64)/[TechTools.net] Microsoft Windows 10 5in1 November (x64).iso
+[2018-01-07 20:00:24.574540][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/[TechTools.net] Microsoft Windows 10 5in1 November (x64)/[TechTools.net] Microsoft Windows 10 5in1 November (x64)/Tools/Rufus v2.5/rufus-2.5.exe
+[2018-01-07 20:00:24.578606][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.pl-PL.exe
+[2018-01-07 20:00:24.581444][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Extras/KMS.7z
+[2018-01-07 20:00:24.581557][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.hi-IN.exe
+[2018-01-07 20:00:24.581656][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.el-GR.exe
+[2018-01-07 20:00:24.581742][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.da-DK.exe
+[2018-01-07 20:00:24.581816][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.de-DE.exe
+[2018-01-07 20:00:24.581887][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.en-US.ISO
+[2018-01-07 20:00:24.581951][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.pt-BR.exe
+[2018-01-07 20:00:24.582015][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.fr-FR.exe
+[2018-01-07 20:00:24.582092][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.nl-NL.exe
+[2018-01-07 20:00:24.582157][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.ru-RU.exe
+[2018-01-07 20:00:24.582219][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.tr-TR.exe
+[2018-01-07 20:00:24.582288][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.pt-PT.exe
+[2018-01-07 20:00:24.582355][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.it-IT.exe
+[2018-01-07 20:00:24.582435][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.ar-SA.exe
+[2018-01-07 20:00:24.582515][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.sv-SE.exe
+[2018-01-07 20:00:24.582579][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.fi-FI.exe
+[2018-01-07 20:00:24.582641][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.es-ES.exe
+[2018-01-07 20:00:24.582711][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Microsoft Office 2016 X64 ProPlus Multi18 Apr 2016 {Generation2}/Office16.X64.nb-NO.exe
+[2018-01-07 20:00:24.584569][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/The.Nightmare.Before.Christmas.1993.720p.BRRip.750MB.MkvCage.mkv
+[2018-01-07 20:00:24.589451][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/Happy Death Day (2017) [720p] [YTS.ME]/Happy.Death.Day.2017.720p.BluRay.x264-[YTS.ME].mp4
+[2018-01-07 20:00:25.703431][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/bootstrap.bat
+[2018-01-07 20:00:31.201221][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/boost/pool/detail/pool_construct.bat
+[2018-01-07 20:00:31.205245][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/boost/pool/detail/pool_construct_simple.bat
+[2018-01-07 20:00:39.464611][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/tools/boostdep/examples/report.bat
+[2018-01-07 20:00:39.694776][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/tools/build/bootstrap.bat
+[2018-01-07 20:00:39.892403][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/tools/build/src/engine/vswhere_usability_wrapper.cmd
+[2018-01-07 20:00:39.895988][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/tools/build/src/engine/guess_toolset.bat
+[2018-01-07 20:00:40.136638][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/tools/build/src/engine/build.bat
+[2018-01-07 20:00:40.163204][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/tools/build/src/engine/config_toolset.bat
+[2018-01-07 20:00:53.376589][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/geometry/doc/doxy/make_documentation.bat
+[2018-01-07 20:00:53.580915][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/geometry/doc/src/docutils/tools/doxygen_xml2qbk/for_debugger.ini
+[2018-01-07 20:01:00.497634][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/math/dot_net_example/Setupdistex/Release/setup.exe
+[2018-01-07 20:01:00.497727][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/math/dot_net_example/Setupdistex/Release/Setupdistex.msi
+[2018-01-07 20:01:00.500565][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/filesystem/tools/backup.bat
+[2018-01-07 20:01:00.501540][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/filesystem/tools/publish.bat
+[2018-01-07 20:01:00.647836][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/filesystem/doc/publish.bat
+[2018-01-07 20:01:00.647925][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/filesystem/doc/build_tutorial.bat
+[2018-01-07 20:01:00.687451][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/filesystem/example/test/setup.bat
+[2018-01-07 20:01:00.689683][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/filesystem/example/test/build.bat
+[2018-01-07 20:01:06.816992][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/python/doc/numpy/make.bat
+[2018-01-07 20:01:08.747890][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/circular_buffer/example/circular_buffer_examples.bat
+[2018-01-07 20:01:10.510452][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/endian/doc/publish.bat
+[2018-01-07 20:01:10.520768][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/endian/benchmark/test.bat
+[2018-01-07 20:01:10.710429][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/boost_1_65_1/libs/mpl/preprocessed/preprocess.cmd
+[2018-01-07 20:01:23.180474][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/The.Shape.of.Water 2017.DVDScr.XVID.AC3.HQ.Hive CM8/The.Shape.of.Water.2017.DVDScr.XVID.AC3.HQ.Hive-CM8.avi
+[2018-01-07 20:01:23.672740][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/rapidjson-master/bin/jsonschema/tox.ini
+[2018-01-07 20:01:23.951396][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/tor-browser_en-US/Browser/.gnome2_private
+[2018-01-07 20:01:23.954091][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/update-settings.ini
+[2018-01-07 20:01:23.955084][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/application.ini
+[2018-01-07 20:01:25.294054][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/TorBrowser/Data/Browser/profiles.ini
+[2018-01-07 20:01:25.328605][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/TorBrowser/Data/Browser/profile.default/extensions.ini
+[2018-01-07 20:01:25.328702][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/TorBrowser/Data/Browser/profile.default/compatibility.ini
+[2018-01-07 20:01:26.072133][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/tor-browser_en-US/Browser/.gnome2
+[2018-01-07 20:01:26.076855][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/webapprt/webapprt.ini
+[2018-01-07 20:01:26.080533][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/platform.ini
+[2018-01-07 20:01:26.081426][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/tor-browser_en-US/Browser/.gstreamer-0.10
+[2018-01-07 20:01:26.081473][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/tor-browser_en-US/Browser/.cache
+[2018-01-07 20:01:26.085358][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Downloads/tor-browser_en-US/Browser/updater.ini
+[2018-01-07 20:01:26.088152][File Scanner][ERROR]: Skipped directory exception: /home/kyle/Downloads/tor-browser_en-US/Browser/.config
+[2018-01-07 20:01:26.142692][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/shared/Microsoft.Windows.10.Enterprise.Final.x64.ISO-SCC/scc-w10entx64.iso
+[2018-01-07 20:01:26.143713][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.adobe
+[2018-01-07 20:01:26.143755][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gconf
+[2018-01-07 20:01:26.145529][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.local
+[2018-01-07 20:01:26.158353][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.thunderbird
+[2018-01-07 20:01:26.158394][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.cinnamon
+[2018-01-07 20:01:26.737237][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/svg/embedded/desktopservices/data/Explosion.wav
+[2018-01-07 20:01:26.738281][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/svg/embedded/desktopservices/data/sax.mp3
+[2018-01-07 20:01:29.252253][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/activeqt/wrapper/wrapper.inf
+[2018-01-07 20:01:29.254189][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/activeqt/opengl/opengl.inf
+[2018-01-07 20:01:29.263176][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/activeqt/multiple/multiple.inf
+[2018-01-07 20:01:29.272200][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/activeqt/hierarchy/hierarchy.inf
+[2018-01-07 20:01:29.304278][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/activeqt/menus/menus.inf
+[2018-01-07 20:01:29.307227][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/activeqt/simple/simple.inf
+[2018-01-07 20:01:31.224583][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/melee-action.wav
+[2018-01-07 20:01:31.224675][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/bomb-action.wav
+[2018-01-07 20:01:31.224746][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/shooter-action.wav
+[2018-01-07 20:01:31.224810][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/catch.wav
+[2018-01-07 20:01:31.224873][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/currency.wav
+[2018-01-07 20:01:31.224936][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/factory-action.wav
+[2018-01-07 20:01:31.224998][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/projectile-action.wav
+[2018-01-07 20:01:31.225060][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/quick/demos/maroon/content/audio/catch-action.wav
+[2018-01-07 20:01:32.657000][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/sensors/shakeit/audio/loopy2a_mono.wav
+[2018-01-07 20:01:32.657088][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/sensors/shakeit/audio/phone.wav
+[2018-01-07 20:01:33.652347][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/widgets/tools/settingseditor/inifiles/qsa.ini
+[2018-01-07 20:01:33.652448][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/widgets/tools/settingseditor/inifiles/licensepage.ini
+[2018-01-07 20:01:34.509300][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/multimedia/audioengine/qml/content/whistle.wav
+[2018-01-07 20:01:34.510251][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/multimedia/audioengine/qml/content/horn.wav
+[2018-01-07 20:01:34.510324][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Examples/Qt-5.5/multimedia/audioengine/qml/content/engine-loop.wav
+[2018-01-07 20:01:35.267969][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/MaintenanceTool.ini
+[2018-01-07 20:01:36.428075][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/5.5/android_armv7/mkspecs/features/data/android/dx.bat
+[2018-01-07 20:01:43.262969][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/5.5/gcc_64/mkspecs/features/data/android/dx.bat
+[2018-01-07 20:01:50.200482][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/Qt/Tools/QtCreator/share/qtcreator/QtProject/QtCreator.ini
+[2018-01-07 20:01:51.024191][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.mysql
+[2018-01-07 20:01:51.024247][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gns3
+[2018-01-07 20:01:51.028117][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.thumbnails
+[2018-01-07 20:01:51.029057][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.steam
+[2018-01-07 20:01:51.029958][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gnome2
+[2018-01-07 20:01:51.370115][File Scanner][ERROR]: Skipped directory exception: /home/kyle/cpp/bv-backup/.objs
+[2018-01-07 20:01:51.415797][File Scanner][ERROR]: Skipped directory exception: /home/kyle/cpp/bv-backup/.git
+[2018-01-07 20:01:51.446967][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.remmina
+[2018-01-07 20:01:51.469729][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.sky2
+[2018-01-07 20:01:51.471542][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.putty
+[2018-01-07 20:01:51.472576][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.gstreamer-0.10
+[2018-01-07 20:01:51.477031][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.cache
+[2018-01-07 20:01:51.477072][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.AMD
+[2018-01-07 20:01:51.477098][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.shutter
+[2018-01-07 20:01:51.479722][File Scanner][ERROR]: Skipped file. File extension is excluded: /home/kyle/movie/movies/movie_0.mpg
+[2018-01-07 20:01:51.482388][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.ssh
+[2018-01-07 20:01:51.482420][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.config
+[2018-01-07 20:01:51.482442][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.mozilla
+[2018-01-07 20:01:51.482463][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.wireshark
+[2018-01-07 20:01:51.482483][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.kodi
+[2018-01-07 20:01:51.519404][File Scanner][ERROR]: Skipped directory exception: /home/kyle/.android

@@ -1,0 +1,80 @@
+\hypertarget{class_a_p_i}{}\section{A\+PI Class Reference}
+\label{class_a_p_i}\index{A\+PI@{A\+PI}}
+
+
+Inheritance diagram for A\+PI\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=146pt]{class_a_p_i__inherit__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_a_p_i_af3ed2fc104249141ea1cca845bb80a5a}{\+\_\+\+\_\+construct} (\$request)
+\item 
+\mbox{\Hypertarget{class_a_p_i_a6469a4c34293f8aa7a4cf280147a4ab7}\label{class_a_p_i_a6469a4c34293f8aa7a4cf280147a4ab7}} 
+{\bfseries process\+A\+PI} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_a_p_i_a5a9859ba17e15528c82f038a47eb3132}{\$method} = \textquotesingle{}\textquotesingle{}
+\item 
+\hyperlink{class_a_p_i_adabfc465b969f5dd4ec2c5f073e142ae}{\$endpoint} = \textquotesingle{}\textquotesingle{}
+\item 
+\hyperlink{class_a_p_i_a6a8f3d5321c4e9c7f3a9a29f0635b138}{\$verb} = \textquotesingle{}\textquotesingle{}
+\item 
+\hyperlink{class_a_p_i_a062ccad22e51e139ebf34d55abdb735d}{\$args} = Array()
+\item 
+\hyperlink{class_a_p_i_a045d1db08467e166b58c5af7447e02b4}{\$raw\+Data} = Null
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_a_p_i_af3ed2fc104249141ea1cca845bb80a5a}\label{class_a_p_i_af3ed2fc104249141ea1cca845bb80a5a}} 
+\index{A\+PI@{A\+PI}!\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}}
+\index{\+\_\+\+\_\+construct@{\+\_\+\+\_\+construct}!A\+PI@{A\+PI}}
+\subsubsection{\texorpdfstring{\+\_\+\+\_\+construct()}{\_\_construct()}}
+{\footnotesize\ttfamily A\+P\+I\+::\+\_\+\+\_\+construct (\begin{DoxyParamCaption}\item[{}]{\$request }\end{DoxyParamCaption})}
+
+Constructor\+: \+\_\+\+\_\+construct Allow for C\+O\+RS, assemble and pre-\/process the data 
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_a_p_i_a062ccad22e51e139ebf34d55abdb735d}\label{class_a_p_i_a062ccad22e51e139ebf34d55abdb735d}} 
+\index{A\+PI@{A\+PI}!\$args@{\$args}}
+\index{\$args@{\$args}!A\+PI@{A\+PI}}
+\subsubsection{\texorpdfstring{\$args}{$args}}
+{\footnotesize\ttfamily A\+P\+I\+::\$args = Array()\hspace{0.3cm}{\ttfamily [protected]}}
+
+Property\+: args Any additional U\+RI components after the endpoint and verb have been removed, in our case, an integer ID for the resource. eg\+: /$<$endpoint$>$/$<$verb$>$/$<$arg0$>$/$<$arg1$>$ or /$<$endpoint$>$/$<$arg0$>$ \mbox{\Hypertarget{class_a_p_i_adabfc465b969f5dd4ec2c5f073e142ae}\label{class_a_p_i_adabfc465b969f5dd4ec2c5f073e142ae}} 
+\index{A\+PI@{A\+PI}!\$endpoint@{\$endpoint}}
+\index{\$endpoint@{\$endpoint}!A\+PI@{A\+PI}}
+\subsubsection{\texorpdfstring{\$endpoint}{$endpoint}}
+{\footnotesize\ttfamily A\+P\+I\+::\$endpoint = \textquotesingle{}\textquotesingle{}\hspace{0.3cm}{\ttfamily [protected]}}
+
+Property\+: endpoint The Model requested in the U\+RI. eg\+: /files \mbox{\Hypertarget{class_a_p_i_a5a9859ba17e15528c82f038a47eb3132}\label{class_a_p_i_a5a9859ba17e15528c82f038a47eb3132}} 
+\index{A\+PI@{A\+PI}!\$method@{\$method}}
+\index{\$method@{\$method}!A\+PI@{A\+PI}}
+\subsubsection{\texorpdfstring{\$method}{$method}}
+{\footnotesize\ttfamily A\+P\+I\+::\$method = \textquotesingle{}\textquotesingle{}\hspace{0.3cm}{\ttfamily [protected]}}
+
+Property\+: method The H\+T\+TP method this request was made in, either G\+ET, P\+O\+ST, P\+UT or D\+E\+L\+E\+TE \mbox{\Hypertarget{class_a_p_i_a045d1db08467e166b58c5af7447e02b4}\label{class_a_p_i_a045d1db08467e166b58c5af7447e02b4}} 
+\index{A\+PI@{A\+PI}!\$raw\+Data@{\$raw\+Data}}
+\index{\$raw\+Data@{\$raw\+Data}!A\+PI@{A\+PI}}
+\subsubsection{\texorpdfstring{\$raw\+Data}{$rawData}}
+{\footnotesize\ttfamily A\+P\+I\+::\$raw\+Data = Null\hspace{0.3cm}{\ttfamily [protected]}}
+
+Property\+: raw\+Data Stores raw data from a P\+O\+ST or P\+UT \mbox{\Hypertarget{class_a_p_i_a6a8f3d5321c4e9c7f3a9a29f0635b138}\label{class_a_p_i_a6a8f3d5321c4e9c7f3a9a29f0635b138}} 
+\index{A\+PI@{A\+PI}!\$verb@{\$verb}}
+\index{\$verb@{\$verb}!A\+PI@{A\+PI}}
+\subsubsection{\texorpdfstring{\$verb}{$verb}}
+{\footnotesize\ttfamily A\+P\+I\+::\$verb = \textquotesingle{}\textquotesingle{}\hspace{0.3cm}{\ttfamily [protected]}}
+
+Property\+: verb An optional additional descriptor about the endpoint, used for things that can not be handled by the basic methods. eg\+: /files/process 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/server/http/core/api.\+class.\+php\end{DoxyCompactItemize}

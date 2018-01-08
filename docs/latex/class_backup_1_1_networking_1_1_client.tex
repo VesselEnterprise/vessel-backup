@@ -1,0 +1,62 @@
+\hypertarget{class_backup_1_1_networking_1_1_client}{}\section{Backup\+:\+:Networking\+:\+:Client Class Reference}
+\label{class_backup_1_1_networking_1_1_client}\index{Backup\+::\+Networking\+::\+Client@{Backup\+::\+Networking\+::\+Client}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a787bea154370a9d165b0fa4f2a9340a1}\label{class_backup_1_1_networking_1_1_client_a787bea154370a9d165b0fa4f2a9340a1}} 
+{\bfseries Client} (const std\+::string \&hostname)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_abccb976632db0b3b5df925875b80b2e7}\label{class_backup_1_1_networking_1_1_client_abccb976632db0b3b5df925875b80b2e7}} 
+bool {\bfseries connect} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a97e144b48409c0a9873eee09f04ce724}\label{class_backup_1_1_networking_1_1_client_a97e144b48409c0a9873eee09f04ce724}} 
+void {\bfseries disconnect} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a1654a80c5c715694b9ad5a8f7db8b6b0}\label{class_backup_1_1_networking_1_1_client_a1654a80c5c715694b9ad5a8f7db8b6b0}} 
+bool {\bfseries is\+\_\+connected} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a32bc5f8ee7fab0d86e86247a1a6a3d21}\label{class_backup_1_1_networking_1_1_client_a32bc5f8ee7fab0d86e86247a1a6a3d21}} 
+void {\bfseries set\+\_\+timeout} (boost\+::posix\+\_\+time\+::time\+\_\+duration t)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a414faccfe00dacbb75f4bdf92a531770}\label{class_backup_1_1_networking_1_1_client_a414faccfe00dacbb75f4bdf92a531770}} 
+void {\bfseries set\+\_\+ssl} (bool f)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a48973fb82474072290509dc6e7bd369a}\label{class_backup_1_1_networking_1_1_client_a48973fb82474072290509dc6e7bd369a}} 
+void {\bfseries send\+\_\+request} (const \hyperlink{class_backup_1_1_networking_1_1_http_request}{Backup\+::\+Networking\+::\+Http\+Request} \&r)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a2d4d14d6aeee19c25a2ae0f8fbb3387f}\label{class_backup_1_1_networking_1_1_client_a2d4d14d6aeee19c25a2ae0f8fbb3387f}} 
+bool {\bfseries upload\+\_\+file\+\_\+single} (const \hyperlink{struct_backup_1_1_types_1_1http__upload__file}{Backup\+::\+Types\+::http\+\_\+upload\+\_\+file} \&f)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a253927293aef3a3e27c1f1c2fdb4aeb7}\label{class_backup_1_1_networking_1_1_client_a253927293aef3a3e27c1f1c2fdb4aeb7}} 
+bool {\bfseries upload\+\_\+file\+\_\+part} (const \hyperlink{struct_backup_1_1_types_1_1http__upload__file}{Backup\+::\+Types\+::http\+\_\+upload\+\_\+file} \&f)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_aa013e81c21518b1bf73ef34a299a282c}\label{class_backup_1_1_networking_1_1_client_aa013e81c21518b1bf73ef34a299a282c}} 
+bool {\bfseries heartbeat} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a3c266c525f57ff238d641c19e9d9d9b6}\label{class_backup_1_1_networking_1_1_client_a3c266c525f57ff238d641c19e9d9d9b6}} 
+std\+::string {\bfseries get\+\_\+client\+\_\+settings} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_ab89fd778cf90c0fe6082bd632c1aa521}\label{class_backup_1_1_networking_1_1_client_ab89fd778cf90c0fe6082bd632c1aa521}} 
+std\+::string {\bfseries get\+\_\+response} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a3d505c1dd66a343dffb5ab80f27bce6b}\label{class_backup_1_1_networking_1_1_client_a3d505c1dd66a343dffb5ab80f27bce6b}} 
+std\+::string {\bfseries get\+\_\+headers} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a9180d4b04e4220fb348c324f1facc08d}\label{class_backup_1_1_networking_1_1_client_a9180d4b04e4220fb348c324f1facc08d}} 
+unsigned int {\bfseries get\+\_\+http\+\_\+status} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_ac605aefd756b4d961552890d3b460711}\label{class_backup_1_1_networking_1_1_client_ac605aefd756b4d961552890d3b460711}} 
+bool {\bfseries activate} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_a3a322f210d20ff14c4f7b64ae1019bf0}\label{class_backup_1_1_networking_1_1_client_a3a322f210d20ff14c4f7b64ae1019bf0}} 
+bool {\bfseries is\+\_\+activated} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_networking_1_1_client_acf76ef5dbe64c9b64b27fdc9275b3d4b}\label{class_backup_1_1_networking_1_1_client_acf76ef5dbe64c9b64b27fdc9275b3d4b}} 
+bool {\bfseries resume\+\_\+transfer} ()
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/client/client.\+hpp\item 
+/home/kyle/cpp/bv-\/backup/client/client.\+cpp\end{DoxyCompactItemize}

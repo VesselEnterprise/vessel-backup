@@ -7,6 +7,7 @@
 #include <sqlite3.h>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -15,6 +16,7 @@
 #include "types.hpp"
 #include "log.hpp"
 #include "version.hpp"
+#include "file.hpp"
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -25,6 +27,7 @@
     #include <sys/utsname.h>
 #endif
 
+#define VACUUM_ON_LOAD 1
 #define DB_FILENAME "local.db"
 
 namespace Backup{
@@ -32,6 +35,7 @@ namespace Backup{
 
         class LocalDatabase
         {
+
             public:
 
                 static LocalDatabase& get_database()
@@ -55,7 +59,7 @@ namespace Backup{
                 //Update file extension count
                 bool update_ext_count( const std::string& ext, int total );
 
-                unsigned int add_file( Backup::Types::file_data* fd );
+                unsigned int add_file( Backup::File::BackupFile* fd );
                 unsigned int add_directory( Backup::Types::file_directory* fd );
 
                 std::string get_last_err();
@@ -67,9 +71,16 @@ namespace Backup{
                 //Scans backup_file table and checks if files exist and mark for deletion if necessary
                 void clean();
 
+                void build_queue();
+
+            protected:
+                sqlite3* get_handle();
+
             private:
 
                 LocalDatabase();
+
+                int vacuum_db();
 
                 int open_db(const std::string& filename);
                 void close_db();

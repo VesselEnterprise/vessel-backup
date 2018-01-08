@@ -1,11 +1,18 @@
 #include "file_iterator.hpp"
 
 using std::cout;
-using namespace Backup;
+using namespace Backup::File;
 namespace fs = boost::filesystem;
 
 FileIterator::FileIterator(const std::string& path) : m_base_path(path), m_skip_dir_periods(false)
 {
+
+    //Get Local Database Instance
+    m_ldb = &Backup::Database::LocalDatabase::get_database();
+
+    //Update some setting(s)
+    if ( m_ldb->get_setting_int("skip_period_dirs") > 0 )
+        m_skip_dir_periods=true;
 
     //Init log
     m_log = new Backup::Logging::Log("scan");
@@ -13,13 +20,16 @@ FileIterator::FileIterator(const std::string& path) : m_base_path(path), m_skip_
     //If Path is blank, try to find home folder
     if ( path.empty() )
     {
-        //Update user home folder
 
-        /*HOMEDRIVE/HOMEPATH sometimes yield incorrect results */
-        //std::string home_drive = std::getenv("HOMEDRIVE");
-        //std::string home_path = std::getenv("HOMEPATH");
-
-        m_base_path = std::getenv("USERPROFILE");
+        #ifdef _WIN32
+            /* This sometimes returns incorrect results in Windows systems
+            std::string home_drive = std::getenv("HOMEDRIVE");
+            std::string home_path = std::getenv("HOMEPATH");
+            */
+            m_base_path = std::getenv("USERPROFILE");
+        #elif __unix
+            m_base_path = std::getenv("HOME");
+        #endif
 
     }
 
@@ -116,10 +126,11 @@ void FileIterator::scan()
             else if ( fs::is_regular_file(*m_itr) )
             {
 
-                std::string file_ext = p.extension().string();
+                //Create new file object
+                File::BackupFile bf(p);
 
                 //Check if we should ignore the file
-                if ( m_ldb->is_ignore_ext( file_ext ) )
+                if ( m_ldb->is_ignore_ext( bf.get_file_type() ) )
                 {
                     m_log->add_message("Skipped file. File extension is excluded: " + p.string(), "File Scanner");
                     continue;
@@ -134,18 +145,13 @@ void FileIterator::scan()
                     m_ldb->add_directory(&m_current_dir);
                 }
 
-                Types::file_data fd;
-                fd.filename = p.filename().string();
-                fd.file_ext = file_ext;
-                fd.filesize = fs::file_size(*m_itr);
-                fd.parent_path = p.parent_path().string();
-                fd.directory_id = m_current_dir.directory_id;
-                fd.last_modified = get_last_write_t(*m_itr);
+                //Set directory ID
+                bf.set_directory_id( m_current_dir.directory_id );
 
                 //cout << "Directory ID is: " << fd.directory_id << '\n';
                 //system("PAUSE");
 
-                m_ldb->add_file( &fd );
+                m_ldb->add_file( &bf );
 
                 cout << "Added file " << p.filename().string() << "..." << std::endl;
 
@@ -168,14 +174,6 @@ void FileIterator::scan()
 
     }
 
-}
-
-void FileIterator::set_local_db(Database::LocalDatabase* db)
-{
-    m_ldb = db;
-
-    if ( m_ldb->get_setting_int("skip_period_dirs") > 0 )
-        m_skip_dir_periods=true;
 }
 
 bool FileIterator::skip_dir(const fs::path& p, int level)

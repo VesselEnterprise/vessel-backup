@@ -28,7 +28,7 @@ namespace Backup {
             unsigned int file_id;
         };
 
-        typedef enum http { HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_DELETE };
+        enum http { HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_DELETE };
 
         struct http_request
         {

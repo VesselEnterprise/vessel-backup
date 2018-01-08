@@ -1,16 +1,28 @@
 #include "local_db.hpp"
 
 using namespace Backup::Database;
+using namespace Backup::File;
 
 LocalDatabase::LocalDatabase()
 {
 
+    //Database logging
+    m_log = new Backup::Logging::Log("db");
+
     m_err_code = this->open_db(DB_FILENAME);
 
-    if ( m_err_code )
+    if ( m_err_code ) {
+        m_log->add_message( "SQLite Error: " + get_last_err(), "Database" );
         this->close_db();
+    }
 
-    m_log = new Backup::Logging::Log("db");
+    if ( !m_err_code && VACUUM_ON_LOAD ) {
+        {
+            if ( vacuum_db() != SQLITE_OK ) {
+                m_log->add_message( "SQLite Error: " + get_last_err(), "Database" );
+            }
+        }
+    }
 
 }
 
@@ -19,9 +31,19 @@ LocalDatabase::~LocalDatabase()
     this->close_db();
 }
 
+sqlite3* LocalDatabase::get_handle()
+{
+    return m_db;
+}
+
 int LocalDatabase::open_db(const std::string& filename)
 {
     return sqlite3_open(filename.c_str(), &m_db );
+}
+
+int LocalDatabase::vacuum_db()
+{
+    return sqlite3_exec(m_db, "VACUUM", NULL, NULL, NULL );
 }
 
 void LocalDatabase::close_db()
@@ -170,7 +192,10 @@ bool LocalDatabase::is_ignore_ext(const std::string& ext )
     if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return false;
 
-    sqlite3_bind_text(stmt, 1, ext.c_str(), ext.size(), 0 );
+    //Some file extensions can be uppercas
+    std::string ext_lc = boost::algorithm::to_lower_copy(ext);
+
+    sqlite3_bind_text(stmt, 1, ext_lc.c_str(), ext_lc.size(), 0 );
 
     int rc = sqlite3_step(stmt);
 
@@ -184,29 +209,30 @@ bool LocalDatabase::is_ignore_ext(const std::string& ext )
 
 }
 
-unsigned int LocalDatabase::add_file( Backup::Types::file_data* fd )
+unsigned int LocalDatabase::add_file( BackupFile* bf )
 {
 
     sqlite3_stmt* stmt;
-    std::string query = "INSERT OR REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified,deleted) VALUES((SELECT file_id FROM backup_file WHERE filename=?1 AND directory_id=?3),?1,?5,?2,?3,?4,0)";
+    std::string query = "REPLACE INTO backup_file (unique_id,filename,file_ext,filesize,directory_id,last_modified,deleted) VALUES(?6,?1,?5,?2,?3,?4,0)";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return false;
 
-    sqlite3_bind_text(stmt, 1, fd->filename.c_str(), fd->filename.size(), 0 );
-    sqlite3_bind_int(stmt, 2, fd->filesize );
-    sqlite3_bind_int(stmt, 3, fd->directory_id );
-    sqlite3_bind_int(stmt, 4, fd->last_modified );
-    sqlite3_bind_text(stmt, 5, fd->file_ext.c_str(), fd->file_ext.size(), 0 );
+    sqlite3_bind_text(stmt, 1, bf->get_file_name().c_str(), bf->get_file_name().size(), 0 );
+    sqlite3_bind_int(stmt, 2, bf->get_file_size() );
+    sqlite3_bind_int(stmt, 3, bf->get_directory_id() );
+    sqlite3_bind_int(stmt, 4, bf->get_last_modified() );
+    sqlite3_bind_text(stmt, 5, bf->get_file_type().c_str(), bf->get_file_type().size(), 0 );
+    sqlite3_bind_text(stmt, 6, bf->get_unique_id().c_str(), bf->get_unique_id().size(), 0 );
 
     int rc = sqlite3_step(stmt);
 
     //Cleanup
     sqlite3_finalize(stmt);
 
-    fd->file_id = sqlite3_last_insert_rowid(m_db);
+    bf->set_file_id( sqlite3_last_insert_rowid(m_db) );
 
-    return fd->file_id;
+    return bf->get_file_id();
 
 }
 
@@ -303,7 +329,13 @@ void LocalDatabase::clean_files()
         std::string filename = (char*)sqlite3_column_text(stmt, 1);
         int file_id = sqlite3_column_int(stmt,2);
 
-        if ( !boost::filesystem::exists(dir + "\\" + filename) )
+        #ifdef _WIN32
+            char cslash = '\';
+        #else
+            char cslash = '/';
+        #endif
+
+        if ( !boost::filesystem::exists(dir + cslash + filename) )
         {
 
             sqlite3_stmt* st;
@@ -317,15 +349,14 @@ void LocalDatabase::clean_files()
             sqlite3_bind_int(st, 1, file_id );
 
             if ( sqlite3_step(st) != SQLITE_DONE )
-                m_log->add_message("Failed to mark file deleted: " + dir + "\\" + filename, "Database Cleaner");
+                m_log->add_message("Failed to mark file deleted: " + dir + cslash + filename, "Database Cleaner");
             else
-                m_log->add_message("File no longer exists: " + dir + "\\" + filename + " (Marked for deletion)", "Database Cleaner");
+                m_log->add_message("File no longer exists: " + dir + cslash + filename + " (Marked for deletion)", "Database Cleaner");
 
             //Cleanup
             sqlite3_finalize(st);
 
         }
-
 
     }
 
@@ -491,5 +522,10 @@ void LocalDatabase::update_client_settings(const std::string& s )
             this->update_setting( itr->name.GetString(), obj["value"].GetInt() );
 
     }
+
+}
+
+void LocalDatabase::build_queue()
+{
 
 }

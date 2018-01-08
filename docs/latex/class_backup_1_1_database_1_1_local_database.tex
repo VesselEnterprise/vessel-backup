@@ -1,0 +1,59 @@
+\hypertarget{class_backup_1_1_database_1_1_local_database}{}\section{Backup\+:\+:Database\+:\+:Local\+Database Class Reference}
+\label{class_backup_1_1_database_1_1_local_database}\index{Backup\+::\+Database\+::\+Local\+Database@{Backup\+::\+Database\+::\+Local\+Database}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a5a1800d6a84e1ee09fb8ed03c1999d1a}\label{class_backup_1_1_database_1_1_local_database_a5a1800d6a84e1ee09fb8ed03c1999d1a}} 
+{\bfseries Local\+Database} (\hyperlink{class_backup_1_1_database_1_1_local_database}{Local\+Database} const \&)=delete
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a018b956b175c068c57958ae8b466e2bd}\label{class_backup_1_1_database_1_1_local_database_a018b956b175c068c57958ae8b466e2bd}} 
+void {\bfseries operator=} (\hyperlink{class_backup_1_1_database_1_1_local_database}{Local\+Database} const \&)=delete
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_ab7bc1e783228e6413af275f1254d0c91}\label{class_backup_1_1_database_1_1_local_database_ab7bc1e783228e6413af275f1254d0c91}} 
+bool {\bfseries is\+\_\+ignore\+\_\+dir} (const boost\+::filesystem\+::path \&p, int level)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a73d2320e6e1c3241f2b0dc8438c963e3}\label{class_backup_1_1_database_1_1_local_database_a73d2320e6e1c3241f2b0dc8438c963e3}} 
+bool {\bfseries is\+\_\+ignore\+\_\+ext} (const std\+::string \&ext)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a9ebeda94ba4b1b981fa321ab2a60adb2}\label{class_backup_1_1_database_1_1_local_database_a9ebeda94ba4b1b981fa321ab2a60adb2}} 
+std\+::string {\bfseries get\+\_\+setting\+\_\+str} (const std\+::string \&s)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_aa7aa1872a73201ac03ebc6de375fd1d5}\label{class_backup_1_1_database_1_1_local_database_aa7aa1872a73201ac03ebc6de375fd1d5}} 
+int {\bfseries get\+\_\+setting\+\_\+int} (const std\+::string \&s)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a7c6ac52eeb64f451d746ff3b3d3e3d3f}\label{class_backup_1_1_database_1_1_local_database_a7c6ac52eeb64f451d746ff3b3d3e3d3f}} 
+{\footnotesize template$<$typename T $>$ }\\bool {\bfseries update\+\_\+setting} (const std\+::string \&key, const T \&val)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a18737407d07d0df8fd904061f139102b}\label{class_backup_1_1_database_1_1_local_database_a18737407d07d0df8fd904061f139102b}} 
+bool {\bfseries update\+\_\+ext\+\_\+count} (const std\+::string \&ext, int total)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_aeb27a45a2b956a5aa0f8ede9212ccc1c}\label{class_backup_1_1_database_1_1_local_database_aeb27a45a2b956a5aa0f8ede9212ccc1c}} 
+unsigned int {\bfseries add\+\_\+file} (\hyperlink{class_backup_1_1_file_1_1_backup_file}{Backup\+::\+File\+::\+Backup\+File} $\ast$fd)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a3a03112d18428b1135a35c1b93aa6f50}\label{class_backup_1_1_database_1_1_local_database_a3a03112d18428b1135a35c1b93aa6f50}} 
+unsigned int {\bfseries add\+\_\+directory} (\hyperlink{struct_backup_1_1_types_1_1file__directory}{Backup\+::\+Types\+::file\+\_\+directory} $\ast$fd)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_aaf894e6e5b748b0c42701353f3741d0b}\label{class_backup_1_1_database_1_1_local_database_aaf894e6e5b748b0c42701353f3741d0b}} 
+std\+::string {\bfseries get\+\_\+last\+\_\+err} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a1e3b91a1b4a4b3d54ff53ba82600abd3}\label{class_backup_1_1_database_1_1_local_database_a1e3b91a1b4a4b3d54ff53ba82600abd3}} 
+void {\bfseries update\+\_\+global\+\_\+settings} ()
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a27f71da48a1c85deda8b4651b3cc4eae}\label{class_backup_1_1_database_1_1_local_database_a27f71da48a1c85deda8b4651b3cc4eae}} 
+void {\bfseries update\+\_\+client\+\_\+settings} (const std\+::string \&s)
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a825296e65a28032e2ece0661c7d430a9}\label{class_backup_1_1_database_1_1_local_database_a825296e65a28032e2ece0661c7d430a9}} 
+void {\bfseries clean} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_backup_1_1_database_1_1_local_database_a646eb6daa0b1fac43475137b351aa625}\label{class_backup_1_1_database_1_1_local_database_a646eb6daa0b1fac43475137b351aa625}} 
+static \hyperlink{class_backup_1_1_database_1_1_local_database}{Local\+Database} \& {\bfseries get\+\_\+database} ()
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/core/local\+\_\+db.\+hpp\item 
+/home/kyle/cpp/bv-\/backup/core/local\+\_\+db.\+cpp\end{DoxyCompactItemize}

@@ -21136,11 +21136,14 @@
 
 1511617592 /usr/local/include/boost/lambda/detail/member_ptr.hpp
 
-1515096717 source:/home/kyle/cpp/bv-backup/tests/client/client_test.cpp
+1515346544 source:/home/kyle/cpp/bv-backup/tests/client/client_test.cpp
 	"local_db.hpp"
 	"client.hpp"
 	"version.hpp"
+	"file.hpp"
+	"file_iterator.hpp"
 	<sstream>
+	<boost/timer/timer.hpp>
 
 1511865372 /home/kyle/cpp/bv-backup//client.hpp
 	<iostream>
@@ -28373,7 +28376,7 @@
 	"version.hpp"
 	<sstream>
 
-1515097763 source:/home/kyle/cpp/bv-backup/client/client.cpp
+1515106791 source:/home/kyle/cpp/bv-backup/client/client.cpp
 	"client.hpp"
 
 1515104865 /home/kyle/cpp/bv-backup/client/client.hpp
@@ -28536,7 +28539,7 @@
 	<string>
 	<vector>
 
-1515081351 /home/kyle/cpp/bv-backup/core/local_db.hpp
+1515343522 /home/kyle/cpp/bv-backup/core/local_db.hpp
 	<iostream>
 	<string>
 	<fstream>
@@ -28549,6 +28552,7 @@
 	"types.hpp"
 	"log.hpp"
 	"version.hpp"
+	"file.hpp"
 	<winsock2.h>
 	<unistd.h>
 	<sys/types.h>
@@ -37107,21 +37111,22 @@
 1511621509 source:/home/kyle/cpp/bv-backup/core/compress.cpp
 	"compress.hpp"
 
-1511621509 source:/home/kyle/cpp/bv-backup/core/file_iterator.cpp
+1515346779 source:/home/kyle/cpp/bv-backup/core/file_iterator.cpp
 	"file_iterator.hpp"
 
-1511621509 /home/kyle/cpp/bv-backup/core/file_iterator.hpp
+1515346585 /home/kyle/cpp/bv-backup/core/file_iterator.hpp
 	<iostream>
 	<string>
 	<boost/filesystem.hpp>
 	"local_db.hpp"
 	"types.hpp"
 	"log.hpp"
+	"file.hpp"
 
 1514952426 source:/home/kyle/cpp/bv-backup/core/http_request.cpp
 	"http_request.hpp"
 
-1515091874 source:/home/kyle/cpp/bv-backup/core/local_db.cpp
+1515347396 source:/home/kyle/cpp/bv-backup/core/local_db.cpp
 	"local_db.hpp"
 
 1511621509 source:/home/kyle/cpp/bv-backup/core/log.cpp
@@ -37158,4 +37163,164 @@
 	<unistd.h>
 	<unistd.h>
 	"android_lf.h"
+
+1515347993 /home/kyle/cpp/bv-backup/core/file.hpp
+	<iostream>
+	<fstream>
+	<string>
+	<boost/filesystem.hpp>
+	<cryptopp/sha.h>
+	<cryptopp/files.h>
+	<cryptopp/filters.h>
+	<cryptopp/hex.h>
+
+1511625519 /usr/local/include/cryptopp/sha.h
+	"config.h"
+	"iterhash.h"
+
+1511625519 /usr/local/include/cryptopp/config.h
+	<malloc.h>
+
+1511625519 /usr/local/include/cryptopp/iterhash.h
+	"cryptlib.h"
+	"secblock.h"
+	"misc.h"
+	"simple.h"
+
+1511625519 /usr/local/include/cryptopp/cryptlib.h
+	"config.h"
+	"stdcpp.h"
+	"trap.h"
+	<signal.h>
+
+1511625519 /usr/local/include/cryptopp/stdcpp.h
+	<intrin.h>
+	<string>
+	<memory>
+	<exception>
+	<typeinfo>
+	<algorithm>
+	<functional>
+	<utility>
+	<vector>
+	<limits>
+	<deque>
+	<list>
+	<map>
+	<new>
+	<iterator>
+	<atomic>
+	<mutex>
+	<utility>
+	<cstdlib>
+	<cstddef>
+	<cstring>
+	<climits>
+	<stdint.h>
+	<stddef.h>
+	<vector.cc>
+	<stdlib.h>
+	<alloca.h>
+	<malloc.h>
+
+1511625519 /usr/local/include/cryptopp/trap.h
+	"config.h"
+	<iostream>
+	<sstream>
+	"ossig.h"
+	<intrin.h>
+
+1511625519 /usr/local/include/cryptopp/ossig.h
+	"config.h"
+	<signal.h>
+
+1511625519 /usr/local/include/cryptopp/secblock.h
+	"config.h"
+	"stdcpp.h"
+	"misc.h"
+
+1511625519 /usr/local/include/cryptopp/misc.h
+	"config.h"
+	"cryptlib.h"
+	"stdcpp.h"
+	"smartptr.h"
+	<intrin.h>
+	<mem.h>
+	<stdlib.h>
+	<byteswap.h>
+	<immintrin.h>
+
+1511625519 /usr/local/include/cryptopp/smartptr.h
+	"config.h"
+	"stdcpp.h"
+
+1511625519 /usr/local/include/cryptopp/simple.h
+	"config.h"
+	"cryptlib.h"
+	"misc.h"
+
+1511625519 /usr/local/include/cryptopp/filters.h
+	"cryptlib.h"
+	"cryptlib.h"
+	"simple.h"
+	"secblock.h"
+	"misc.h"
+	"smartptr.h"
+	"queue.h"
+	"algparam.h"
+	"stdcpp.h"
+
+1511625519 /usr/local/include/cryptopp/queue.h
+	"cryptlib.h"
+	"simple.h"
+
+1511625519 /usr/local/include/cryptopp/algparam.h
+	"config.h"
+	"cryptlib.h"
+	"smartptr.h"
+	"secblock.h"
+	"integer.h"
+	"misc.h"
+
+1511625519 /usr/local/include/cryptopp/integer.h
+	"cryptlib.h"
+	"secblock.h"
+	"stdcpp.h"
+	<iosfwd>
+
+1511625519 /usr/local/include/cryptopp/hex.h
+	"cryptlib.h"
+	"basecode.h"
+
+1511625519 /usr/local/include/cryptopp/basecode.h
+	"cryptlib.h"
+	"filters.h"
+	"algparam.h"
+	"argnames.h"
+
+1511625519 /usr/local/include/cryptopp/argnames.h
+	"cryptlib.h"
+
+1511625519 /usr/local/include/cryptopp/files.h
+	"cryptlib.h"
+	"filters.h"
+	"argnames.h"
+	"smartptr.h"
+	<iostream>
+	<fstream>
+
+1511617588 /usr/local/include/boost/timer/timer.hpp
+	<boost/config/warning_disable.hpp>
+	<boost/timer/config.hpp>
+	<boost/cstdint.hpp>
+	<string>
+	<cstring>
+	<ostream>
+	<boost/config/abi_prefix.hpp>
+	<boost/config/abi_suffix.hpp>
+
+1511617588 /usr/local/include/boost/timer/config.hpp
+	<boost/config.hpp>
+	<boost/system/api_config.hpp>
+	<boost/config/auto_link.hpp>
 
