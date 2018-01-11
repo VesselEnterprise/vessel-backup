@@ -326,7 +326,7 @@ void Client::handle_response( const boost::system::error_code& e )
             std::cout << "Response returned with status code ";
             std::cout << m_http_status << "\n";
             m_response_ec = boost::asio::error::operation_aborted; //Set static error
-            return;
+            //return;
         }
 
         // Read the response headers, which are terminated by a blank line.
@@ -454,7 +454,7 @@ void Client::disconnect()
 
 }
 
-void Client::send_request( const Backup::Networking::HttpRequest& r )
+void Client::send_request( Backup::Networking::HttpRequest* r )
 {
 
     if ( !m_connected ) {
@@ -468,11 +468,11 @@ void Client::send_request( const Backup::Networking::HttpRequest& r )
     m_response_data.clear();
     m_header_data.clear();
 
-    m_deadline_timer.expires_from_now(boost::posix_time::seconds(15));
+    //m_deadline_timer.expires_from_now(boost::posix_time::seconds(15));
 
     //Build the HTTP Request
     std::ostringstream request_stream;
-    request_stream << r.get_method() << " " << r.get_uri() << " HTTP/1.1\r\n";
+    request_stream << r->get_method() << " " << r->get_uri() << " HTTP/1.1\r\n";
     request_stream << "Host: " << m_hostname << "\r\n";
     request_stream << "Accept: */*\r\n";
 
@@ -481,33 +481,46 @@ void Client::send_request( const Backup::Networking::HttpRequest& r )
         request_stream << "Authorization: " << this->m_auth_token << "\r\n";
     }
 
+    std::string http_method = r->get_method();
+    std::string content_type = r->get_content_type();
+
+    bool do_send_data=false; /* Flag which indicates we want to send raw data */
+
     //If POST or PUT, send content length and type headers
-    std::string http_method = r.get_method();
-    bool do_send_data=false;
     if ( http_method == "POST" || http_method == "PUT" )
     {
-        request_stream << "Content-Length: " << r.get_body_length() << "\r\n";
-        request_stream << "Content-Type: " << r.get_content_type() << "\r\n";
+        request_stream << "Content-Length: " << r->get_body_length() << "\r\n";
+
+        if ( !content_type.empty() )
+            request_stream << "Content-Type: " << content_type << "\r\n";
+
         do_send_data=true;
     }
 
     //Add any custom headers
-    std::vector<std::string> headers = r.get_headers();
+    std::vector<std::string> headers = r->get_headers();
     for ( std::vector<std::string>::iterator itr = headers.begin(); itr != headers.end(); ++itr )
         request_stream << *itr << "\r\n";
 
+    //Close connection after response
     request_stream << "Connection: close\r\n\r\n";
 
+    request_stream << "\r\n";
+
     if ( do_send_data )
-        request_stream << r.get_body().c_str();
+        request_stream << r->get_body();
+
+    //std::cout << "Request:\n" << request_stream.str() << std::endl;
 
     //Clear status code before sending new data
     m_response_ec.clear();
 
+    const char* request = request_stream.str().data(); /*Allows us to send binary data through ASIO */
+
     if ( !m_use_ssl )
-        boost::asio::async_write(m_socket, boost::asio::buffer(request_stream.str().c_str(), request_stream.str().size()), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
+        boost::asio::async_write(m_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
     else
-        boost::asio::async_write(m_ssl_socket, boost::asio::buffer(request_stream.str().c_str(), request_stream.str().size()), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
+        boost::asio::async_write(m_ssl_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
 
     //Run the handlers until the response sets the status code or EOF
     do { m_io_service.run_one(); std::cout << "..." << '\n'; } while ( !m_response_ec );
@@ -516,21 +529,80 @@ void Client::send_request( const Backup::Networking::HttpRequest& r )
 
 }
 
-bool Client::upload_file_single( const Backup::Types::http_upload_file& f )
+bool Client::upload_file_single( Backup::File::BackupFile bf )
 {
 
-    //Create the raw JSON payload for the request
-    std::string request = make_upload_json(f);
+    using namespace rapidjson;
+
+    //Build a JSON payload of the file properties/metadata
+    Document doc;
+    doc.SetObject();
+    Document::AllocatorType& alloc = doc.GetAllocator();
+
+    std::map<std::string,Value> jmap;
+
+    //Get Activation Code from DB
+    jmap.insert( std::pair<std::string,Value>( "file_name", Value( bf.get_file_name().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_size", Value( bf.get_file_size() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_type", Value( bf.get_file_type().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf.get_hash().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf.get_parent_path().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "last_modified", Value( bf.get_last_modified() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "compressed", Value( false ) ) );
+
+    //Add values to document object
+    for ( auto &kv : jmap )
+    {
+        doc.AddMember(Value().SetString(kv.first.c_str(),alloc), kv.second, alloc );
+    }
+
+    //Write object to buffer
+    StringBuffer strbuf;
+    PrettyWriter<StringBuffer> writer(strbuf);
+
+    doc.Accept(writer);
+
+    //Build the request body
+    std::ostringstream body;
+
+    //Write a boundary
+    body << "\r\n--BackupFile\r\n";
+    body << "Content-Disposition: form-data; name=\"metadata\"\r\n\r\n";
+
+    //Write JSON payload
+    body << strbuf.GetString();
+
+    body << "\r\n";
+
+    //Write a boundary
+    body << "--BackupFile\r\n";
+    body << "Content-Disposition: form-data; name=\"fileData\"\r\n\r\n";
+
+    //Write file data
+
+    body << bf.get_file_contents();
+
+    body << "\r\n";
+
+    //Write a boundary
+    body << "--BackupFile--\r\n\r\n";
+
+    std::cout << "Body:\n" << body.str() << std::endl;
 
     //Create a new HTTP request
     HttpRequest r;
-    r.set_content_type("application/json");
-    r.set_body("");
+    r.add_header("Content-Disposition: multipart/form-data");
+    r.add_header("Content-Type: multipart/form-data; boundary=BackupFile");
+    r.add_header("Content-Length: " + std::to_string(body.str().size()));
+    r.set_body(body.str());
     r.set_method("POST");
-    r.set_uri("/api/v1/file");
-    //r.add_header("");
+    r.set_uri("/backup/api/v1/file");
 
-    this->send_request(r);
+    //std::cout << "Example body:\n" << r.get_body() << std::endl;
+
+    this->send_request(&r);
+
+    return true;
 
 }
 
@@ -602,7 +674,7 @@ bool Client::heartbeat()
     r.set_uri("/backup/api/v1/heartbeat");
     r.set_body( strbuf.GetString() );
 
-    this->send_request(r);
+    this->send_request(&r);
 
     return true;
 
@@ -629,7 +701,7 @@ std::string Client::get_client_settings()
     r.set_method("GET");
     r.set_uri("/backup/api/v1/settings");
 
-    this->send_request(r);
+    this->send_request(&r);
 
     return this->get_response();
 
@@ -665,7 +737,7 @@ bool Client::activate()
     r.set_content_type("application/json");
     r.set_body( strbuf.GetString() );
 
-    this->send_request( r );
+    this->send_request( &r );
 
     std::cout << strbuf.GetString() << std::endl;
 

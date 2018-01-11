@@ -43,6 +43,7 @@ void BackupFile::set_path( const std::string& fp )
 {
     m_file_path = fs::path(fp);
     update_attributes();
+    m_content.clear(); //Clear file content if it's been read
 }
 
 void BackupFile::set_path( const fs::path& fp )
@@ -66,7 +67,7 @@ std::string& BackupFile::get_file_name()
     return m_file_attrs.file_name;
 }
 
-size_t BackupFile::get_file_size()
+size_t BackupFile::get_file_size() const
 {
     return m_file_attrs.file_size;
 }
@@ -111,7 +112,7 @@ std::string& BackupFile::get_relative_path()
     return m_file_attrs.relative_path;
 }
 
-unsigned long BackupFile::get_last_modified()
+unsigned long BackupFile::get_last_modified() const
 {
     return m_file_attrs.last_write_time;
 }
@@ -133,24 +134,55 @@ std::string BackupFile::get_hash(bool use_file_source)
     }
     else
     {
-        std::string contents; //File contents
 
-        //Read file contents
-        std::ifstream infile( get_file_path(), std::ifstream::in | std::ifstream::binary );
-        if ( !infile.is_open() )
-            return ""; //No hash
+        if ( m_content.empty() )
+        {
 
-        infile.seekg( 0, std::ios::end );
-        contents.resize( infile.tellg() ); //Pre-allocate memory
-        infile.seekg( 0, std::ios::beg );
-        infile.read( &contents[0], contents.size() ); //Read contents
-        infile.close(); //Close file
+            //Read file contents
+            std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
+            if ( !infile.is_open() )
+                return ""; //No hash
 
-        StringSource s(contents, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+            infile.seekg( 0, std::ios::end );
+            auto file_size = infile.tellg();
+            m_content.resize( file_size ); //Pre-allocate memory
+            infile.seekg( 0, std::ios::beg );
+            infile.read( &m_content[0], m_content.size() ); //Read contents
+            infile.close(); //Close file
+
+        }
+
+        StringSource s(m_content, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
 
     }
 
     return digest;
+
+}
+
+std::string BackupFile::get_file_contents()
+{
+
+    //If file has already been read and content was stored, return the existing data
+    if ( !m_content.empty() )
+        return m_content;
+
+    //Read file contents
+    std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
+    if ( !infile.is_open() )
+        return "";
+
+    //infile.ignore(  std::numeric_limits<std::streamsize>::max(), '\0' );
+
+    infile.seekg( 0, std::ios::end );
+    auto file_size = infile.tellg();
+    m_content.resize( file_size ); //Pre-allocate memory
+    infile.seekg( 0, std::ios::beg );
+    infile.read( &m_content[0], m_content.size() ); //Read contents
+
+    infile.close(); //Close file
+
+    return m_content;
 
 }
 

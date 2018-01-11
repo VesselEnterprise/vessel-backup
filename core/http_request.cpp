@@ -22,46 +22,26 @@ void HttpRequest::set_body( const std::string& str) {
     m_body = str;
 }
 
-std::string HttpRequest::get_uri() const {
+std::string HttpRequest::get_uri() {
     return m_uri;
 }
 
-std::string& HttpRequest::get_uri() {
-    return m_uri;
-}
-
-std::string HttpRequest::get_method() const {
+std::string HttpRequest::get_method() {
     return m_http_method;
 }
 
-std::string& HttpRequest::get_method() {
-    return m_http_method;
-}
-
-std::vector<std::string>& HttpRequest::get_headers() {
+std::vector<std::string> HttpRequest::get_headers() {
     return m_headers;
 }
 
-std::vector<std::string> HttpRequest::get_headers() const {
-    return m_headers;
-}
-
-std::string& HttpRequest::get_content_type() {
+std::string HttpRequest::get_content_type() {
     return m_content_type;
 };
 
-std::string HttpRequest::get_content_type() const {
-    return m_content_type;
-};
-
-std::string& HttpRequest::get_body() {
+std::string HttpRequest::get_body() {
     return m_body;
 }
 
-std::string HttpRequest::get_body() const {
-    return m_body;
-}
-
-size_t HttpRequest::get_body_length() const {
+size_t HttpRequest::get_body_length() {
     return m_body.size();
 }

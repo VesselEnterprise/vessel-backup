@@ -23,27 +23,17 @@ namespace Backup {
                 void set_content_type( const std::string& str);
                 void set_body( const std::string& str);
 
-                std::string get_uri() const;
+                std::string get_uri();
 
-                std::string& get_uri();
+                std::string get_method();
 
-                std::string get_method() const;
+                std::vector<std::string> get_headers();
 
-                std::string& get_method();
+                std::string get_content_type();
 
-                std::vector<std::string>& get_headers();
+                std::string get_body();
 
-                std::vector<std::string> get_headers() const;
-
-                std::string& get_content_type();
-
-                std::string get_content_type() const;
-
-                std::string& get_body();
-
-                std::string get_body() const;
-
-                size_t get_body_length() const;
+                size_t get_body_length();
 
             private:
                 std::string m_uri;

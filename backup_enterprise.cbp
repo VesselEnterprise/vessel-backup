@@ -182,6 +182,31 @@
 					<Add option="-lwsock32" />
 				</Linker>
 			</Target>
+			<Target title="win64-upload_test">
+				<Option output="bin/tests/win64/client/upload_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="client" />
+				</Compiler>
+				<Linker>
+					<Add option="-lssl" />
+					<Add option="-lcrypto" />
+					<Add option="-lboost_system-mgw72-mt-1_65_1" />
+					<Add option="-lboost_filesystem-mgw72-mt-1_65_1" />
+					<Add option="-lboost_date_time-mgw72-mt-1_65_1" />
+					<Add option="-lboost_thread-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log-mgw72-mt-1_65_1" />
+					<Add option="-lboost_log_setup-mgw72-mt-1_65_1" />
+					<Add option="-larchive.dll" />
+					<Add option="-lsqlite3_dll" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz.dll" />
+					<Add option="-lws2_32" />
+					<Add option="-lwsock32" />
+				</Linker>
+			</Target>
 			<Target title="linux-server">
 				<Option output="bin/linux/server/backup_server" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
@@ -251,6 +276,32 @@
 					<Add option="-lpthread" />
 				</Linker>
 			</Target>
+			<Target title="linux-upload_test">
+				<Option output="bin/tests/linux/client/upload_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="client" />
+				</Compiler>
+				<Linker>
+					<Add option="-lssl" />
+					<Add option="-lcrypto" />
+					<Add option="-ldl" />
+					<Add option="-lboost_system" />
+					<Add option="-lboost_filesystem" />
+					<Add option="-lboost_date_time" />
+					<Add option="-lboost_timer" />
+					<Add option="-lboost_thread" />
+					<Add option="-lboost_log" />
+					<Add option="-lboost_log_setup" />
+					<Add option="-larchive" />
+					<Add option="-lsqlite3" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz" />
+					<Add option="-lpthread" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -283,6 +334,8 @@
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
 			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="client/client.hpp">
 			<Option target="win64-client-debug" />
@@ -290,6 +343,8 @@
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
 			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="client/main.cpp">
 			<Option target="win64-client-debug" />
@@ -303,12 +358,16 @@
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
 			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="core/file.hpp">
 			<Option target="win64-client" />
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
 			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="core/file_iterator.cpp" />
 		<Unit filename="core/file_iterator.hpp" />
@@ -317,12 +376,16 @@
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
 			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="core/http_request.hpp">
 			<Option target="win64-client" />
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
 			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="core/local_db.cpp" />
 		<Unit filename="core/local_db.hpp" />
@@ -336,10 +399,16 @@
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
 			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="tests/client/client_test.cpp">
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
+		</Unit>
+		<Unit filename="tests/client/upload_test.cpp">
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
 		</Unit>
 		<Unit filename="tests/compression/compress_test.cpp">
 			<Option virtualFolder="Tests/" />

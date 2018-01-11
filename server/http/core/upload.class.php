@@ -59,7 +59,10 @@ class BackupUpload
 		//Verify SHA-1 hash
 		$hashed = sha1($this->_fileContentsRaw);
 		
-		if ( $hashed != $this->_fileMetadata->{'hash'} ) {
+		echo "Hashed is: " . $hashed . "Sent hash was: " . $this->_fileMetadata->{'hash'};
+		flush();
+		
+		if ( $hashed != strtolower($this->_fileMetadata->{'hash'}) ) {
 			$this->_setError("File integrity check failed. SHA-1 hash mismatch- the file contents are not correct.");
 			return false;
 		}

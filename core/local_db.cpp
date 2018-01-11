@@ -330,7 +330,7 @@ void LocalDatabase::clean_files()
         int file_id = sqlite3_column_int(stmt,2);
 
         #ifdef _WIN32
-            char cslash = '\';
+            char cslash = '\\';
         #else
             char cslash = '/';
         #endif

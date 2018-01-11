@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <boost/filesystem.hpp>
 #include <cryptopp/sha.h>
@@ -59,13 +60,18 @@ namespace Backup {
                     \brief
                     \return Returns the file size
                 */
-                size_t get_file_size();
+                size_t get_file_size() const;
 
                 /*! \fn std::string get_file_type();
                     \return Returns the file extension as a string
                 */
                 std::string get_file_type() const;
                 std::string& get_file_type();
+
+                /*! \fn std::string get_file_contents();
+                    \return Returns the file contents
+                */
+                std::string get_file_contents();
 
                 /*! \fn std::string get_unique_id();
                     \brief
@@ -144,7 +150,7 @@ namespace Backup {
                     \brief
                     \return Returns the last write time of the file as a Unix timestamp
                 */
-                unsigned long get_last_modified();
+                unsigned long get_last_modified() const;
 
                 /*! \fn bool exists();
                     \brief
@@ -158,6 +164,7 @@ namespace Backup {
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file
                 std::string m_hash; //!< SHA-1 hash of the file contents
                 std::string m_unique_id; //!< SHA-1 hash of the file path
+                std::string m_content; //!< Contents of the file (binary)
                 file_attrs m_file_attrs; //!< Struct containing common file attributes
                 unsigned int m_file_id; //!< Database ID of the file
                 unsigned int m_directory_id; //!< Database ID of the parent directory

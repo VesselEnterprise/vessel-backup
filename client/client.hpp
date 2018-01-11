@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <boost/array.hpp>
@@ -24,6 +25,7 @@
 #include "local_db.hpp"
 #include "compress.hpp"
 #include "http_request.hpp"
+#include "file.hpp"
 
 //#define BOOST_NETWORK_ENABLE_HTTPS 1
 
@@ -49,9 +51,9 @@ namespace Backup {
                 void set_timeout( boost::posix_time::time_duration t );
                 void set_ssl(bool f);
 
-                void send_request( const Backup::Networking::HttpRequest& r );
+                void send_request( Backup::Networking::HttpRequest* r );
 
-                bool upload_file_single( const Backup::Types::http_upload_file& f);
+                bool upload_file_single( Backup::File::BackupFile bf);
                 bool upload_file_part ( const Backup::Types::http_upload_file& f );
                 bool heartbeat();
                 std::string get_client_settings();
@@ -77,8 +79,11 @@ namespace Backup {
                 tcp::socket m_socket;
                 boost::asio::ssl::stream<tcp::socket> m_ssl_socket;
                 deadline_timer m_deadline_timer;
+
                 boost::asio::streambuf m_response_buffer;
                 boost::asio::streambuf m_request_buffer;
+                std::string m_request_data;
+
                 unsigned int m_http_status;
                 std::string m_header_data;
                 std::string m_response_data;
