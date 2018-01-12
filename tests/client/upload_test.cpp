@@ -17,9 +17,9 @@ int main(int argc, char** argv)
 
     std::string host = ldb->get_setting_str("master_server");
 
-    Client* cli = new Client(host);
+    BackupClient* cli = new BackupClient(host);
 
-    std::string test_file = "/home/kyle/Pictures/exchange_mailboxes.png";
+    std::string test_file = "C:\\Users\\kett.ky\\Downloads\\FileZilla_3.30.0_win64-setup.exe";
 
     BackupFile bf(test_file);
 

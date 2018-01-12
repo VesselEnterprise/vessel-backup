@@ -24,7 +24,7 @@ int main()
 
     std::string host = ldb->get_setting_str("master_server");
 
-    Client* c = new Client(host);
+    BackupClient* c = new BackupClient(host);
     c->set_timeout( boost::posix_time::seconds(5) );
 
     /**
@@ -33,7 +33,7 @@ int main()
     c->activate();
 
     if ( !c->is_activated() ) {
-        std::cout << "Error: Client is not activated" << std::endl;
+        std::cout << "Error: BackupClient is not activated" << std::endl;
         return 1;
     }
 
@@ -45,11 +45,11 @@ int main()
     std::cout << c->get_response();
 
     /**
-    ** Test Get Client Settings
+    ** Test Get BackupClient Settings
     **/
     std::string client_settings = c->get_client_settings();
 
-    //Update Client Settings
+    //Update BackupClient Settings
     ldb->update_client_settings( client_settings );
 
     /**

@@ -57,62 +57,37 @@ bool BackupFile::exists()
     return fs::exists(m_file_path);
 }
 
-std::string BackupFile::get_file_name() const
+std::string BackupFile::get_file_name()
 {
     return m_file_attrs.file_name;
 }
 
-std::string& BackupFile::get_file_name()
-{
-    return m_file_attrs.file_name;
-}
-
-size_t BackupFile::get_file_size() const
+size_t BackupFile::get_file_size()
 {
     return m_file_attrs.file_size;
 }
 
-std::string BackupFile::get_file_type() const
+std::string BackupFile::get_file_type()
 {
     return m_file_attrs.file_type;
 }
 
-std::string& BackupFile::get_file_type()
-{
-    return m_file_attrs.file_type;
-}
-
-std::string BackupFile::get_file_path() const
+std::string BackupFile::get_file_path()
 {
     return m_file_attrs.file_path;
 }
 
-std::string& BackupFile::get_file_path()
-{
-    return m_file_attrs.file_path;
-}
-
-std::string BackupFile::get_parent_path() const
+std::string BackupFile::get_parent_path()
 {
     return m_file_attrs.parent_path;
 }
 
-std::string& BackupFile::get_parent_path()
-{
-    return m_file_attrs.parent_path;
-}
-
-std::string BackupFile::get_relative_path() const
+std::string BackupFile::get_relative_path()
 {
     return m_file_attrs.relative_path;
 }
 
-std::string& BackupFile::get_relative_path()
-{
-    return m_file_attrs.relative_path;
-}
-
-unsigned long BackupFile::get_last_modified() const
+unsigned long BackupFile::get_last_modified()
 {
     return m_file_attrs.last_write_time;
 }
@@ -198,12 +173,7 @@ std::string BackupFile::calculate_unique_id()
         return digest;
 }
 
-std::string BackupFile::get_unique_id() const
-{
-    return m_unique_id;
-}
-
-std::string& BackupFile::get_unique_id()
+std::string BackupFile::get_unique_id()
 {
     return m_unique_id;
 }

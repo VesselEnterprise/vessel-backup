@@ -53,20 +53,18 @@ namespace Backup {
                     \brief
                     \return Returns the filename
                 */
-                std::string get_file_name() const;
-                std::string& get_file_name();
+                std::string get_file_name();
 
                 /*! \fn size_t get_file_size();
                     \brief
                     \return Returns the file size
                 */
-                size_t get_file_size() const;
+                size_t get_file_size();
 
                 /*! \fn std::string get_file_type();
                     \return Returns the file extension as a string
                 */
-                std::string get_file_type() const;
-                std::string& get_file_type();
+                std::string get_file_type();
 
                 /*! \fn std::string get_file_contents();
                     \return Returns the file contents
@@ -77,8 +75,7 @@ namespace Backup {
                     \brief
                     \return Returns a SHA-1 hash of the file path
                 */
-                std::string get_unique_id() const;
-                std::string& get_unique_id();
+                std::string get_unique_id();
 
                 /*! \fn std::string get_hash(bool use_file_source=false);
                     \brief
@@ -110,47 +107,29 @@ namespace Backup {
                 */
                 void set_file_id(unsigned int id);
 
-                /*! \fn std::string get_file_path() const;
+                /*! \fn std::string get_file_path();
                     \brief
                     \return Returns the complete file path as a string
                 */
-                std::string get_file_path() const;
+                std::string get_file_path();
 
-                /*! \fn std::string& get_file_path();
-                    \brief
-                    \return Returns the complete file path as a string
-                */
-                std::string& get_file_path();
-
-                /*! \fn std::string get_parent_path() const;
+                /*! \fn std::string get_parent_path();
                     \brief
                     \return Returns the parent path of the file as a string
                 */
-                std::string get_parent_path() const;
+                std::string get_parent_path();
 
-                 /*! \fn std::string& get_parent_path();
-                    \brief
-                    \return Returns the parent path of the file as a string
-                */
-                std::string& get_parent_path();
-
-                 /*! \fn std::string get_relative_path() const;
+                 /*! \fn std::string get_relative_path();
                     \brief
                     \return Returns the relative path of the file as a string
                 */
-                std::string get_relative_path() const;
-
-                /*! \fn std::string& get_relative_path();
-                    \brief
-                    \return Returns the relative path of the file as a string
-                */
-                std::string& get_relative_path();
+                std::string get_relative_path();
 
                 /*! \fn unsigned long get_last_modified();
                     \brief
                     \return Returns the last write time of the file as a Unix timestamp
                 */
-                unsigned long get_last_modified() const;
+                unsigned long get_last_modified();
 
                 /*! \fn bool exists();
                     \brief

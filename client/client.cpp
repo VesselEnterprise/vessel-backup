@@ -4,7 +4,7 @@ using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
 using namespace Backup::Networking;
 
-Client::Client( const std::string& host ) :
+BackupClient::BackupClient( const std::string& host ) :
     m_socket(m_io_service),
     m_deadline_timer(m_io_service),
     m_use_ssl(false),
@@ -36,7 +36,7 @@ Client::Client( const std::string& host ) :
 
 }
 
-Client::~Client()
+BackupClient::~BackupClient()
 {
 
     if ( m_socket.is_open() )
@@ -47,7 +47,7 @@ Client::~Client()
 
 }
 
-void Client::parse_url( const std::string& host )
+void BackupClient::parse_url( const std::string& host )
 {
 
     //Detect HTTP protocol
@@ -93,17 +93,17 @@ void Client::parse_url( const std::string& host )
 
 }
 
-void Client::set_timeout( boost::posix_time::time_duration t )
+void BackupClient::set_timeout( boost::posix_time::time_duration t )
 {
     m_timeout = t;
 }
 
-void Client::set_ssl(bool f)
+void BackupClient::set_ssl(bool f)
 {
     m_use_ssl = f;
 }
 
-bool Client::connect()
+bool BackupClient::connect()
 {
 
     m_conn_status.clear();
@@ -122,9 +122,9 @@ bool Client::connect()
         m_conn_status = boost::asio::error::would_block;
 
         if ( !m_use_ssl )
-            boost::asio::async_connect(m_socket, endpoint_iterator, boost::bind(&Client::handle_connect, this, boost::asio::placeholders::error) );
+            boost::asio::async_connect(m_socket, endpoint_iterator, boost::bind(&BackupClient::handle_connect, this, boost::asio::placeholders::error) );
         else
-            boost::asio::async_connect(m_ssl_socket.lowest_layer(), endpoint_iterator, boost::bind(&Client::handle_connect, this, boost::asio::placeholders::error) );
+            boost::asio::async_connect(m_ssl_socket.lowest_layer(), endpoint_iterator, boost::bind(&BackupClient::handle_connect, this, boost::asio::placeholders::error) );
 
         //Run ASYNC connect until operation completed
         do m_io_service.run_one(); while (m_conn_status == boost::asio::error::would_block);
@@ -168,7 +168,7 @@ bool Client::connect()
     return m_connected;
 }
 
-void Client::handle_connect(const boost::system::error_code& e)
+void BackupClient::handle_connect(const boost::system::error_code& e)
 {
 
     if ( !e )
@@ -181,7 +181,7 @@ void Client::handle_connect(const boost::system::error_code& e)
         }
         else //SSL client must perform handshake
         {
-            m_ssl_socket.async_handshake(ssl::stream_base::client,boost::bind(&Client::handle_handshake, this, boost::asio::placeholders::error) );
+            m_ssl_socket.async_handshake(ssl::stream_base::client,boost::bind(&BackupClient::handle_handshake, this, boost::asio::placeholders::error) );
 
             //Do not return until handshake is complete
             do m_io_service.run_one(); while (m_conn_status == boost::asio::error::would_block && !m_ssl_good);
@@ -198,7 +198,7 @@ void Client::handle_connect(const boost::system::error_code& e)
 
 }
 
-void Client::handle_handshake(const boost::system::error_code& e )
+void BackupClient::handle_handshake(const boost::system::error_code& e )
 {
 
     if (!e)
@@ -216,7 +216,7 @@ void Client::handle_handshake(const boost::system::error_code& e )
         boost::asio::async_write(
             m_ssl_socket,
             boost::asio::buffer(***, request_length),
-            boost::bind(&Client::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
+            boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
         );
         */
     }
@@ -229,7 +229,7 @@ void Client::handle_handshake(const boost::system::error_code& e )
 
 }
 
-void Client::handle_write( const boost::system::error_code& e )
+void BackupClient::handle_write( const boost::system::error_code& e )
 {
 
     std::cout << "Handle write..." << '\n';
@@ -244,9 +244,9 @@ void Client::handle_write( const boost::system::error_code& e )
         // automatically grow to accommodate the entire line. The growth may be
         // limited by passing a maximum size to the streambuf constructor.
         if ( !m_use_ssl )
-            boost::asio::async_read_until(m_socket, m_response_buffer, "\r\n", boost::bind(&Client::handle_response, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_socket, m_response_buffer, "\r\n", boost::bind(&BackupClient::handle_response, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read_until(m_ssl_socket, m_response_buffer, "\r\n", boost::bind(&Client::handle_response, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_ssl_socket, m_response_buffer, "\r\n", boost::bind(&BackupClient::handle_response, this, boost::asio::placeholders::error));
 
     }
     else
@@ -256,7 +256,7 @@ void Client::handle_write( const boost::system::error_code& e )
 
 }
 
-void Client::handle_response( const boost::system::error_code& e )
+void BackupClient::handle_response( const boost::system::error_code& e )
 {
 
     m_response_ec = e; //Update error code
@@ -331,9 +331,9 @@ void Client::handle_response( const boost::system::error_code& e )
 
         // Read the response headers, which are terminated by a blank line.
         if ( !m_use_ssl )
-            boost::asio::async_read_until(m_socket, m_response_buffer, "\r\n\r\n", boost::bind(&Client::handle_read_headers, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_socket, m_response_buffer, "\r\n\r\n", boost::bind(&BackupClient::handle_read_headers, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read_until(m_ssl_socket, m_response_buffer, "\r\n\r\n", boost::bind(&Client::handle_read_headers, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(m_ssl_socket, m_response_buffer, "\r\n\r\n", boost::bind(&BackupClient::handle_read_headers, this, boost::asio::placeholders::error));
 
     }
     else
@@ -343,7 +343,7 @@ void Client::handle_response( const boost::system::error_code& e )
 
 }
 
-void Client::handle_read_headers( const boost::system::error_code& e )
+void BackupClient::handle_read_headers( const boost::system::error_code& e )
 {
 
     std::cout << "Handle read headers..." << '\n';
@@ -364,9 +364,9 @@ void Client::handle_read_headers( const boost::system::error_code& e )
 
         // Start reading remaining data until EOF.
         if ( !m_use_ssl )
-            boost::asio::async_read( m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error) );
+            boost::asio::async_read( m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&BackupClient::handle_read_content, this, boost::asio::placeholders::error) );
         else
-            boost::asio::async_read( m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error) );
+            boost::asio::async_read( m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&BackupClient::handle_read_content, this, boost::asio::placeholders::error) );
 
     }
     else
@@ -378,7 +378,7 @@ void Client::handle_read_headers( const boost::system::error_code& e )
 
 }
 
-void Client::handle_read_content( const boost::system::error_code& e )
+void BackupClient::handle_read_content( const boost::system::error_code& e )
 {
 
     std::cout << "Read some content" << '\n';
@@ -394,9 +394,9 @@ void Client::handle_read_content( const boost::system::error_code& e )
 
         // Continue reading remaining data until EOF.
         if ( !m_use_ssl )
-            boost::asio::async_read(m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error));
+            boost::asio::async_read(m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&BackupClient::handle_read_content, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read(m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&Client::handle_read_content, this, boost::asio::placeholders::error));
+            boost::asio::async_read(m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&BackupClient::handle_read_content, this, boost::asio::placeholders::error));
 
     }
     else if (e != boost::asio::error::eof)
@@ -409,7 +409,7 @@ void Client::handle_read_content( const boost::system::error_code& e )
 
 }
 
-void Client::check_deadline()
+void BackupClient::check_deadline()
 {
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
@@ -427,11 +427,11 @@ void Client::check_deadline()
     }
 
     // Put the actor back to sleep.
-    m_deadline_timer.async_wait(boost::bind(&Client::check_deadline, this));
+    m_deadline_timer.async_wait(boost::bind(&BackupClient::check_deadline, this));
 
 }
 
-void Client::disconnect()
+void BackupClient::disconnect()
 {
     try
     {
@@ -454,7 +454,7 @@ void Client::disconnect()
 
 }
 
-void Client::send_request( Backup::Networking::HttpRequest* r )
+void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 {
 
     if ( !m_connected ) {
@@ -518,9 +518,9 @@ void Client::send_request( Backup::Networking::HttpRequest* r )
     const char* request = request_stream.str().data(); /*Allows us to send binary data through ASIO */
 
     if ( !m_use_ssl )
-        boost::asio::async_write(m_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
+        boost::asio::async_write(m_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
     else
-        boost::asio::async_write(m_ssl_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&Client::handle_write, this, boost::asio::placeholders::error)) ;
+        boost::asio::async_write(m_ssl_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
 
     //Run the handlers until the response sets the status code or EOF
     do { m_io_service.run_one(); std::cout << "..." << '\n'; } while ( !m_response_ec );
@@ -529,7 +529,7 @@ void Client::send_request( Backup::Networking::HttpRequest* r )
 
 }
 
-bool Client::upload_file_single( Backup::File::BackupFile bf )
+bool BackupClient::upload_file_single( Backup::File::BackupFile bf )
 {
 
     using namespace rapidjson;
@@ -547,7 +547,7 @@ bool Client::upload_file_single( Backup::File::BackupFile bf )
     jmap.insert( std::pair<std::string,Value>( "file_type", Value( bf.get_file_type().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "hash", Value( bf.get_hash().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf.get_parent_path().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "last_modified", Value( bf.get_last_modified() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf.get_last_modified() ) ) );
     jmap.insert( std::pair<std::string,Value>( "compressed", Value( false ) ) );
 
     //Add values to document object
@@ -587,7 +587,7 @@ bool Client::upload_file_single( Backup::File::BackupFile bf )
     //Write a boundary
     body << "--BackupFile--\r\n\r\n";
 
-    std::cout << "Body:\n" << body.str() << std::endl;
+    //std::cout << "Body:\n" << body.str() << std::endl;
 
     //Create a new HTTP request
     HttpRequest r;
@@ -606,7 +606,7 @@ bool Client::upload_file_single( Backup::File::BackupFile bf )
 
 }
 
-std::string Client::make_upload_json( const Backup::Types::http_upload_file& f )
+std::string BackupClient::make_upload_json( const Backup::Types::http_upload_file& f )
 {
 
     rapidjson::Document doc;
@@ -636,7 +636,7 @@ std::string Client::make_upload_json( const Backup::Types::http_upload_file& f )
 
 }
 
-bool Client::heartbeat()
+bool BackupClient::heartbeat()
 {
 
     this->connect();
@@ -680,17 +680,17 @@ bool Client::heartbeat()
 
 }
 
-std::string Client::get_response()
+std::string BackupClient::get_response()
 {
     return m_response_data;
 }
 
-std::string Client::get_headers()
+std::string BackupClient::get_headers()
 {
     return m_header_data;
 }
 
-std::string Client::get_client_settings()
+std::string BackupClient::get_client_settings()
 {
 
     if ( m_auth_token == "" ) //Don't try to get settings if no auth token is present
@@ -707,7 +707,7 @@ std::string Client::get_client_settings()
 
 }
 
-bool Client::activate()
+bool BackupClient::activate()
 {
 
     using namespace rapidjson;
@@ -779,12 +779,12 @@ bool Client::activate()
 
 }
 
-bool Client::is_activated()
+bool BackupClient::is_activated()
 {
     return m_activated;
 }
 
-unsigned int Client::get_http_status()
+unsigned int BackupClient::get_http_status()
 {
     return m_http_status;
 }

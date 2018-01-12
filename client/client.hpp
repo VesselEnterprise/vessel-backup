@@ -36,14 +36,14 @@ namespace ssl = boost::asio::ssl;
 namespace Backup {
     namespace Networking {
 
-        class Client
+        class BackupClient
         {
 
             enum { buffer_size = 1024 };
 
             public:
-                Client( const std::string& hostname );
-                ~Client();
+                BackupClient( const std::string& hostname );
+                ~BackupClient();
 
                 bool connect();
                 void disconnect();
