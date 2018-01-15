@@ -2,6 +2,7 @@
 #define FILE_HPP
 
 #include <iostream>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -10,6 +11,9 @@
 #include <cryptopp/files.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
+
+#define BACKUP_LARGE_SZ 52428800 //Default size in bytes of what should be considered a larger file (50MB)
+#define BACKUP_CHUNK_SZ 1048576 //Default chunk size if not defined in DB (10MB)
 
 namespace fs = boost::filesystem;
 
@@ -77,12 +81,11 @@ namespace Backup {
                 */
                 std::string get_unique_id();
 
-                /*! \fn std::string get_hash(bool use_file_source=false);
+                /*! \fn std::string get_hash();
                     \brief
                     \return Returns a SHA-1 hash of the file contents
-                    \param use_file_source Use CryptoPP FileSource class vs. StringSource (default=false)
                 */
-                std::string get_hash(bool use_file_source=false);
+                std::string get_hash();
 
                 /*! \fn unsigned int get_directory_id();
                     \brief
@@ -137,7 +140,28 @@ namespace Backup {
                 */
                 bool exists();
 
+                /*! \fn bool is_compressed();
+                    \brief
+                    \return Returns whether or not the file is compressed
+                */
                 bool is_compressed();
+
+                /*! \fn void set_chunk_size( size_t chunk_sz );
+                    \brief Sets the size of chunks of bytes returned from a file part for multi part uploads
+                */
+                void set_chunk_size( size_t chunk_sz );
+
+                /*! \fn std::string get_file_part(unsigned int num);
+                    \brief
+                    \return Returns the bytes of a file for the given part number
+                */
+                std::string get_file_part(unsigned int num);
+
+                /*! \fn unsigned int get_total_parts();
+                    \brief
+                    \return Returns the total number of file parts based on the chunk size
+                */
+                unsigned int get_total_parts();
 
             private:
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file
@@ -147,6 +171,7 @@ namespace Backup {
                 file_attrs m_file_attrs; //!< Struct containing common file attributes
                 unsigned int m_file_id; //!< Database ID of the file
                 unsigned int m_directory_id; //!< Database ID of the parent directory
+                size_t m_chunk_size; //!< Size in bytes in a file part for multi part uploads
 
                 /*! \fn void update_attributes()
                     \brief Updates private member variables for file properties. Called in constructor and when assigning an object a new file path

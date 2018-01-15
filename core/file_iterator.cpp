@@ -129,6 +129,13 @@ void FileIterator::scan()
                 //Create new file object
                 File::BackupFile bf(p);
 
+                //Skip empty files
+                if ( bf.get_file_size() == 0 )
+                {
+                    m_log->add_message("Skipped file. File is empty: " + p.string(), "File Scanner");
+                    continue;
+                }
+
                 //Check if we should ignore the file
                 if ( m_ldb->is_ignore_ext( bf.get_file_type() ) )
                 {

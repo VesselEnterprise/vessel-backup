@@ -53,7 +53,7 @@ namespace Backup {
 
                 void send_request( Backup::Networking::HttpRequest* r );
 
-                bool upload_file_single( Backup::File::BackupFile bf);
+                bool upload_file_single( Backup::File::BackupFile * bf);
                 bool upload_file_part ( const Backup::Types::http_upload_file& f );
                 bool heartbeat();
                 std::string get_client_settings();

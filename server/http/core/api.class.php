@@ -4,6 +4,7 @@ require_once 'api_session.class.php';
 require_once 'file.class.php';
 require_once 'user.class.php';
 require_once 'upload.class.php';
+require_once 'upload_part.class.php';
 
 abstract class API
 {
@@ -35,6 +36,12 @@ abstract class API
      * Stores raw data from a POST or PUT
      */
     protected $rawData = Null;
+	
+	/**
+     * Property: headers
+     * HTTP Request headers
+     */
+	protected $headers;
 	 
 	private $_db;
 	private $_log;	
@@ -57,6 +64,9 @@ abstract class API
         if (array_key_exists(0, $this->args) && !is_numeric($this->args[0])) {
             $this->verb = array_shift($this->args);
         }
+		
+		//Get Headers
+		$this->_parseHeaders();
 		
 		//Set HTTP Method
 		$this->method = $_SERVER['REQUEST_METHOD'];
@@ -106,7 +116,7 @@ abstract class API
 
     private function _response($data, $status=200) {
         header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
-        return json_encode( array( 'response' => $data ), JSON_PRETTY_PRINT );
+        return json_encode( array( 'response' => $data ), JSON_FORCE_OBJECT | JSON_PRETTY_PRINT );
     }
 	
     private function _error($data, $status=200) {
@@ -116,7 +126,7 @@ abstract class API
 		
         header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
 		
-        return json_encode( array( 'error' => array('message' => $data, 'code' => $status) ), JSON_PRETTY_PRINT );
+        return json_encode( array( 'error' => array('message' => $data, 'code' => $status) ), JSON_FORCE_OBJECT | JSON_PRETTY_PRINT );
 		
     }
 
@@ -144,9 +154,27 @@ abstract class API
             500 => 'Internal Server Error',
         );
 		
-        return ($status[$code]) ? $status[$code] : $status[500]; 
+        return ($status[$code]) ? $status[$code] : $status[500];
 		
     }
+	
+	private function _parseHeaders() {
+		$this->headers = apache_request_headers();		
+	}
+	
+	private function _parseMultipartPut() {
+		
+		//Get the content disposition
+		$token = $this->headers('Content-Disposition');
+		
+		if ( empty($token) )
+			return;
+		
+		
+		
+		
+		
+	}
 	
 	private function test() {
 		echo $this->_response("Hello World");
@@ -192,9 +220,7 @@ abstract class API
 		else {
 			$msg = "User has been successfully activated";
 		}
-		
-		
-		
+
 		echo $this->_response( array( 
 			"user_name" => $userName,
 			"access_token" => $accessToken,
@@ -311,6 +337,68 @@ abstract class API
 			
 		}
 
+	}
+	
+	private function file_part() {
+		
+		if ( !$this->_session->isAuthenticated() ) {
+			echo $this->_error("You are not authorized to perform this action", 401 );
+			return;			
+		}
+		
+		//Initiate a new multi part upload
+		if ( $this->method == "POST" ) {
+			
+			$payload = json_decode( $this->rawData );
+			
+			if ( json_last_error() != JSON_ERROR_NONE ) {
+				echo $this->_error("JSON payload is invalid", 400 );
+				return;		
+			}
+			
+			$uploadPart = new BackupUploadPart();
+			if ( !$uploadPart->initialize($payload) ) {
+				echo $this->_error( $uploadPart->getError(), 400 );
+				return;
+			}
+			
+			echo $this->_response( array( "upload_id" => $uploadPart->getUploadID(), "file_id" => $uploadPart->getFileID() ) );
+			
+			return;
+			
+		}
+		
+		if ( $this->method == "PUT" ) {
+			
+			if ( empty($_PUT[0]['metadata']) ) {
+				echo $this->_error("JSON metadata is missing", 400 );
+				return;		
+			}
+			
+			if ( empty($_PUT['fileData']) ) {
+				echo $this->_error("File contents are missing", 400 );
+				return;		
+			}
+			
+			$metadata = json_decode( $_PUT['metadata'] );
+			
+			if ( json_last_error() != JSON_ERROR_NONE ) {
+				echo $this->_error("JSON payload is invalid", 400 );
+				return;		
+			}
+			
+			var_dump($fileData);
+			flush();
+			return;
+			
+			$uploadPart = new BackupUploadPart();
+			if ( !$uploadPart->uploadPart($metadata,$_POST['fileData']) ) {
+				echo $this->_error( $uploadPart->getError(), 400 );
+				return;
+			}
+			
+		}
+		
 	}
 	
 	private function heartbeat() {

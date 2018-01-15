@@ -28376,10 +28376,10 @@
 	"version.hpp"
 	<sstream>
 
-1515555301 source:/home/kyle/cpp/bv-backup/client/client.cpp
+1515804879 source:/home/kyle/cpp/bv-backup/client/client.cpp
 	"client.hpp"
 
-1515555301 /home/kyle/cpp/bv-backup/client/client.hpp
+1515804914 /home/kyle/cpp/bv-backup/client/client.hpp
 	<iostream>
 	<string>
 	<sstream>
@@ -37107,7 +37107,7 @@
 	<fcntl.h>
 	<io.h>
 
-1514952477 /home/kyle/cpp/bv-backup/core/http_request.hpp
+1515603798 /home/kyle/cpp/bv-backup/core/http_request.hpp
 	<string>
 	<vector>
 
@@ -37126,10 +37126,10 @@
 	"log.hpp"
 	"file.hpp"
 
-1514952426 source:/home/kyle/cpp/bv-backup/core/http_request.cpp
+1515603792 source:/home/kyle/cpp/bv-backup/core/http_request.cpp
 	"http_request.hpp"
 
-1515372354 source:/home/kyle/cpp/bv-backup/core/local_db.cpp
+1515590781 source:/home/kyle/cpp/bv-backup/core/local_db.cpp
 	"local_db.hpp"
 
 1511621509 source:/home/kyle/cpp/bv-backup/core/log.cpp
@@ -37167,9 +37167,11 @@
 	<unistd.h>
 	"android_lf.h"
 
-1515555282 /home/kyle/cpp/bv-backup/core/file.hpp
+1515949242 /home/kyle/cpp/bv-backup/core/file.hpp
 	<iostream>
+	<cmath>
 	<fstream>
+	<sstream>
 	<string>
 	<boost/filesystem.hpp>
 	<cryptopp/sha.h>
@@ -37327,10 +37329,10 @@
 	<boost/system/api_config.hpp>
 	<boost/config/auto_link.hpp>
 
-1515589456 source:/home/kyle/cpp/bv-backup/core/file.cpp
+1515949449 source:/home/kyle/cpp/bv-backup/core/file.cpp
 	"file.hpp"
 
-1515545137 source:/home/kyle/cpp/bv-backup/tests/client/upload_test.cpp
+1515949304 source:/home/kyle/cpp/bv-backup/tests/client/upload_test.cpp
 	"local_db.hpp"
 	"file.hpp"
 	"client.hpp"

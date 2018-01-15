@@ -60,11 +60,11 @@ class BackupDatabase
 		return $this->dbConn;
 	}
 	
-	public function getSetting($name) {
+	private function _getSetting($tableName, $fieldName) {
 		
 		$val = '';
 		
-		if ( $result = mysqli_query($this->dbConn, "SELECT value FROM backup_setting WHERE name='" . $name . "'") ) {
+		if ( $result = mysqli_query($this->dbConn, "SELECT value FROM " . $tableName . " WHERE name='" . $fieldName . "'") ) {
 			
 			if ( $row = $result->fetch_row() ) {
 				$val = $row[0];
@@ -80,6 +80,18 @@ class BackupDatabase
 		}
 		
 		return $val;
+		
+	}
+	
+	public function getSetting($name) {
+		
+		return $this->_getSetting("backup_setting", $name);
+		
+	}
+	
+	public function getClientSetting($name) {
+		
+		return $this->_getSetting("backup_client_setting", $name);
 		
 	}
 
