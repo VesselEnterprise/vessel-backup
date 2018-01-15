@@ -325,7 +325,7 @@ void BackupClient::handle_response( const boost::system::error_code& e )
         {
             std::cout << "Response returned with status code ";
             std::cout << m_http_status << "\n";
-            m_response_ec = boost::asio::error::operation_aborted; //Set static error
+            //m_response_ec = boost::asio::error::operation_aborted; //Set static error
             //return;
         }
 
@@ -468,10 +468,10 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
     m_response_data.clear();
     m_header_data.clear();
 
-    //m_deadline_timer.expires_from_now(boost::posix_time::seconds(15));
+    m_deadline_timer.expires_from_now(boost::posix_time::seconds(15));
 
     //Build the HTTP Request
-    std::ostringstream request_stream;
+    std::stringstream request_stream(std::stringstream::out | std::stringstream::binary);
     request_stream << r->get_method() << " " << r->get_uri() << " HTTP/1.1\r\n";
     request_stream << "Host: " << m_hostname << "\r\n";
     request_stream << "Accept: */*\r\n";
@@ -508,19 +508,17 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
     request_stream << "\r\n";
 
     if ( do_send_data )
-        request_stream << r->get_body();
-
-    //std::cout << "Request:\n" << request_stream.str() << std::endl;
+        request_stream.write( &r->get_body()[0], r->get_body_length() );
 
     //Clear status code before sending new data
     m_response_ec.clear();
 
-    const char* request = request_stream.str().data(); /*Allows us to send binary data through ASIO */
+    std::string data = request_stream.str();
 
     if ( !m_use_ssl )
-        boost::asio::async_write(m_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
+        boost::asio::async_write(m_socket, boost::asio::buffer( data, request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
     else
-        boost::asio::async_write(m_ssl_socket, boost::asio::buffer( request, request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
+        boost::asio::async_write(m_ssl_socket, boost::asio::buffer( &request_stream.str()[0], request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
 
     //Run the handlers until the response sets the status code or EOF
     do { m_io_service.run_one(); std::cout << "..." << '\n'; } while ( !m_response_ec );
@@ -529,7 +527,7 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 
 }
 
-bool BackupClient::upload_file_single( Backup::File::BackupFile bf )
+bool BackupClient::upload_file_single( Backup::File::BackupFile * bf )
 {
 
     using namespace rapidjson;
@@ -542,12 +540,12 @@ bool BackupClient::upload_file_single( Backup::File::BackupFile bf )
     std::map<std::string,Value> jmap;
 
     //Get Activation Code from DB
-    jmap.insert( std::pair<std::string,Value>( "file_name", Value( bf.get_file_name().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "file_size", Value( bf.get_file_size() ) ) );
-    jmap.insert( std::pair<std::string,Value>( "file_type", Value( bf.get_file_type().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf.get_hash().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf.get_parent_path().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf.get_last_modified() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_name", Value( bf->get_file_name().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_size", Value( bf->get_file_size() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_type", Value( bf->get_file_type().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf->get_parent_path().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf->get_last_modified() ) ) );
     jmap.insert( std::pair<std::string,Value>( "compressed", Value( false ) ) );
 
     //Add values to document object
@@ -563,7 +561,7 @@ bool BackupClient::upload_file_single( Backup::File::BackupFile bf )
     doc.Accept(writer);
 
     //Build the request body
-    std::ostringstream body;
+    std::stringstream body;
 
     //Write a boundary
     body << "\r\n--BackupFile\r\n";
@@ -580,7 +578,7 @@ bool BackupClient::upload_file_single( Backup::File::BackupFile bf )
 
     //Write file data
 
-    body << bf.get_file_contents();
+    body.write( &bf->get_file_contents()[0], bf->get_file_size() );
 
     body << "\r\n";
 
@@ -593,7 +591,6 @@ bool BackupClient::upload_file_single( Backup::File::BackupFile bf )
     HttpRequest r;
     r.add_header("Content-Disposition: multipart/form-data");
     r.add_header("Content-Type: multipart/form-data; boundary=BackupFile");
-    r.add_header("Content-Length: " + std::to_string(body.str().size()));
     r.set_body(body.str());
     r.set_method("POST");
     r.set_uri("/backup/api/v1/file");

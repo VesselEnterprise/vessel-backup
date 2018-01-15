@@ -3,7 +3,7 @@
 using namespace Backup::File;
 namespace fs = boost::filesystem;
 
-BackupFile::BackupFile(const std::string& fp ) : m_file_path(fp)
+BackupFile::BackupFile(const std::string& fp ) : m_file_path(fp), m_chunk_size(BACKUP_CHUNK_SZ)
 {
     update_attributes();
 }
@@ -92,7 +92,7 @@ unsigned long BackupFile::get_last_modified()
     return m_file_attrs.last_write_time;
 }
 
-std::string BackupFile::get_hash(bool use_file_source)
+std::string BackupFile::get_hash()
 {
 
     using namespace CryptoPP;
@@ -100,12 +100,13 @@ std::string BackupFile::get_hash(bool use_file_source)
     SHA1 hash;
     std::string digest;
 
-    if ( use_file_source )
+    //Use this method for larger files
+    if ( get_file_size() > BACKUP_LARGE_SZ )
     {
         /**
         * This peforms about 20% slower than reading the file manually and passing to StringSource
         */
-        FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+        FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
     }
     else
     {
@@ -127,7 +128,7 @@ std::string BackupFile::get_hash(bool use_file_source)
 
         }
 
-        StringSource s(m_content, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+        StringSource s(m_content, true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
 
     }
 
@@ -196,4 +197,57 @@ unsigned int BackupFile::get_file_id()
 void BackupFile::set_file_id(unsigned int id)
 {
     m_file_id = id;
+}
+
+void BackupFile::set_chunk_size(size_t chunk_sz)
+{
+    m_chunk_size = chunk_sz;
+}
+
+unsigned int BackupFile::get_total_parts()
+{
+    return std::ceil( get_file_size() / m_chunk_size );
+}
+
+std::string BackupFile::get_file_part(unsigned int num) {
+
+    size_t total_bytes = get_file_size();
+
+    size_t start_pos = ((m_chunk_size * num) - m_chunk_size);
+    size_t end_pos = (start_pos + m_chunk_size) -1;
+
+    if ( start_pos >= total_bytes )
+        start_pos = (total_bytes - m_chunk_size) >= 0 ? (total_bytes - m_chunk_size) : 0;
+
+    if ( total_bytes <= end_pos )
+        end_pos = get_file_size()-1;
+
+    std::string file_part;
+    file_part.resize( m_chunk_size ); //Optimize string alloc
+
+    //If file is > 50 MB, we do not want to store all the contents in memory
+    if ( total_bytes > BACKUP_LARGE_SZ )
+    {
+
+        //Read file contents
+        std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
+        if ( !infile.is_open() )
+            return "";
+
+        infile.seekg( start_pos, std::ios::beg );
+        infile.read( &file_part[0], m_chunk_size ); //Read contents
+
+        infile.close(); //Close file
+
+    }
+    else
+    {
+        if ( m_content.empty() )
+            get_file_contents();
+
+        file_part = m_content.substr(start_pos, end_pos);
+    }
+
+    return file_part;
+
 }

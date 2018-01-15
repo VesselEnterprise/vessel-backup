@@ -24,7 +24,7 @@ class BackupFile
 		
 		if ( $result = mysqli_query($this->_db->getConnection(), "SELECT * FROM backup_file WHERE file_id=" . $this->_fileID) ) {
 			
-			if ( $this->_fileRow = mysqli_fetch_array($result, MYSQLI_ASSOC ) ) {
+			if ( $this->_fileRow = mysqli_fetch_assoc($result) ) {
 			
 				//Fix data types
 				for ( $i=0; $i < sizeof($this->_fileRow); $i++ ) {
