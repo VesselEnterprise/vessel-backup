@@ -65,9 +65,6 @@ abstract class API
             $this->verb = array_shift($this->args);
         }
 		
-		//Get Headers
-		$this->_parseHeaders();
-		
 		//Set HTTP Method
 		$this->method = $_SERVER['REQUEST_METHOD'];
         if ($this->method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
@@ -79,6 +76,18 @@ abstract class API
                 throw new Exception("Unexpected Header");
             }
         }
+		
+		//Get Headers
+		$this->_parseHeaders();
+		
+		//Handle HTTP PUT
+		if ( $this->method == 'PUT') {
+			
+			//Handle multipart/form-data PUT request
+			if ( strpos($headers['Content-Type'],'multipart/form-data') >= 0 ) {
+				$this->_parseMultipartPut();
+			}
+		}
 		
 		//Build objects
 		$this->_db = BackupDatabase::getDatabase();
@@ -164,16 +173,32 @@ abstract class API
 	
 	private function _parseMultipartPut() {
 		
-		//Get the content disposition
-		$token = $this->headers('Content-Disposition');
+		//Split the data into two parts
+		$parts = explode("\r\n\r\n", $this->rawData;
 		
-		if ( empty($token) )
+		//Make sure we have two parts
+		if ( count($parts) <= 1 )
 			return;
 		
+		//Find the boundary
+		$pattern = '/(Content-Type: multipart/form-data; boundary=)(.+)$/';
+		preg_match($pattern, $parts[0], $matches );
 		
+		if ( !isset($matches[2]) )
+			return;
 		
+		$boundary = trim($matches[2]);
 		
+		$multiparts = explode($boundary, $parts[1] );
 		
+		//Iterate through parts and create global keys for disposition names
+		foreach( $multiparts as $key => $value ) {
+			
+			
+			
+			
+		}
+
 	}
 	
 	private function test() {
