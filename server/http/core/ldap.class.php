@@ -24,7 +24,7 @@ class BackupLDAP
 		$this->_session = BackupSession::getSession();
 		
 		//Create new log object
-		$this->_log = BackupLog::getLog( $this->_session->getUserID() );
+		$this->_log = BackupLog::getLog( $this->_session->getUserId() );
 		
 		$this->_host = $this->_db->getSetting('ldap_server');
 		$this->_port = $this->_db->getSetting('ldap_port');
@@ -167,12 +167,12 @@ class BackupLDAP
 						echo "User " . $entries[$i]['samaccountname'][0] . " has been added to database<br/>";
 						flush();
 						
-						$userID = mysqli_insert_id($this->_dbconn);
+						$userId = mysqli_insert_id($this->_dbconn);
 						
 						//Create new user activation record?
 						
 						//Get user object
-						$user = BackupUser::getUser($userID);
+						$user = BackupUser::getUser($userId);
 						
 						//If user has no access token, create a new activation record
 						if ( !$user->getUserData('access_token') ) {

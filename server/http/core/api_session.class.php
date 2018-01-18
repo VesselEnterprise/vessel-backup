@@ -7,7 +7,7 @@ class BackupAPISession
 	
 	private static $factory;
 	private $_db;
-	private $_userID = -1;
+	private $_userId = -1;
 	private $_isAuthenticated = false;
 	
 	public function __construct() {
@@ -55,7 +55,7 @@ class BackupAPISession
 				$result = $stmt->get_result();
 				
 				if ( $result->num_rows > 0 ) {
-					$this->_userID = $result->fetch_row()[0];
+					$this->_userId = $result->fetch_row()[0];
 					$this->_isAuthenticated = true;
 				}
 				
@@ -75,7 +75,7 @@ class BackupAPISession
 		$query = "INSERT INTO backup_api_session (user_id,endpoint,http_method,ip_address) VALUES(?,?,?,?)";
 		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
 			
-			$stmt->bind_param('isss', $this->_userID, $endpoint, $http_method, $ip);
+			$stmt->bind_param('isss', $this->_userId, $endpoint, $http_method, $ip);
 			$stmt->execute();
 			$stmt->close();
 			
@@ -87,8 +87,8 @@ class BackupAPISession
 		return $this->_isAuthenticated;
 	}
 	
-	public function getUserID() {
-		return $this->_userID;
+	public function getUserId() {
+		return $this->_userId;
 	}
 	
 }

@@ -7,22 +7,22 @@ class BackupUser
 	
 	private static $factory;
 	
-	private $_userID;
+	private $_userId;
 	private $_dbconn;
 	private $_log;
 	private $_userRow;
 	
-	public function __construct($userID) {
+	public function __construct($userId) {
 		
-		$this->_userID = $userID;
+		$this->_userId = $userId;
 		
 		//Get database connection
 		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
 		
 		//Get Log Object
-		$this->_log = BackupLog::getLog($userID);
+		$this->_log = BackupLog::getLog($userId);
 		
-		$this->_userRow = $this->_getUserRow($userID);
+		$this->_userRow = $this->_getUserRow($userId);
 		
 	}
 	
@@ -30,15 +30,15 @@ class BackupUser
 		
 	}
 	
-	private function _getUserRow($userID) {
+	private function _getUserRow($userId) {
 		
 		$row = array();
 		
-		$userName = (string)$userID;
+		$userName = (string)$userId;
 		
 		$query = "SELECT * FROM backup_user WHERE user_id=? OR user_name=?";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
-			$stmt->bind_param('is', $userID, $userName );
+			$stmt->bind_param('is', $userId, $userName );
 			if ( $stmt->execute() ) {
 				$result = $stmt->get_result();
 				$row = mysqli_fetch_array($result);
@@ -47,8 +47,8 @@ class BackupUser
 		}
 		
 		//Check if user_name was provided instead
-		if ( gettype($userID) == "string" )
-			$this->_userID = $row['user_id'];
+		if ( gettype($userId) == "string" )
+			$this->_userId = $row['user_id'];
 		
 		return $row;		
 		
@@ -58,10 +58,10 @@ class BackupUser
 		return $this->_userRow[$col];
 	}
 	
-	public static function getUser($userID)
+	public static function getUser($userId)
 	{
 		if (!self::$factory)
-			self::$factory = new BackupUser($userID);
+			self::$factory = new BackupUser($userId);
 		
 		return self::$factory;
 	}
@@ -71,13 +71,13 @@ class BackupUser
 		$hash = password_hash( $pwd, PASSWORD_DEFAULT );
 		
 		//Update user password
-		if ( $stmt = mysqli_prepare("UPDATE backup_user SET password=?,password_set=NOW() WHERE userID=?") ) {
+		if ( $stmt = mysqli_prepare("UPDATE backup_user SET password=?,password_set=NOW() WHERE userId=?") ) {
 			
-			$stmt->bind_param('si', $hash, $this->_userID );
+			$stmt->bind_param('si', $hash, $this->_userId );
 			$stmt->execute();
 			$stmt->close();
 			
-			$this->_log->addMessage("User (User ID = " . $this->_userID . ") changed their password");
+			$this->_log->addMessage("User (User Id = " . $this->_userId . ") changed their password");
 			
 		}		
 		
@@ -98,7 +98,7 @@ class BackupUser
 		
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 			
-			$stmt->bind_param('is', $this->_userID, $code );
+			$stmt->bind_param('is', $this->_userId, $code );
 			if ( $stmt->execute() ) {
 				$status=true;
 			}
@@ -121,7 +121,7 @@ class BackupUser
 		
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 			
-			$stmt->bind_param('is', $this->_userID, $activationCode );
+			$stmt->bind_param('is', $this->_userId, $activationCode );
 			
 			if ( $stmt->execute() ) {
 				
@@ -134,24 +134,24 @@ class BackupUser
 					
 					//Set the user's access key
 					if ( $s2 = mysqli_prepare($this->_dbconn, "UPDATE backup_user SET access_token=? WHERE user_id=?") ) {
-						$s2->bind_param('si', $accessTokenHashed, $this->_userID);
+						$s2->bind_param('si', $accessTokenHashed, $this->_userId);
 						if ( $s2->execute() ) {
-							$this->_log->addMessage("Successfully activated user (user_id=" . $this->_userID . ")", "User Activation");
+							$this->_log->addMessage("Successfully activated user (user_id=" . $this->_userId . ")", "User Activation");
 						}
 						$s2->close();
 					}
 					
 					//Remove the user activation record
-					@mysqli_query($this->_dbconn, "DELETE FROM backup_user_activation WHERE user_id=" . $this->_userID );
+					@mysqli_query($this->_dbconn, "DELETE FROM backup_user_activation WHERE user_id=" . $this->_userId );
 					
 				}
 				else {
-					$this->_log->addError("Error: Failed to activate user (user_id=" . $this->_userID . ") (" . mysqli_error($this->_dbconn) . ")", "User Activation");
+					$this->_log->addError("Error: Failed to activate user (user_id=" . $this->_userId . ") (" . mysqli_error($this->_dbconn) . ")", "User Activation");
 				}
 				
 			}
 			else {
-				$this->_log->addError("Error: Failed to activate user (user_id=" . $this->_userID . "(" . mysqli_error($this->_dbconn) . ")", "User Activation");
+				$this->_log->addError("Error: Failed to activate user (user_id=" . $this->_userId . "(" . mysqli_error($this->_dbconn) . ")", "User Activation");
 			}
 				
 			

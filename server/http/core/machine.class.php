@@ -9,15 +9,15 @@ class BackupMachine
 	private $_machine = array();
 	private $_exists=false;
 	
-	public function __construct($hostID) {
+	public function __construct($hostId) {
 		
 		$this->_db = BackupDatabase::getDatabase();
 		
-		if ( gettype($hostID) == 'string') {
-			$this->_getMachineByName($hostID);
+		if ( gettype($hostId) == 'string') {
+			$this->_getMachineByName($hostId);
 		}
 		else {
-			$this->_getMachineByID($hostID);
+			$this->_getMachineById($hostId);
 		}
 
 	}
@@ -44,12 +44,12 @@ class BackupMachine
 		
 	}
 	
-	private function _getMachineByID($hostID) {
+	private function _getMachineById($hostId) {
 		
 		$query = "SELECT * FROM backup_machine WHERE machine_id=?";
 		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
 			
-			$stmt->bind_param('i', $hostID);
+			$stmt->bind_param('i', $hostId);
 			
 			if ( $stmt->execute() ) {
 				

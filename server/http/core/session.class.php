@@ -8,11 +8,11 @@ class BackupSession
 {
 	
 	private static $factory;
-	private $_userID = -1;
+	private $_userId = -1;
 	private $_dbconn;
 	private $_loginSuccess;
 	private $_sessionHash;
-	private $_sessionID = -1;
+	private $_sessionId = -1;
 	private $_sessionExpired;
 	private $_ip_address;
 	private $_log;
@@ -26,7 +26,7 @@ class BackupSession
 		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
 		
 		//Get Log Obj
-		$this->_log = BackupLog::getLog( $this->_userID );
+		$this->_log = BackupLog::getLog( $this->_userId );
 		
 		//Get or Create User Session		
 		$this->_initSession();
@@ -63,11 +63,11 @@ class BackupSession
 				
 				if ( password_verify($pwd, $row[1]) == TRUE ) {
 					
-					//Set UserID
-					$this->_userID = $row[0];
+					//Set UserId
+					$this->_userId = $row[0];
 					
-					//Update user ID for the current session
-					$this->_updateSessionUserID($this->_userID);
+					//Update user Id for the current session
+					$this->_updateSessionUserId($this->_userId);
 					
 					//Create new session
 					$this->_initSession();
@@ -96,7 +96,7 @@ class BackupSession
 		return $this->_loginSuccess;
 	}
 	
-	private function _updateSessionUserID($user_id) {
+	private function _updateSessionUserId($user_id) {
 		
 		$query = "UPDATE backup_user_session SET user_id=? WHERE session_hash=?";
 		
@@ -105,7 +105,7 @@ class BackupSession
 			$stmt->bind_param('is', $user_id, $this->_sessionHash );
 			
 			if ( $stmt->execute() ) {
-				$this->_log->addMessage("Updated session user ID (" . $user_id . ")", "Authentication");
+				$this->_log->addMessage("Updated session user Id (" . $user_id . ")", "Authentication");
 			}
 			
 			$stmt->close();
@@ -130,16 +130,16 @@ class BackupSession
 		session_destroy();
 	}
 	
-	public function getUserID() {
-		return $this->_userID;
+	public function getUserId() {
+		return $this->_userId;
 	}
 	
 	private function _updateLastLogin() {
 		
-		if ( !$this->_userID )
+		if ( !$this->_userId )
 			return;
 		
-		mysqli_query($this->_dbconn, "UPDATE backup_user SET last_login = NOW() WHERE user_id = '" . $this->_userID . "'");
+		mysqli_query($this->_dbconn, "UPDATE backup_user SET last_login = NOW() WHERE user_id = '" . $this->_userId . "'");
 		
 	}
 	
@@ -147,16 +147,16 @@ class BackupSession
 		return bin2hex(random_bytes(32));
 	}
 	
-	public function getSessionID() {
+	public function getSessionId() {
 		
-		$sessionID = '';
+		$sessionId = '';
 		
 		$query = "SELECT session_id FROM backup_user_session WHERE session_hash = '" . $this->_sessionHash . "'";
 		if ( $result = mysqli_query($this->_dbconn, $query) ) {
-			$sessionID = $result[0];
+			$sessionId = $result[0];
 		}
 		
-		return $sessionID;		
+		return $sessionId;		
 		
 	}
 	
@@ -182,7 +182,7 @@ class BackupSession
 				}
 				else {
 					$isValid=true;
-					/* If session hash is valid, not expired, and user ID is > 0, user is logged in */
+					/* If session hash is valid, not expired, and user Id is > 0, user is logged in */
 					if ( $row[2] > 0 )
 						$this->_loginSuccess=true; //User is logged in
 				}
@@ -208,7 +208,7 @@ class BackupSession
 				
 				$this->_sessionExpired=true;
 				$this->_sessionHash = '';
-				$this->_sessionID = '';
+				$this->_sessionId = '';
 				
 				$this->_log->addMessage("User session has been expired (" . $this->_sessionHash . ")", "Authentication");
 				
@@ -228,14 +228,14 @@ class BackupSession
 		
 		session_start();
 		
-		//Check if the user has an existing sessionID
+		//Check if the user has an existing sessionId
 		if ( !empty($_COOKIE['session_key'] ) ) {
 			
 			$this->_sessionHash = $this->_hashSessionKey($_COOKIE['session_key']);
 			
 			if ( !empty($_COOKIE['user_id'] ) ) {
-				$this->_userID = $_COOKIE['user_id'];
-				$this->_log->setUserID( $this->_userID );
+				$this->_userId = $_COOKIE['user_id'];
+				$this->_log->setUserId( $this->_userId );
 			}
 			
 			//Validate session
@@ -255,8 +255,8 @@ class BackupSession
 		}
 		
 		//Create new session
-		if ( !$this->_userID )
-			$this->_userID = -1; //User is not logged in
+		if ( !$this->_userId )
+			$this->_userId = -1; //User is not logged in
 		
 		$sessionKey = $this->_createSessionKey();
 		$this->_sessionHash = $this->_hashSessionKey($sessionKey);
@@ -268,18 +268,18 @@ class BackupSession
 			
 			$stmt->bind_param(
 				"iss",
-				$this->_userID,
+				$this->_userId,
 				$this->_sessionHash,
 				$ip
 			);
 			
 			if ( $stmt->execute() ) {
 				
-				$this->_sessionID = mysqli_insert_id($this->_dbconn);
+				$this->_sessionId = mysqli_insert_id($this->_dbconn);
 				$this->_sessionHash = $this->_hashSessionKey($sessionKey);
 				
 				setcookie("session_key", $sessionKey);
-				setcookie("user_id", $this->_userID );
+				setcookie("user_id", $this->_userId );
 				
 			}
 			

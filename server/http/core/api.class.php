@@ -27,7 +27,7 @@ abstract class API
     /**
      * Property: args
      * Any additional URI components after the endpoint and verb have been removed, in our
-     * case, an integer ID for the resource. eg: /<endpoint>/<verb>/<arg0>/<arg1>
+     * case, an integer Id for the resource. eg: /<endpoint>/<verb>/<arg0>/<arg1>
      * or /<endpoint>/<arg0>
      */
     protected $args = Array();
@@ -80,22 +80,13 @@ abstract class API
 		//Get Headers
 		$this->_parseHeaders();
 		
-		//Handle HTTP PUT
-		if ( $this->method == 'PUT') {
-			
-			//Handle multipart/form-data PUT request
-			if ( strpos($headers['Content-Type'],'multipart/form-data') >= 0 ) {
-				$this->_parseMultipartPut();
-			}
-		}
-		
 		//Build objects
 		$this->_db = BackupDatabase::getDatabase();
 		//
 		$this->_session = BackupAPISession::getSession();
 		$this->_session->logSession($this->endpoint, $this->method);
 		//
-		$this->_log = BackupLog::getLog( $this->_session->getUserID() );
+		$this->_log = BackupLog::getLog( $this->_session->getUserId() );
 
         switch($this->method) {
 			case 'DELETE':
@@ -109,19 +100,26 @@ abstract class API
 			case 'PUT':
 				$this->request = $this->_cleanInputs($_GET);
 				$this->rawData = file_get_contents("php://input");
+				
+				//Handle multipart/form-data PUT request
+				if ( strpos($headers['Content-Type'],'multipart/form-data') >= 0 ) {
+					$this->_parseMultipartPut();
+				}
+				
 				break;
 			default:
 				$this->_response('Invalid Method', 405);
 				break;
         }
+		
     }
 	
-	 public function processAPI() {
+ 	public function processAPI() {
         if (method_exists($this, $this->endpoint)) {
             return $this->{$this->endpoint}($this->args);
         }
         return $this->_response("No Endpoint: $this->endpoint", 404);
-    }
+	}
 
     private function _response($data, $status=200) {
         header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
@@ -171,31 +169,45 @@ abstract class API
 		$this->headers = apache_request_headers();		
 	}
 	
-	private function _parseMultipartPut() {
+	function parseMultipartPut() {
+		
+		global $_PUT;
 		
 		//Split the data into two parts
-		$parts = explode("\r\n\r\n", $this->rawData;
+		$parts = explode("\r\n\r\n", $this->rawData, 2);
 		
 		//Make sure we have two parts
 		if ( count($parts) <= 1 )
 			return;
 		
 		//Find the boundary
-		$pattern = '/(Content-Type: multipart/form-data; boundary=)(.+)$/';
+		$pattern = '/(Content-Type: multipart\/form-data; boundary=)(.+)/'; //\/form-data; boundary=)(.+)$
 		preg_match($pattern, $parts[0], $matches );
 		
+		//$matches[2] should contain the boundary
 		if ( !isset($matches[2]) )
 			return;
 		
-		$boundary = trim($matches[2]);
+		$boundary = "--" . trim($matches[2]);
 		
-		$multiparts = explode($boundary, $parts[1] );
+		$multiparts = array_filter(explode( $boundary, trim($parts[1]) ));
 		
 		//Iterate through parts and create global keys for disposition names
 		foreach( $multiparts as $key => $value ) {
 			
+			$arr = explode( "\r\n\r\n", $value );
 			
+			if ( count($arr) <= 1 )
+				continue;
 			
+			//Parse the PUT variable name
+			$pattern = '/(name=")(.+)(")/';
+			preg_match($pattern, $value, $matches );
+			
+			if ( !isset($matches[2]) )
+				continue;
+			
+			$GLOBALS['PUT'][$matches[2]] = trim($arr[1]);
 			
 		}
 
@@ -273,7 +285,7 @@ abstract class API
 		
 		$settings = array();
 		
-		if ( $result = mysqli_query($this->_db->getConnection(), "SELECT a.setting_id,a.name,a.value,a.data_type,b.setting_id,b.value AS override_value FROM backup_client_setting AS a LEFT JOIN backup_user_setting AS b ON a.setting_id = b.setting_id AND b.user_id = " . $this->_session->getUserID() ) ) {
+		if ( $result = mysqli_query($this->_db->getConnection(), "SELECT a.setting_id,a.name,a.value,a.data_type,b.setting_id,b.value AS override_value FROM backup_client_setting AS a LEFT JOIN backup_user_setting AS b ON a.setting_id = b.setting_id AND b.user_id = " . $this->_session->getUserId() ) ) {
 			
 			while ( $row = mysqli_fetch_array($result) ) {
 				
@@ -309,14 +321,14 @@ abstract class API
 		if ( $this->method == "GET" ) {
 			
 			if ( empty($this->args[0]) ) {
-				echo $this->_error("File ID is missing or does not exist", 400 );
+				echo $this->_error("File Id is missing or does not exist", 400 );
 				return;		
 			}
 			
 			$file = new BackupFile($this->args[0]);
 			
 			if ( !$file->exists() ) {
-				echo $this->_error("File ID does not exist", 400 );
+				echo $this->_error("File Id does not exist", 400 );
 				return;
 			}
 			
@@ -327,6 +339,11 @@ abstract class API
 		}
 		
 		if ( $this->method == "POST" ) {
+			
+			if ( !isset($_GET['action']) ) {
+				echo $this->_error("Invalid request", 400 );
+				return;		
+			}
 			
 			if ( empty($_POST['metadata']) ) {
 				echo $this->_error("JSON metadata is missing", 400 );
@@ -352,7 +369,7 @@ abstract class API
 			}
 			
 			if ( $upload->upload() ) {
-				echo $this->_response( array( 'file' => array('upload_id' => $upload->getUploadID() ) ) );
+				echo $this->_response( array( 'file' => array('upload_id' => $upload->getUploadId() ) ) );
 				return;
 			}
 			else {
@@ -387,7 +404,7 @@ abstract class API
 				return;
 			}
 			
-			echo $this->_response( array( "upload_id" => $uploadPart->getUploadID(), "file_id" => $uploadPart->getFileID() ) );
+			echo $this->_response( array( "upload_id" => $uploadPart->getUploadId(), "file_id" => $uploadPart->getFileId() ) );
 			
 			return;
 			
@@ -465,8 +482,8 @@ abstract class API
 		$ip = $_SERVER['REMOTE_ADDR'];
 		
 		//Create or Update Client Machine
-		$machineID = -1;
-		$query = "INSERT INTO backup_machine (name,os,dns_name,ip_address,domain,client_version,last_check_in) VALUES(?,?,?,?,?,?,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE machine_id=LAST_INSERT_ID(machine_id),ip_address=?,domain=?,client_version=?";
+		$machineId = -1;
+		$query = "INSERT INTO backup_machine (name,os,dns_name,ip_address,domain,client_version,last_check_in) VALUES(?,?,?,?,?,?,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE machine_id=LAST_INSERT_Id(machine_id),ip_address=?,domain=?,client_version=?";
 		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
 			
 			$stmt->bind_param(
@@ -485,7 +502,7 @@ abstract class API
 			
 			if ( $stmt->execute() ) {
 				
-				$machineID = mysqli_insert_id($this->_db->getConnection());
+				$machineId = mysqli_insert_id($this->_db->getConnection());
 				
 			}
 			
@@ -493,18 +510,18 @@ abstract class API
 			
 		}
 		
-		$userID = $this->_session->getUserID();
+		$userId = $this->_session->getUserId();
 		
 		//Add or update user => machine association
 		$query = "INSERT INTO backup_user_machine (machine_id,user_id,last_check_in) VALUES (?,?,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE last_check_in=FROM_UNIXTIME(?)";
 		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
 			
-			$stmt->bind_param('iiii', $machineID, $userID, $ts, $ts);
+			$stmt->bind_param('iiii', $machineId, $userId, $ts, $ts);
 			$stmt->execute();		
 			$stmt->close();
 		}
 		
-		echo $this->_response( array("machine_id" => $machineID, "last_check_in" => $ts ) );
+		echo $this->_response( array("machine_id" => $machineId, "last_check_in" => $ts ) );
 		
 	}
 	
