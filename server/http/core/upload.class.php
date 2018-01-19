@@ -336,20 +336,92 @@ class BackupUpload
 		
 	}
 	
-	private function getPartTotal($uploadId) {
+	private function _getPartCount($uploadId) {
 		
-		$query = "SELECT 
+		$total=0;
+		
+		$query = "SELECT COUNT(*) FROM backup_upload_part WHERE upload_id=" . $uploadId;
+		if ( $result = mysqli_query($this->_db->getConnection(),$query) ) {
+			
+			$total = $result[0];
+		
+			$result->close();
+			
+		}
+		else {
+			$this->_setError("Failed to retrieve upload parts (" . mysqli_error($this->_db->getConnection()) . ")");
+			return false;	
+		}
+		
+		return $total;
 		
 	}
 	
+	/**
+	 ** Complete the file upload
+	 ** Set the uploaded flag to "1"
+	 ** Merge upload parts together if all have been completed and more than one
+	*/
 	public function completeUpload($uploadId) {
-		
-		
-		
-		if ( !isset($this->_uploadRow) ) {
-			$this->
-		}
 
+		if ( !isset($this->_uploadRow) ) {
+			$this->getUpload($uploadId);
+		}
+		
+		/** File is more than one part
+		 ** Check if all parts have been uploaded, if so, merge into one file and save into destination directory
+		**/
+		
+		$uploaded=false;
+		
+		$query = "SELECT * FROM backup_file_part WHERE upload_id=?";
+		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+			
+			$stmt->bind_param('i', $uploadId );
+			
+			if ( $stmt->execute() ) {
+				
+				$result = $stmt->get_result();
+				
+				$totalParts = mysqli_num_rows($result);
+				
+				//If only one part, then the file is in place and we are good
+				if ( $totalParts == 1 ) {				
+					if ( $this->_setFileUploaded( $this->_uploadRow['file_id'] ) )
+						$uploaded=true;
+				}
+				else {
+					
+					while ( $row = $result->fetch_assoc() ) {
+						
+						
+						
+					}
+					
+				}
+				
+			}
+			
+			$stmt->close();
+			
+		}
+		
+
+	}
+	
+	/**
+	 ** Sets the backup_file "uploaded" column to 1
+	**/
+	private function _setFileUploaded($fileId) {
+		
+		$query = "UPDATE backup_file SET uploaded=1 WHERE file_id=" . $fileId;
+		if ( !mysqli_query($this->_db->getConnection(), $query) {
+			$this->_setError("Failed to set file to uploaded=1 (" . mysqli_error($this->_db->getConnection()) . ")");
+			return false;	
+		}
+			
+		return true;
+		
 	}
 	
 	private function _writeLocalFile($path) {
