@@ -6,6 +6,7 @@ class BackupFile
 {
 	
 	private $_db;
+	private $_dbconn;
 	private $_fileId = -1;
 	private $_uniqueId;
 	private $_fileRow = array();
@@ -15,9 +16,10 @@ class BackupFile
 	public function __construct($fileId=-1) {
 		
 		$this->_db = BackupDatabase::getDatabase();
+		$this->_dbconn = $this->_db->getConnection();
 		
 		if ( $fileId >= 0 ) {
-			$this->_getFileById($this->_fileId);
+			$this->_getFileById($fileId);
 		}
 		
 	}
@@ -39,14 +41,14 @@ class BackupFile
 			
 	}
 	
-	private function _getFileById($id) {
+	private function _getFileById($fileId) {
 		
 		$query = "SELECT * FROM backup_file WHERE file_id=" . $fileId;
 		
 		if ( $this->_userId > 0 )
 			$query .= " AND user_id=" . $this->_userId;
 		
-		if ( $result = mysqli_query($this->_db->getConnection(), ) ) {
+		if ( $result = mysqli_query($this->_dbconn,$query ) ) {
 			
 			if ( $this->_fileRow = mysqli_fetch_assoc($result) ) {
 				
@@ -68,7 +70,7 @@ class BackupFile
 		if ( $this->_userId > 0 )
 			$query .= " AND user_id=" . $this->_userId;
 		
-		if ( $result = mysqli_query($this->_db->getConnection(), $query) ) {
+		if ( $result = mysqli_query($this->_dbconn, $query) ) {
 			
 			if ( $this->_fileRow = mysqli_fetch_assoc($result) ) {
 				

@@ -4,7 +4,6 @@ require_once 'api_session.class.php';
 require_once 'file.class.php';
 require_once 'user.class.php';
 require_once 'upload.class.php';
-require_once 'upload_part.class.php';
 
 abstract class API
 {
@@ -340,41 +339,63 @@ abstract class API
 		
 		if ( $this->method == "POST" ) {
 			
-			if ( !isset($_GET['action']) ) {
-				echo $this->_error("Invalid request", 400 );
+			$uploadAction = isset($_GET['action']) ? $_GET['action'] : "";
+			
+			if ( !isset($_POST['metadata']) ) {
+				echo $this->_error("File metadata is missing", 400 );
+				return;		
+			}
+		
+			if ( !isset($_POST['fileContent']) ) {
+				echo $this->_error("File content is missing", 400 );
 				return;		
 			}
 			
-			if ( empty($_POST['metadata']) ) {
-				echo $this->_error("JSON metadata is missing", 400 );
-				return;		
-			}
-			
-			if ( empty($_POST['fileData']) ) {
-				echo $this->_error("File contents are missing", 400 );
-				return;		
-			}
-			
-			$metadata = json_decode($_POST['metadata']);
-			
-			if ( json_last_error() != JSON_ERROR_NONE ) {
-				echo $this->_error("JSON payload is invalid", 400 );
-				return;		
-			}
-			
-			$upload = new BackupUpload($metadata, $_POST['fileData'] );
-			if ( !$upload->isValid() ) {
-				echo $this->_error( $upload->getError(), 400 );
+			/**
+			 ** Upload a single file, or a part of a file
+			**/
+			if ( empty($uploadAction) || $uploadAction == "upload" ) {
+				
+				$metadata = json_decode( $_POST['metadata'] );
+				
+				if ( json_last_error() != JSON_ERROR_NONE ) {
+					echo $this->_error("JSON payload is invalid", 400 );
+					return;		
+				}
+				
+				$upload = new BackupUpload($metadata);
+				
+				if ( !$upload->uploadPart($_POST['fileContent']) ) {
+					echo $this->_error("Failed to upload file content: " . $upload->getError(), 400 );
+					return;		
+				}
+				
+				echo $this->_response( array("upload_id" => $upload->getUploadId(), "message" => "File was uploaded successfully") );
 				return;
+				
 			}
 			
-			if ( $upload->upload() ) {
-				echo $this->_response( array( 'file' => array('upload_id' => $upload->getUploadId() ) ) );
+			/**
+			 ** Initialize new file upload
+			**/
+			if ( $uploadAction == "init") {
+				
+				$metadata = json_decode( $this->rawData );
+				
+				if ( json_last_error() != JSON_ERROR_NONE ) {
+					echo $this->_error("JSON payload is invalid", 400 );
+					return;		
+				}
+				
+				$upload = new BackupUpload($metadata);
+				if ( !$uploadId = $upload->initUpload() ) {
+					echo $this->_error("Failed to initialize upload: " . $upload->getError(), 400 );
+					return;
+				}
+				
+				echo $this->_response( array("upload_id" => $uploadId) );
 				return;
-			}
-			else {
-				echo $this->_error( "There was a problem receiving the file: " . $upload->getError() );
-				return;
+				
 			}
 			
 		}

@@ -11,6 +11,7 @@ class BackupUpload
 	 ** Private members
 	**/
 	private $_db;
+	private $_dbconn;
 	private $_errorMsg;
 	private $_uploadId = -1;
 	private $_fileId = -1;
@@ -24,6 +25,7 @@ class BackupUpload
 	public function __construct($metadata) {
 		
 		$this->_db = BackupDatabase::getDatabase();
+		$this->_dbconn = $this->_db->getConnection();
 		$this->_session = BackupAPISession::getSession();
 		$this->_userId = $this->_session->getUserId();
 		$this->_metadata = $metadata;
@@ -57,7 +59,7 @@ class BackupUpload
 	private function _getUpload($uploadId) {
 		
 		$query = "SELECT * FROM backup_upload WHERE upload_id=?";
-		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
 			$stmt->bind_param('i', $uploadId);
 			if ( $stmt->execute() ) {
@@ -71,7 +73,7 @@ class BackupUpload
 				
 			}
 			else {
-				$this->_setError("There was an error inserting the file. (" . mysqli_error($this->_db->getConnection()) . ")");
+				$this->_setError("There was an error inserting the file. (" . mysqli_error($this->_dbconn) . ")");
 				return false;
 			}
 			
@@ -84,7 +86,7 @@ class BackupUpload
 	}
 	
 	public function getUpload() {
-		return $this->_uploadRow;	
+		return $this->_getUpload();
 	}
 	
 	public function setUploadId($uploadId) {
@@ -92,7 +94,7 @@ class BackupUpload
 	}
 	
 	/* Initialize a new file upload and return the upload Id to the client */
-	public function init_upload() {
+	public function initUpload() {
 		
 		$requiredFields = array(
 			'file_name',
@@ -143,7 +145,7 @@ class BackupUpload
 		
 		//Insert a new file
 		$query = "INSERT INTO backup_file (unique_id,file_name,file_size,user_id,file_type,hash,file_path,last_modified,last_backup) VALUES(?,?,?,?,?,?,?,FROM_UNIXTIME(?),NOW()) ON DUPLICATE KEY UPDATE file_id=LAST_INSERT_ID(file_id),file_size=?,last_modified=FROM_UNIXTIME(?),last_backup=NOW()";
-		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query ) ) {
+		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 
 			$stmt->bind_param(
 				'ssiisssiii',
@@ -160,10 +162,10 @@ class BackupUpload
 			);
 			
 			if ( $stmt->execute() ) {
-				$this->_fileId = mysqli_insert_id( $this->_db->getConnection() );
+				$this->_fileId = mysqli_insert_id( $this->_dbconn );
 			}
 			else {
-				$this->_setError("There was an error inserting the file. (" . mysqli_error($this->_db->getConnection()) . ")");
+				$this->_setError("There was an error inserting the file. (" . mysqli_error($this->_dbconn) . ")");
 				return false;
 			}
 			
@@ -172,18 +174,18 @@ class BackupUpload
 		}
 		
 		if ( $this->_fileId < 0 ) {
-			$this->_setError("There was an error inserting the file. (" . mysqli_error($this->_db->getConnection()) . ")");
+			$this->_setError("There was an error inserting the file. (" . mysqli_error($this->_dbconn) . ")");
 			return false;
 		}
 		
 		//Create new upload and associate it with the file
 		$query = "INSERT INTO backup_upload (file_id,user_id,parts,bytes,hash) VALUES(?,?,?,?,?)";
-		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query ) ) {
+		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 		
 			$stmt->bind_param('iiiis', $this->_fileId, $this->_userId, $this->_metadata->{'parts'}, $this->_metadata->{'file_size'}, $this->_metadata->{'hash'} );
 			
 			if ( $stmt->execute() ) {
-				$this->_uploadId = mysqli_insert_id( $this->_db->getConnection() );
+				$this->_uploadId = mysqli_insert_id( $this->_dbconn );
 			}
 			
 			$stmt->close();
@@ -191,7 +193,7 @@ class BackupUpload
 		}
 		
 		if ( $this->_uploadId < 0 ) {
-			$this->_setError("There was an error creating the file upload (" . mysqli_error($this->_db->getConnection()) . ")");
+			$this->_setError("There was an error creating the file upload (" . mysqli_error($this->_dbconn) . ")");
 			return false;
 		}
 		
@@ -202,7 +204,7 @@ class BackupUpload
 	/**
 	* Upload file contents
 	*/
-	public function upload_part($contents) {
+	public function uploadPart($contents) {
 		
 		if ( empty($contents) ) {
 			$this->_setError("File contents are empty");
@@ -230,9 +232,9 @@ class BackupUpload
 		
 		//Verify Upload Exists
 		$this->setUploadId($this->_metadata->{'upload_id'});
-		$fileUpload = $this->getUpload();
+		$fileUpload = $this->_getUpload( $this->_uploadId );
 		if ( !$fileUpload ) {
-			$this->_setError("File upload with id " . $this->_metadata->{'upload_id'} . " does not exist");
+			$this->_setError("File upload with upload id " . $this->_metadata->{'upload_id'} . " does not exist");
 			return false;
 		}
 		
@@ -305,19 +307,19 @@ class BackupUpload
 		//Add a new part to the database if the write operation was successful
 		$partId = -1;
 		$query = "REPLACE INTO backup_upload_part (upload_id,part_number,bytes,tmp_file_name,hash) VALUES(?,?,?,?,?)";
-		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
 			$stmt->bind_param(
 				'iiiss',
 				$this->_uploadId,
 				$this->_metadata->{'part_number'},
 				$contentSize,
-				$tmpFileName,
+				$fileName,
 				$contentHash
 			);
 			
 			if ( $stmt->execute() ) {
-				$partId = mysqli_insert_id($this->_db->getConnection());
+				$partId = mysqli_insert_id($this->_dbconn);
 			}
 				
 			$stmt->close();
@@ -325,7 +327,7 @@ class BackupUpload
 		}
 		
 		if ( $partId < 0 ) {
-			$this->_setError("Failed to add upload part to the database (" . mysqli_error($this->_db->getConnection()) . ")");
+			$this->_setError("Failed to add upload part to the database (" . mysqli_error($this->_dbconn) . ")");
 			return false;
 		}
 
@@ -341,7 +343,7 @@ class BackupUpload
 		$total=0;
 		
 		$query = "SELECT COUNT(*) FROM backup_upload_part WHERE upload_id=" . $uploadId;
-		if ( $result = mysqli_query($this->_db->getConnection(),$query) ) {
+		if ( $result = mysqli_query($this->_dbconn,$query) ) {
 			
 			$total = $result[0];
 		
@@ -349,7 +351,7 @@ class BackupUpload
 			
 		}
 		else {
-			$this->_setError("Failed to retrieve upload parts (" . mysqli_error($this->_db->getConnection()) . ")");
+			$this->_setError("Failed to retrieve upload parts (" . mysqli_error($this->_dbconn) . ")");
 			return false;	
 		}
 		
@@ -365,7 +367,7 @@ class BackupUpload
 	public function completeUpload($uploadId) {
 
 		if ( !isset($this->_uploadRow) ) {
-			$this->getUpload($uploadId);
+			$this->_getUpload($uploadId);
 		}
 		
 		/** File is more than one part
@@ -374,8 +376,8 @@ class BackupUpload
 		
 		$uploaded=false;
 		
-		$query = "SELECT * FROM backup_file_part WHERE upload_id=?";
-		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+		$query = "SELECT * FROM backup_file_part AS a LEFT JOIN backup_file AS b ON a.file_id=b.file_id WHERE a.upload_id=? ORDER BY part_number ASC";
+		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
 			$stmt->bind_param('i', $uploadId );
 			
@@ -392,7 +394,12 @@ class BackupUpload
 				}
 				else {
 					
+					$writeFile = fopen($)
+					
+					//Get all tmp file parts and merge into one file
 					while ( $row = $result->fetch_assoc() ) {
+						
+						$fh = fopen()
 						
 						
 						
@@ -415,8 +422,8 @@ class BackupUpload
 	private function _setFileUploaded($fileId) {
 		
 		$query = "UPDATE backup_file SET uploaded=1 WHERE file_id=" . $fileId;
-		if ( !mysqli_query($this->_db->getConnection(), $query) {
-			$this->_setError("Failed to set file to uploaded=1 (" . mysqli_error($this->_db->getConnection()) . ")");
+		if ( !mysqli_query($this->_dbconn, $query) ) {
+			$this->_setError("Failed to set file to uploaded=1 (" . mysqli_error($this->_dbconn) . ")");
 			return false;	
 		}
 			
@@ -424,7 +431,7 @@ class BackupUpload
 		
 	}
 	
-	private function _writeLocalFile($path) {
+	private function _writeLocalFile($filePath) {
 		
 		$file = new BackupFile($this->_fileId);
 		
@@ -433,8 +440,7 @@ class BackupUpload
 			return false;
 		}
 		
-		$base_dir = $path . "/users/" . $this->_userId . "/" . $file->getData['file_path'];
-		$target_path = $base_dir . "/" . $file->getData['file_name'];
+		$base_dir = dirname($filePath);
 		
 		//Check if directory exists, if not then create it
 		if ( !is_dir($base_dir) ) {
@@ -456,7 +462,7 @@ class BackupUpload
 		//Save file
 		if ( is_writable($base_dir) ) {
 			
-			if ( $fh = fopen($target_path, 'w') ) {
+			if ( $fh = fopen($filePath, 'w') ) {
 				
 				if ( !fwrite($fh, $this->_contentBytes) ) {
 					$this->_setError("Could not write to file " . $target_path);
@@ -488,7 +494,7 @@ class BackupUpload
 
 		//Check if there are any individual user targets configured
 		$query = "SELECT a.* FROM backup_target AS a INNER JOIN backup_user_target AS b ON a.target_id=b.target_id WHERE b.user_id=" . $this->_userId;
-		if ( $result = mysqli_query($this->_db->getConnection(), $query) ) {
+		if ( $result = mysqli_query($this->_dbconn, $query) ) {
 
 			if ( $backupTarget = mysqli_fetch_array($result) ) {
 				$hasUserTarget=true;
@@ -504,7 +510,7 @@ class BackupUpload
 
 		//Find the default Global target
 		$query = "SELECT a.* FROM backup_target AS a INNER JOIN backup_setting AS b ON CAST(a.target_id AS CHAR(1)) = b.value WHERE b.name = 'default_target'";
-		if ( $result = mysqli_query($this->_db->getConnection(), $query) ) {
+		if ( $result = mysqli_query($this->_dbconn, $query) ) {
 
 			if ( $backupTarget = mysqli_fetch_array($result) ) {
 				$hasUserTarget=false;
