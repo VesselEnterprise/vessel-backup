@@ -41,12 +41,7 @@
 				
 			}
 			
-			//Verify minimum file size
-			$minimumFilesize = (int)$this->_db->getClientSetting('multipart_filesize');
-			if ( $metadata->{'file_size'} < $minimumFilesize ) {
-				$this->_setError("File does not meet the minimum filesize for a multi-part upload: " . $minimumFilesize);
-				return false;
-			}
+			
 			
 			//Insert a new backup_file
 			

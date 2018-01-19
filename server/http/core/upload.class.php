@@ -116,6 +116,15 @@ class BackupUpload
 			}
 			
 		}
+
+		//Verify minimum file size for multi part upload
+		if ( $this->_metadata->{'parts'} > 1 ) {
+			$minimumFilesize = (int)$this->_db->getClientSetting('multipart_filesize');
+			if ( $metadata->{'file_size'} < $minimumFilesize ) {
+				$this->_setError("File does not meet the minimum filesize for a multi-part upload: " . $minimumFilesize);
+				return false;
+			}
+		}
 		
 		//The database unique ID is the SHA-1 hash of the file path
 		$uniqueId = sha1( $this->_metadata->{'file_path'} . "/" . $this->_metadata->{'file_name'} );
@@ -286,7 +295,7 @@ class BackupUpload
 			$filePath .= "/" . $fileName;
 			
 		
-			if ( !$this->_writeLocalFile($target['path']) ) {
+			if ( !$this->_writeLocalFile($filePath) ) {
 				$this->_setError("Failed to write file to local storage. Please check the path and folder permissions (" . $this->getError() . ")");
 				return false;
 			}
@@ -320,15 +329,22 @@ class BackupUpload
 			return false;
 		}
 
-		//If total parts = 1, automatically complete the upload
-		if ( $fileUpload['parts'] == 1 )
-			$this->completeUpload($this->_uploadId);
+		//Check if all parts have been uploaded
+		$this->completeUpload($this->_uploadId);
 		
 		return $partId;
 		
 	}
 	
+	private function getPartTotal($uploadId) {
+		
+		$query = "SELECT 
+		
+	}
+	
 	public function completeUpload($uploadId) {
+		
+		
 		
 		if ( !isset($this->_uploadRow) ) {
 			$this->
