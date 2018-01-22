@@ -16,11 +16,13 @@ class BackupUpload
 	private $_uploadId = -1;
 	private $_fileId = -1;
 	private $_userId = -1;
-	private $_uploadRow;
+	private $_uploadRow;         //Associated array of backup_upload row
+	private $_file;              //BackupFile object
 	private $_backupTarget;
 	private $_isValid = false;
 	private $_metadata;
 	private $_contentBytes;
+	private $_uploadComplete=false;
 
 	public function __construct($metadata) {
 		
@@ -30,6 +32,17 @@ class BackupUpload
 		$this->_userId = $this->_session->getUserId();
 		$this->_metadata = $metadata;
 		
+		//If upload id exists in the metadata, preload the upload row
+		if ( isset($metadata->{'upload_id'}) )
+			$this->_getUpload( $metadata->{'upload_id'} );
+		
+		//If upload row was found, pre-load the file data
+		if ( $this->_uploadId > -1 )
+			$this->_file = new BackupFile( $this->_uploadRow['file_id'] );
+		
+		//Preload storage target
+		$this->_backupTarget = $this->_getTarget();
+
 	}
 	
 	private function _setError($msg) {
@@ -58,14 +71,19 @@ class BackupUpload
 	**/
 	private function _getUpload($uploadId) {
 		
+		if ( $uploadId == $this->_uploadId )
+			return;
+		
 		$query = "SELECT * FROM backup_upload WHERE upload_id=?";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
 			$stmt->bind_param('i', $uploadId);
 			if ( $stmt->execute() ) {
 				
-				$result = $stmt->get_result();
-				$this->_uploadRow = $result->fetch_assoc();
+				if ( $result = $stmt->get_result() )
+					$this->_uploadRow = $result->fetch_assoc();
+				else
+					$this->_setError("The upload record could not be found. (" . mysqli_error($this->_dbconn) . ")");
 				
 				//Set internal member vars
 				$this->_uploadId = $this->_uploadRow['upload_id'];
@@ -73,20 +91,17 @@ class BackupUpload
 				
 			}
 			else {
-				$this->_setError("There was an error inserting the file. (" . mysqli_error($this->_dbconn) . ")");
-				return false;
+				$this->_setError("There was an error querying for the upload. (" . mysqli_error($this->_dbconn) . ")");
 			}
 			
 			$stmt->close();
 			
 		}
 		
-		return $this->_uploadRow;
-		
 	}
 	
 	public function getUpload() {
-		return $this->_getUpload();
+		return $this->_uploadRow;
 	}
 	
 	public function setUploadId($uploadId) {
@@ -122,9 +137,9 @@ class BackupUpload
 		//Verify minimum file size for multi part upload
 		if ( $this->_metadata->{'parts'} > 1 ) {
 			$minimumFilesize = (int)$this->_db->getClientSetting('multipart_filesize');
-			if ( $metadata->{'file_size'} < $minimumFilesize ) {
-				$this->_setError("File does not meet the minimum filesize for a multi-part upload: " . $minimumFilesize);
-				return false;
+			if ( $this->_metadata->{'file_size'} < $minimumFilesize ) {
+				//$this->_setError("File does not meet the minimum filesize for a multi-part upload: " . $minimumFilesize);
+				//return false;
 			}
 		}
 		
@@ -231,9 +246,7 @@ class BackupUpload
 		}
 		
 		//Verify Upload Exists
-		$this->setUploadId($this->_metadata->{'upload_id'});
-		$fileUpload = $this->_getUpload( $this->_uploadId );
-		if ( !$fileUpload ) {
+		if ( !$this->_uploadRow ) {
 			$this->_setError("File upload with upload id " . $this->_metadata->{'upload_id'} . " does not exist");
 			return false;
 		}
@@ -257,45 +270,40 @@ class BackupUpload
 		$this->_contentBytes = $contents;
 		
 		//Get the associated backup file
-		$file = new BackupFile($this->_fileId);
-		if ( !$file->exists() ) {
+		if ( !$this->_file->exists() ) {
 			$this->_setError("File with id " . $this->_fileId . " does not exist");
 			return;
 		}
 		
 		//Check for valid part number
-		if ( $this->_metadata->{'part_number'} > $fileUpload['parts'] ) {
+		if ( $this->_metadata->{'part_number'} > $this->_uploadRow['parts'] ) {
 			$this->_setError("Invalid part number was specified.");
 			return false;
 		}
 		
-		//Verify Backup Target
-		$target = $this->_getTarget();
-		
-		if ( !$target ) {
+		if ( !$this->_backupTarget ) {
 			$this->_setError("Could not find storage target");
 			return false;
 		}
 		
 		//Write file content to storage
 		//Storage Target Handlers here
-		if ( $fileUpload['parts'] <= 1 )
-			$fileName = $file->getValue('file_name');
+		if ( $this->_uploadRow['parts'] <= 1 )
+			$fileName = $this->_file->getValue('file_name');
 		else
-			$fileName = $file->getValue('unique_id') . "_" . $this->_metadata->{'part_number'} . ".part";
+			$fileName = $this->_file->getValue('unique_id') . "_" . $this->_metadata->{'part_number'} . ".part";
 		
-		if ( $target['type'] == "local") {
+		if ( $this->_backupTarget['type'] == "local") {
 			
 			//If there is only one part, write to the file path. If there are multiple parts, we write to the parts folder
-			$filePath = $target['path'];
+			$filePath = $this->_backupTarget['path'];
 			
-			if ( $fileUpload['parts'] <= 1 )
-				$filePath .= "/users/" . $this->_userId . $file->getValue('file_path');
+			if ( $this->_uploadRow['parts'] <= 1 )
+				$filePath .= "/users/" . $this->_userId . $this->_file->getValue('file_path');
 			else
 				$filePath .= "/parts";
 			
 			$filePath .= "/" . $fileName;
-			
 		
 			if ( !$this->_writeLocalFile($filePath) ) {
 				$this->_setError("Failed to write file to local storage. Please check the path and folder permissions (" . $this->getError() . ")");
@@ -332,7 +340,7 @@ class BackupUpload
 		}
 
 		//Check if all parts have been uploaded
-		$this->completeUpload($this->_uploadId);
+		$this->completeUpload();
 		
 		return $partId;
 		
@@ -364,44 +372,104 @@ class BackupUpload
 	 ** Set the uploaded flag to "1"
 	 ** Merge upload parts together if all have been completed and more than one
 	*/
-	public function completeUpload($uploadId) {
+	public function completeUpload($uploadId=-1) {
 
-		if ( !isset($this->_uploadRow) ) {
+		//If an upload ID is passed, load a new upload row
+		//If an id was not passed, use the constructed upload row
+		if ( $uploadId > 0 && !$this->_uploadRow ) {
 			$this->_getUpload($uploadId);
+			$this->_file = new BackupFile($this->_fileId);
 		}
 		
 		/** File is more than one part
 		 ** Check if all parts have been uploaded, if so, merge into one file and save into destination directory
 		**/
 		
-		$uploaded=false;
-		
-		$query = "SELECT * FROM backup_file_part AS a LEFT JOIN backup_file AS b ON a.file_id=b.file_id WHERE a.upload_id=? ORDER BY part_number ASC";
+		$query = "SELECT * FROM backup_upload_part WHERE upload_id=? ORDER BY part_number ASC";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
-			$stmt->bind_param('i', $uploadId );
+			$stmt->bind_param('i', $this->_uploadId );
 			
 			if ( $stmt->execute() ) {
 				
 				$result = $stmt->get_result();
 				
-				$totalParts = mysqli_num_rows($result);
+				$totalParts = $result->num_rows;
+				
+				//Ensure that all parts have been uploaded
+				if ( $totalParts < $this->_uploadRow['parts'] ) {
+					$this->_setError("Failed to complete upload. All parts have not been uploaded yet.");
+					return false;
+				}
 				
 				//If only one part, then the file is in place and we are good
-				if ( $totalParts == 1 ) {				
-					if ( $this->_setFileUploaded( $this->_uploadRow['file_id'] ) )
-						$uploaded=true;
+				if ( $totalParts == 1 && $this->_uploadRow['parts'] == 1) {
+					if ( $this->_setFileUploaded( $this->_uploadRow['file_id'] ) ) {
+						$this->_uploadComplete=true;
+						return true;
+					}
+					else {
+						$this->_setError("Failed to set backup_file to uploaded=true");
+						return false;
+					}
+
 				}
 				else {
 					
-					$writeFile = fopen($)
+					if ( $this->_backupTarget['type'] == "local") {
 					
-					//Get all tmp file parts and merge into one file
-					while ( $row = $result->fetch_assoc() ) {
+						$filePath = $this->_backupTarget['path'] . "/users/" . $this->_userId . "/" . $this->_file->getValue('file_path') . "/" . $this->_file->getValue('file_name');
 						
-						$fh = fopen()
-						
-						
+						//Prepare directory
+						if ( !$this->_mkDirIfNotExists(dirname($filePath)) ) {
+							$this->_setError("Could not create directory: " . $this->getError());
+							return false;
+						}
+
+						if ( $writeFile = fopen($filePath, 'w') ) {
+
+							//Get all tmp file parts and merge into one file
+							while ( $row = $result->fetch_assoc() ) {
+								
+								$fp = $this->_backupTarget['path'] . "/parts/" . $row['tmp_file_name'];
+
+								if ( $tmpFile = fopen($fp, 'r') ) {
+									
+									if ( $bytes = fread($tmpFile, filesize($fp)) ) {
+										
+										//Write bytes to the target file
+										if ( !fwrite($writeFile, $bytes) ) {
+											$this->_setError("Failed to write content to target file: " . $filePath);
+											return false;
+										}
+										
+									}
+									else {
+										$this->_setError("Unable to read file part: " . $fp);
+										return false;
+									}
+									
+									fclose($tmpFile);
+									
+								}
+								else {
+									$this->_setError("Unable to open file for writing: " . $fp);
+									return false;
+								}
+
+							}
+
+							fclose($writeFile);
+							
+							//Mark completed after all parts have been written
+							if ( $this->_setFileUploaded( $this->_uploadRow['file_id'] ) )
+								$this->_uploadComplete=true;
+							
+						}
+						else {
+							$this->_setError("Unable to open file for writing: " . $filePath);
+							return false;							
+						}
 						
 					}
 					
@@ -412,8 +480,39 @@ class BackupUpload
 			$stmt->close();
 			
 		}
+		else {
+			$this->_setError("There was an error retrieving the upload part(s): " . mysqli_error($this->_dbconn));
+			return false;
+		}
+		
+		return true;
 		
 
+	}
+	
+	private function _mkDirIfNotExists($path) {
+		
+		//Check if directory exists, if not then create it
+		if ( !is_dir($path) ) {
+			if ( mkdir($path, 0777, true) ) {
+				chmod($path, 0777);
+			}
+			else {
+				$this->_setError("Failed to create directory or set directory permissions: " . $path);
+				return false;
+			}
+
+		}
+
+		//Try to CHMOD the dir if not writable before failing completely
+		if ( !is_writable($path) ) {
+			if ( chmod($path, 0777) )
+				return true;
+			return false;
+		}
+		
+		return true;
+		
 	}
 	
 	/**
@@ -433,13 +532,6 @@ class BackupUpload
 	
 	private function _writeLocalFile($filePath) {
 		
-		$file = new BackupFile($this->_fileId);
-		
-		if ( !$file->exists() ) {
-			$this->_setError("File with id " . $this->_fileId . " does not exist");
-			return false;
-		}
-		
 		$base_dir = dirname($filePath);
 		
 		//Check if directory exists, if not then create it
@@ -448,7 +540,7 @@ class BackupUpload
 				chmod($base_dir, 0777);
 			}
 			else {
-				$this->_setError("Failed to create directory or set directory permissions: " . $target_path);
+				$this->_setError("Failed to create directory or set directory permissions: " . $base_dir);
 				return false;
 			}
 			
@@ -465,7 +557,7 @@ class BackupUpload
 			if ( $fh = fopen($filePath, 'w') ) {
 				
 				if ( !fwrite($fh, $this->_contentBytes) ) {
-					$this->_setError("Could not write to file " . $target_path);
+					$this->_setError("Could not write to file " . $filePath);
 					return false;
 				}
 				
@@ -473,13 +565,13 @@ class BackupUpload
 				
 			}
 			else {
-				$this->_setError("The file handle could not be obtained: " . $target_path);
+				$this->_setError("The file handle could not be obtained: " . $filePath);
 				return false;
 			}
 			
 		}
 		else {
-			$this->_setError("The file is not writable: " . $target_path);
+			$this->_setError("The file is not writable: " . $filePath);
 			return false;
 		}
 			

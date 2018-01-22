@@ -175,7 +175,7 @@ class BackupLDAP
 						$user = BackupUser::getUser($userId);
 						
 						//If user has no access token, create a new activation record
-						if ( !$user->getUserData('access_token') ) {
+						if ( !$user->getValue('access_token') ) {
 							$user->createUserActivation( $ldapActivateCode );
 						}
 						

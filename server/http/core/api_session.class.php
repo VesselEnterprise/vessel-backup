@@ -8,13 +8,16 @@ class BackupAPISession
 	private static $factory;
 	private $_db;
 	private $_userId = -1;
-	private $_isAuthenticated = false;
+	private $_errorMsg;
+	private $_tokenExpired=false;
+	private $_tokenExists=false;
+	private $_isAuthenticated=false;
 	
 	public function __construct() {
 		
 		$this->_db = BackupDatabase::getDatabase();
 		
-		//Authenticate the client
+		//Authenticate the client when the object is instantiated
 		$this->_authenticate();
 		
 	}
@@ -46,17 +49,31 @@ class BackupAPISession
 		$accessTokenHashed = sha1( $headers['Authorization'] );
 		
 		//Validate access token
-		$query = "SELECT user_id FROM backup_user WHERE access_token=?";
+		$query = "SELECT user_id,UNIX_TIMESTAMP(token_expiry) FROM backup_user WHERE access_token=?";
 		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query ) ) {
 			
 			$stmt->bind_param('s', $accessTokenHashed );
 			if ( $stmt->execute() ) {
 				
-				$result = $stmt->get_result();
-				
-				if ( $result->num_rows > 0 ) {
-					$this->_userId = $result->fetch_row()[0];
-					$this->_isAuthenticated = true;
+				if ( $result = $stmt->get_result() ) {
+					if ( $row = $result->fetch_row() ) {
+						
+						$this->_tokenExists=true;
+						
+						//Check if token is expired
+						if ( time() > $row[1] ) {
+							$this->_setError("Token is expired");
+							$this->_tokenExpired=true;
+						}
+						else {
+							$this->_userId = $row[0];
+							$this->_isAuthenticated = true;
+						}
+						
+					}
+					else {
+						$this->_setError("Token is invalid");	
+					}
 				}
 				
 			}
@@ -66,6 +83,14 @@ class BackupAPISession
 		}
 	
 		
+	}
+							
+	private function _setError($msg) {
+		$this->_errorMsg = $msg;	
+	}
+	
+	public function isTokenExpired() {
+		return $this->_tokenExpired;	
 	}
 	
 	public function logSession($endpoint, $http_method) {

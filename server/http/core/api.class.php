@@ -34,7 +34,7 @@ abstract class API
      * Property: rawData
      * Stores raw data from a POST or PUT
      */
-    protected $rawData = Null;
+    protected $rawData = NULL;
 	
 	/**
      * Property: headers
@@ -125,7 +125,7 @@ abstract class API
         return json_encode( array( 'response' => $data ), JSON_FORCE_OBJECT | JSON_PRETTY_PRINT );
     }
 	
-    private function _error($data, $status=200) {
+    private function _error($data, $status=400) {
 		
 		//Log Error
 		$this->_log->addError($data,"API", 1 );		
@@ -135,6 +135,24 @@ abstract class API
         return json_encode( array( 'error' => array('message' => $data, 'code' => $status) ), JSON_FORCE_OBJECT | JSON_PRETTY_PRINT );
 		
     }
+	
+	private function _authError($data, $status=401) {
+		
+		//Log Error
+		$this->_log->addError($data,"API", 1 );		
+		
+        header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
+		
+        return json_encode(
+					array( 'error' =>
+						array('message' => $data,
+							  'token_expired' => $this->_session->isTokenExpired(),
+							  'authenticated' => $this->_session->isAuthenticated()
+							 )
+					), JSON_FORCE_OBJECT | JSON_PRETTY_PRINT
+				);
+		
+	}
 
     private function _cleanInputs($data) {
         $clean_input = Array();
@@ -240,10 +258,10 @@ abstract class API
 		$activationCode = trim($request['activation_code']);
 		
 		$user = new BackupUser($userName);
-		$isActivated = $user->getUserData("access_token") ? true : false;
+		$isActivated = $user->getValue("activated") == 1 ? true : false;
 		
 		if ( $accessToken = $user->activateUser($activationCode) ) {
-			$isActivated=true;	
+			$isActivated=true;
 		}
 		
 		$msg = '';
@@ -278,7 +296,7 @@ abstract class API
 		}
 		
 		if ( !$this->_session->isAuthenticated() ) {
-			echo $this->_error("You are not authorized to perform this action", 401 );
+			echo $this->_authError("You are not authorized to perform this action", 401 );
 			return;
 		}
 		
@@ -313,7 +331,7 @@ abstract class API
 	private function file() {
 		
 		if ( !$this->_session->isAuthenticated() ) {
-			echo $this->_error("You are not authorized to perform this action", 401 );
+			echo $this->_authError("You are not authorized to perform this action", 401 );
 			return;			
 		}
 		
@@ -341,20 +359,20 @@ abstract class API
 			
 			$uploadAction = isset($_GET['action']) ? $_GET['action'] : "";
 			
-			if ( !isset($_POST['metadata']) ) {
-				echo $this->_error("File metadata is missing", 400 );
-				return;		
-			}
-		
-			if ( !isset($_POST['fileContent']) ) {
-				echo $this->_error("File content is missing", 400 );
-				return;		
-			}
-			
 			/**
 			 ** Upload a single file, or a part of a file
 			**/
 			if ( empty($uploadAction) || $uploadAction == "upload" ) {
+			
+				if ( !isset($_POST['metadata']) ) {
+					echo $this->_error("File metadata is missing", 400 );
+					return;		
+				}
+
+				if ( !isset($_POST['fileContent']) ) {
+					echo $this->_error("File content is missing", 400 );
+					return;		
+				}
 				
 				$metadata = json_decode( $_POST['metadata'] );
 				
@@ -405,7 +423,7 @@ abstract class API
 	private function file_part() {
 		
 		if ( !$this->_session->isAuthenticated() ) {
-			echo $this->_error("You are not authorized to perform this action", 401 );
+			echo $this->_authError("You are not authorized to perform this action", 401 );
 			return;			
 		}
 		
@@ -467,7 +485,7 @@ abstract class API
 	private function heartbeat() {
 		
 		if ( !$this->_session->isAuthenticated() ) {
-			echo $this->_error("You are not authorized to perform this action", 401 );
+			echo $this->_authError("You are not authorized to perform this action", 401 );
 			return;			
 		}
 		

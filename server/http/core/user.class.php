@@ -8,6 +8,7 @@ class BackupUser
 	private static $factory;
 	
 	private $_userId;
+	private $_db;
 	private $_dbconn;
 	private $_log;
 	private $_userRow;
@@ -17,7 +18,8 @@ class BackupUser
 		$this->_userId = $userId;
 		
 		//Get database connection
-		$this->_dbconn = BackupDatabase::getDatabase()->getConnection();
+		$this->_db = BackupDatabase::getDatabase();
+		$this->_dbconn = $this->_db->getConnection();
 		
 		//Get Log Object
 		$this->_log = BackupLog::getLog($userId);
@@ -54,7 +56,7 @@ class BackupUser
 		
 	}
 	
-	public function getUserData($col) {
+	public function getValue($col) {
 		return $this->_userRow[$col];
 	}
 	
@@ -133,8 +135,12 @@ class BackupUser
 					$accessTokenHashed = sha1( $accessToken );
 					
 					//Set the user's access key
-					if ( $s2 = mysqli_prepare($this->_dbconn, "UPDATE backup_user SET access_token=? WHERE user_id=?") ) {
-						$s2->bind_param('si', $accessTokenHashed, $this->_userId);
+					if ( $s2 = mysqli_prepare($this->_dbconn, "UPDATE backup_user SET access_token=?,token_expiry=(NOW()+INTERVAL ? HOUR) WHERE user_id=?") ) {
+						
+						//Get token lifetime
+						$tokenExpiry = (int)$this->_db->getSetting('token_expiry');
+						
+						$s2->bind_param('sii', $accessTokenHashed, $tokenExpiry, $this->_userId);
 						if ( $s2->execute() ) {
 							$this->_log->addMessage("Successfully activated user (user_id=" . $this->_userId . ")", "User Activation");
 						}
