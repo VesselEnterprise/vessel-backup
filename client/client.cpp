@@ -274,6 +274,7 @@ void BackupClient::handle_response( const boost::system::error_code& e )
 
         // Check that response is OK.
         std::istream response_stream(&m_response_buffer);
+
         std::string http_version;
         response_stream >> http_version;
         response_stream >> m_http_status;
@@ -505,7 +506,7 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
     //Close connection after response
     request_stream << "Connection: close\r\n\r\n";
 
-    request_stream << "\r\n";
+    //request_stream << "\r\n";
 
     if ( do_send_data )
         request_stream.write( &r->get_body()[0], r->get_body_length() );
@@ -514,8 +515,6 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
     m_response_ec.clear();
 
     std::string data = request_stream.str();
-
-    std::cout << "Request body: " << data << std::endl;
 
     if ( !m_use_ssl )
         boost::asio::async_write(m_socket, boost::asio::buffer( data, request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
@@ -576,28 +575,57 @@ int BackupClient::init_upload ( Backup::File::BackupFile * bf )
 
     //Reset Document
     doc.RemoveAllMembers();
+    strbuf.Clear();
     writer.Reset(strbuf);
 
-    doc.Parse( m_response_data.c_str() );
+    m_response_data = "osdfsdfljdsfj";
 
+    doc.Parse( m_response_data.c_str() );
     doc.Accept(writer);
 
-    std::cout << "Response: " << m_response_data << std::endl;
-    std::cout << strbuf.GetString() << std::endl;
+    //Default to -1
+    int upload_id = -1;
 
-    //Check if access token is present
-    const Value& response = doc["response"];
+    //std::cout << "Response: " << m_response_data << std::endl;
+    std::cout << "Response: \n" << m_response_data << std::endl;
 
-    if ( !response.HasMember("upload_id") ) {
-        return -1;
+    if ( m_http_status == 200 ) {
+
+        if ( !doc.HasMember("response") ) {
+            set_error("There was an error parsing the JSON response");
+            return -1;
+        }
+
+        //Check if access token is present
+        const Value& response = doc["response"];
+
+        if ( !response.HasMember("upload_id") ) {
+            set_error("There was an error parsing the JSON response");
+            return -1;
+        }
+
+        return response["upload_id"].GetInt();
+
     }
 
-    return response["upload_id"].GetInt();
+}
 
+void BackupClient::set_error( const std::string& msg )
+{
+    m_error_message = msg;
+}
+
+std::string BackupClient::get_error()
+{
+    return m_error_message;
 }
 
 bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_number=1 )
 {
+
+    //Validate upload id
+    if ( bf->get_upload_id() < 0 )
+        return false;
 
     using namespace rapidjson;
 
@@ -611,7 +639,7 @@ bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
     std::string file_part = bf->get_file_part(part_number);
 
     //Get Activation Code from DB
-    jmap.insert( std::pair<std::string,Value>( "upload_id", Value( bf->get_file_name().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "upload_id", Value( bf->get_upload_id() ) ) );
     jmap.insert( std::pair<std::string,Value>( "part_number", Value( part_number) ) );
     jmap.insert( std::pair<std::string,Value>( "part_size", Value( file_part.size() ) ) );
     jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash(file_part).c_str(), alloc ) ) );
@@ -666,6 +694,8 @@ bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
     //std::cout << "Example body:\n" << r.get_body() << std::endl;
 
     this->send_request(&r);
+
+    std::cout << "File part response: " << m_response_data << std::endl;
 
     return true;
 

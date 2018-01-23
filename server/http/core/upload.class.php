@@ -138,8 +138,8 @@ class BackupUpload
 		if ( $this->_metadata->{'parts'} > 1 ) {
 			$minimumFilesize = (int)$this->_db->getClientSetting('multipart_filesize');
 			if ( $this->_metadata->{'file_size'} < $minimumFilesize ) {
-				//$this->_setError("File does not meet the minimum filesize for a multi-part upload: " . $minimumFilesize);
-				//return false;
+				$this->_setError("File does not meet the minimum filesize for a multi-part upload: " . $minimumFilesize);
+				return false;
 			}
 		}
 		
@@ -152,7 +152,7 @@ class BackupUpload
 		$tmpFile->setUserId($this->_userId); //Set user scope
 		$tmpFile->getFileByUniqueId($uniqueId);
 		if ( $tmpFile->exists() ) {
-			if ( $tmpFile->getValue['hash'] == $this->_metadata->{'hash'} && ($tmpFile->getValue['uploaded'] == 1) ) {
+			if ( $tmpFile->getValue('hash') == $this->_metadata->{'hash'} && ($tmpFile->getValue('uploaded') == 1) ) {
 				$this->_setError("File has already been uploaded");
 				return false;
 			}

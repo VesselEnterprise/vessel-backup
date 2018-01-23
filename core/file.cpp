@@ -220,7 +220,7 @@ void BackupFile::set_chunk_size(size_t chunk_sz)
 
 unsigned int BackupFile::get_total_parts()
 {
-    return std::ceil( get_file_size() / m_chunk_size );
+    return std::ceil( get_file_size() / (double)m_chunk_size );
 }
 
 void BackupFile::set_upload_id(unsigned int id)

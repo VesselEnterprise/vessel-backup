@@ -1,6 +1,7 @@
 <?php
 
 require_once 'database.class.php';
+require_once 'log.class.php';
 
 class BackupFile
 {
@@ -17,6 +18,7 @@ class BackupFile
 		
 		$this->_db = BackupDatabase::getDatabase();
 		$this->_dbconn = $this->_db->getConnection();
+		$this->_log = BackupLog::getLog();
 		
 		if ( $fileId >= 0 ) {
 			$this->_getFileById($fileId);
@@ -37,6 +39,7 @@ class BackupFile
 		$this->_fileRow=null;
 		
 		$this->_getFileByUniqueId($uniqueId);
+		
 		return $this->_fileRow;
 			
 	}
@@ -65,7 +68,7 @@ class BackupFile
 	
 	private function _getFileByUniqueId($uniqueId) {
 		
-		$query = "SELECT * FROM backup_file WHERE unique_id=" . $uniqueId;
+		$query = "SELECT * FROM backup_file WHERE unique_id='" . $uniqueId . "'";
 		
 		if ( $this->_userId > 0 )
 			$query .= " AND user_id=" . $this->_userId;
@@ -79,8 +82,14 @@ class BackupFile
 				$this->_fileExists = true;
 				
 			}
+			else
+				$this->_fileExists=false;
 			
 			$result->close();
+		}
+		else {
+			$this->_log->addError("Failed to query for backup_file: " . mysqli_error($this->_dbconn), "BackupFile");
+			$this->_fileExists = false;
 		}
 		
 	}

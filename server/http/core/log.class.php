@@ -25,7 +25,7 @@ class BackupLog
 		
 	}
 	
-	public static function getLog($userId)
+	public static function getLog($userId=-1)
 	{
 		if (!self::$factory)
 			self::$factory = new BackupLog($userId);
@@ -51,7 +51,7 @@ class BackupLog
 		
 		if ( $stmt = mysqli_prepare($this->_dbconn, "INSERT INTO backup_log (message,type,user_id,priority,error) VALUES(?,?,?,?,?)") ) {
 			
-			$stmt->bind_param('ssiii', $msg, $type, $userId, $priority, $error );
+			$stmt->bind_param('ssiii', $msg, $type, $this->_userId, $priority, $error );
 			
 			$stmt->execute();
 			$stmt->close();

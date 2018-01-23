@@ -145,10 +145,13 @@ class BackupUser
 							$this->_log->addMessage("Successfully activated user (user_id=" . $this->_userId . ")", "User Activation");
 						}
 						$s2->close();
+						
+						//Remove the user activation record
+						@mysqli_query($this->_dbconn, "DELETE FROM backup_user_activation WHERE user_id=" . $this->_userId );
 					}
-					
-					//Remove the user activation record
-					@mysqli_query($this->_dbconn, "DELETE FROM backup_user_activation WHERE user_id=" . $this->_userId );
+					else {
+						$this->_log->addError("Error: Failed to activate user (user_id=" . $this->_userId . ") (" . mysqli_error($this->_dbconn) . ")", "User Activation");
+					}				
 					
 				}
 				else {

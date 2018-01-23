@@ -330,10 +330,6 @@ abstract class API
 	
 	private function file() {
 		
-		echo $this->rawData;
-		flush();
-		return;
-		
 		if ( !$this->_session->isAuthenticated() ) {
 			echo $this->_authError("You are not authorized to perform this action", 401 );
 			return;			

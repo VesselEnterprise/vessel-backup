@@ -63,6 +63,7 @@ namespace Backup {
                 unsigned int get_http_status();
                 bool activate();
                 bool is_activated();
+                std::string get_error();
 
                 bool resume_transfer();
 
@@ -92,6 +93,7 @@ namespace Backup {
                 bool m_ssl_good;
                 boost::system::error_code m_response_ec;
 
+
                 void parse_url(const std::string& host );
 
                 //Async function which persistently checks if the connection should timeout
@@ -103,6 +105,9 @@ namespace Backup {
                 void handle_write( const boost::system::error_code& e );
                 void handle_read_content( const boost::system::error_code& e );
                 void handle_read_headers( const boost::system::error_code& e );
+
+                std::string m_error_message;
+                void set_error(const std::string& msg);
 
                 std::string m_auth_token;
                 bool m_activated;

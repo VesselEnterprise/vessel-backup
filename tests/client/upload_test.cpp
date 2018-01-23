@@ -33,7 +33,10 @@ int main(int argc, char** argv)
     std::cout << cli->get_response() << std::endl;
 
     //Test Multi Part Uploads
-    std::string large_file = "/home/kyle/Downloads/artful-desktop-amd64.iso";
+    //std::string large_file = "/home/kyle/Downloads/artful-desktop-amd64.iso"; //Linux
+    //std::string large_file = "D:/iso/ubuntu-17.10-server-amd64.iso";
+
+    std::string large_file = "C:/Users/kett.ky/Pictures/218b17fee6d179f3ac52d1f706e97912.jpg";
 
     bf = new BackupFile( large_file );
 
@@ -44,7 +47,11 @@ int main(int argc, char** argv)
     std::cout << "Total file parts: " << bf->get_total_parts() << std::endl;
 
     //Initialize upload
-    std::cout << "Initiated Upload ID: " << cli->init_upload(bf) << std::endl;
+    int upload_id = cli->init_upload(bf);
+
+    std::cout << "Initialized upload id: " << upload_id << std::endl;
+
+    bf->set_upload_id(upload_id);
 
     //Upload parts of the upload
     for ( int i=1; i <= bf->get_total_parts(); i++ )
@@ -54,7 +61,6 @@ int main(int argc, char** argv)
     }
 
     delete bf;
-
     delete cli;
 
 }
