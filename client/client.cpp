@@ -515,6 +515,8 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 
     std::string data = request_stream.str();
 
+    std::cout << "Request body: " << data << std::endl;
+
     if ( !m_use_ssl )
         boost::asio::async_write(m_socket, boost::asio::buffer( data, request_stream.str().size() ), boost::bind(&BackupClient::handle_write, this, boost::asio::placeholders::error)) ;
     else
@@ -527,12 +529,11 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 
 }
 
-bool BackupClient::upload_file_single( Backup::File::BackupFile * bf )
+int BackupClient::init_upload ( Backup::File::BackupFile * bf )
 {
 
     using namespace rapidjson;
 
-    //Build a JSON payload of the file properties/metadata
     Document doc;
     doc.SetObject();
     Document::AllocatorType& alloc = doc.GetAllocator();
@@ -546,7 +547,74 @@ bool BackupClient::upload_file_single( Backup::File::BackupFile * bf )
     jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf->get_parent_path().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf->get_last_modified() ) ) );
-    jmap.insert( std::pair<std::string,Value>( "compressed", Value( false ) ) );
+    jmap.insert( std::pair<std::string,Value>( "parts", Value( bf->get_total_parts() ) ) );
+
+        //Add values to document object
+    for ( auto &kv : jmap )
+    {
+        doc.AddMember(Value().SetString(kv.first.c_str(),alloc), kv.second, alloc );
+    }
+
+    //Write object to buffer
+    StringBuffer strbuf;
+    PrettyWriter<StringBuffer> writer(strbuf);
+
+    doc.Accept(writer);
+
+    //Create a new HTTP request
+    HttpRequest r;
+    r.add_header("Content-Type: application/json");
+    r.set_body(strbuf.GetString());
+    r.set_method("POST");
+    r.set_uri("/backup/api/v1/file?action=init");
+
+    //std::cout << "Example body:\n" << r.get_body() << std::endl;
+
+    this->send_request(&r);
+
+    //Parse response and get upload id
+
+    //Reset Document
+    doc.RemoveAllMembers();
+    writer.Reset(strbuf);
+
+    doc.Parse( m_response_data.c_str() );
+
+    doc.Accept(writer);
+
+    std::cout << "Response: " << m_response_data << std::endl;
+    std::cout << strbuf.GetString() << std::endl;
+
+    //Check if access token is present
+    const Value& response = doc["response"];
+
+    if ( !response.HasMember("upload_id") ) {
+        return -1;
+    }
+
+    return response["upload_id"].GetInt();
+
+}
+
+bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_number=1 )
+{
+
+    using namespace rapidjson;
+
+    //Build a JSON payload of the file properties/metadata
+    Document doc;
+    doc.SetObject();
+    Document::AllocatorType& alloc = doc.GetAllocator();
+
+    std::map<std::string,Value> jmap;
+
+    std::string file_part = bf->get_file_part(part_number);
+
+    //Get Activation Code from DB
+    jmap.insert( std::pair<std::string,Value>( "upload_id", Value( bf->get_file_name().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "part_number", Value( part_number) ) );
+    jmap.insert( std::pair<std::string,Value>( "part_size", Value( file_part.size() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash(file_part).c_str(), alloc ) ) );
 
     //Add values to document object
     for ( auto &kv : jmap )
@@ -574,11 +642,11 @@ bool BackupClient::upload_file_single( Backup::File::BackupFile * bf )
 
     //Write a boundary
     body << "--BackupFile\r\n";
-    body << "Content-Disposition: form-data; name=\"fileData\"\r\n\r\n";
+    body << "Content-Disposition: form-data; name=\"fileContent\"\r\n\r\n";
 
     //Write file data
 
-    body.write( &bf->get_file_contents()[0], bf->get_file_size() );
+    body.write( &file_part[0], file_part.size() );
 
     body << "\r\n";
 
@@ -600,36 +668,6 @@ bool BackupClient::upload_file_single( Backup::File::BackupFile * bf )
     this->send_request(&r);
 
     return true;
-
-}
-
-std::string BackupClient::make_upload_json( const Backup::Types::http_upload_file& f )
-{
-
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
-
-    //Build backup_file object
-    rapidjson::Value backup_file(rapidjson::kObjectType);
-    {
-        backup_file.AddMember("file_name", "test", alloc );
-        backup_file.AddMember("file_size", 1000000, alloc );
-        backup_file.AddMember("last_modified", 10000000, alloc );
-        backup_file.AddMember("parent_path", "test", alloc );
-    }
-
-    //Add backup_file object to JSON
-    doc.AddMember("backup_file", backup_file, alloc );
-
-    rapidjson::StringBuffer strbuf;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
-
-    doc.Accept(writer);
-
-    std::cout << "Example JSON:\n" << strbuf.GetString() << '\n';
-
-    return strbuf.GetString();
 
 }
 

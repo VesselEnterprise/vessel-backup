@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     BackupFile* bf = new BackupFile(test_file);
 
     //Test file upload
-    cli->upload_file_single(bf);
+    //cli->upload_file_part(bf);
 
     delete bf;
 
@@ -42,6 +42,16 @@ int main(int argc, char** argv)
 
     std::cout << "Total file size: " << bf->get_file_size() << std::endl;
     std::cout << "Total file parts: " << bf->get_total_parts() << std::endl;
+
+    //Initialize upload
+    std::cout << "Initiated Upload ID: " << cli->init_upload(bf) << std::endl;
+
+    //Upload parts of the upload
+    for ( int i=1; i <= bf->get_total_parts(); i++ )
+    {
+        std::cout << "Uploading part " << i << " of " << bf->get_total_parts() << std::endl;
+        cli->upload_file_part(bf, i);
+    }
 
     delete bf;
 

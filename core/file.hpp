@@ -87,6 +87,12 @@ namespace Backup {
                 */
                 std::string get_hash();
 
+                /*! \fn std::string get_hash(const std::string& content);
+                    \brief
+                    \return Returns a SHA-1 hash of the provided data
+                */
+                std::string get_hash(const std::string& data);
+
                 /*! \fn unsigned int get_directory_id();
                     \brief
                     \return Returns the database ID of the directory
@@ -163,6 +169,19 @@ namespace Backup {
                 */
                 unsigned int get_total_parts();
 
+                /*! \fn void set_upload_id();
+                    \brief Sets the server upload id for the file
+                */
+                void set_upload_id(unsigned int id);
+
+                /*! \fn unsigned int get_upload_id();
+                    \brief
+                    \return Returns the server upload id from the initiated upload
+                */
+                unsigned int get_upload_id();
+
+
+
             private:
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file
                 std::string m_hash; //!< SHA-1 hash of the file contents
@@ -171,6 +190,7 @@ namespace Backup {
                 file_attrs m_file_attrs; //!< Struct containing common file attributes
                 unsigned int m_file_id; //!< Database ID of the file
                 unsigned int m_directory_id; //!< Database ID of the parent directory
+                unsigned int m_upload_id; //!< Server Upload ID of the file
                 size_t m_chunk_size; //!< Size in bytes in a file part for multi part uploads
 
                 /*! \fn void update_attributes()

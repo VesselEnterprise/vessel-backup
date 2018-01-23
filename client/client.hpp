@@ -53,8 +53,9 @@ namespace Backup {
 
                 void send_request( Backup::Networking::HttpRequest* r );
 
-                bool upload_file_single( Backup::File::BackupFile * bf);
-                bool upload_file_part ( const Backup::Types::http_upload_file& f );
+                int init_upload( Backup::File::BackupFile * bf );
+
+                bool upload_file_part( Backup::File::BackupFile * bf, int part_number );
                 bool heartbeat();
                 std::string get_client_settings();
                 std::string get_response();
@@ -102,9 +103,6 @@ namespace Backup {
                 void handle_write( const boost::system::error_code& e );
                 void handle_read_content( const boost::system::error_code& e );
                 void handle_read_headers( const boost::system::error_code& e );
-
-                //POST a new file upload
-                std::string make_upload_json( const Backup::Types::http_upload_file& f );
 
                 std::string m_auth_token;
                 bool m_activated;

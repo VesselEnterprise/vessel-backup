@@ -136,6 +136,20 @@ std::string BackupFile::get_hash()
 
 }
 
+std::string BackupFile::get_hash( const std::string& data )
+{
+
+    using namespace CryptoPP;
+
+    SHA1 hash;
+    std::string digest;
+
+    StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+
+    return digest;
+
+}
+
 std::string BackupFile::get_file_contents()
 {
 
@@ -207,6 +221,16 @@ void BackupFile::set_chunk_size(size_t chunk_sz)
 unsigned int BackupFile::get_total_parts()
 {
     return std::ceil( get_file_size() / m_chunk_size );
+}
+
+void BackupFile::set_upload_id(unsigned int id)
+{
+    m_upload_id = id;
+}
+
+unsigned int BackupFile::get_upload_id()
+{
+    return m_upload_id;
 }
 
 std::string BackupFile::get_file_part(unsigned int num) {
