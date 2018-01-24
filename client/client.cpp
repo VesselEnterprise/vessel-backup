@@ -578,8 +578,6 @@ int BackupClient::init_upload ( Backup::File::BackupFile * bf )
     strbuf.Clear();
     writer.Reset(strbuf);
 
-    m_response_data = "osdfsdfljdsfj";
-
     doc.Parse( m_response_data.c_str() );
     doc.Accept(writer);
 
@@ -599,14 +597,14 @@ int BackupClient::init_upload ( Backup::File::BackupFile * bf )
         //Check if access token is present
         const Value& response = doc["response"];
 
-        if ( !response.HasMember("upload_id") ) {
+        if ( response.HasMember("upload_id") )
+            upload_id = response["upload_id"].GetInt();
+        else
             set_error("There was an error parsing the JSON response");
-            return -1;
-        }
-
-        return response["upload_id"].GetInt();
 
     }
+
+    return upload_id;
 
 }
 

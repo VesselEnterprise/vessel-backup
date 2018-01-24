@@ -381,6 +381,10 @@ abstract class API
 					return;		
 				}
 				
+				echo "Hello world!";
+				flush();
+				return;
+				
 				$upload = new BackupUpload($metadata);
 				
 				if ( !$upload->uploadPart($_POST['fileContent']) ) {

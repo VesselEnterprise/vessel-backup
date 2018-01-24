@@ -1,6 +1,7 @@
 <?php
 
 require_once 'database.class.php';
+require_once 'log.class.php';
 require_once 'api_session.class.php';
 require_once 'file.class.php';
 
@@ -11,6 +12,7 @@ class BackupUpload
 	 ** Private members
 	**/
 	private $_db;
+	private $_log;
 	private $_dbconn;
 	private $_errorMsg;
 	private $_uploadId = -1;
@@ -19,10 +21,12 @@ class BackupUpload
 	private $_uploadRow;         //Associated array of backup_upload row
 	private $_file;              //BackupFile object
 	private $_backupTarget;
-	private $_isValid = false;
 	private $_metadata;
 	private $_contentBytes;
 	private $_uploadComplete=false;
+	private $_partsUploaded=0;
+	private $_partsRemaining=0;
+	private $_totalParts=0;
 
 	public function __construct($metadata) {
 		
@@ -30,6 +34,7 @@ class BackupUpload
 		$this->_dbconn = $this->_db->getConnection();
 		$this->_session = BackupAPISession::getSession();
 		$this->_userId = $this->_session->getUserId();
+		$this->_log = BackupLog::getLog($this->_userId);
 		$this->_metadata = $metadata;
 		
 		//If upload id exists in the metadata, preload the upload row
@@ -46,12 +51,13 @@ class BackupUpload
 	}
 	
 	private function _setError($msg) {
+		
+		//Update database log
+		$this->_log->addError($msg, "API");
+		
+		//Set internal error message
 		$this->_errorMsg = $msg;
-		$this->_isValid=false;
-	}
-	
-	public function isValid() {
-		return $this->_isValid;	
+		
 	}
 	
 	public function getError() {
@@ -74,20 +80,27 @@ class BackupUpload
 		if ( $uploadId == $this->_uploadId )
 			return;
 		
-		$query = "SELECT * FROM backup_upload WHERE upload_id=?";
+		$query = "SELECT a.*,COUNT(b.upload_id) AS parts_uploaded FROM backup_upload AS a LEFT JOIN backup_upload_part AS b ON a.upload_id=b.upload_id WHERE a.upload_id=?";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
 			$stmt->bind_param('i', $uploadId);
 			if ( $stmt->execute() ) {
 				
-				if ( $result = $stmt->get_result() )
+				if ( $result = $stmt->get_result() ) {
+					
 					$this->_uploadRow = $result->fetch_assoc();
-				else
-					$this->_setError("The upload record could not be found. (" . mysqli_error($this->_dbconn) . ")");
 				
-				//Set internal member vars
-				$this->_uploadId = $this->_uploadRow['upload_id'];
-				$this->_fileId = $this->_uploadRow['file_id'];
+					//Set internal member vars
+					$this->_uploadId = $this->_uploadRow['upload_id'];
+					$this->_fileId = $this->_uploadRow['file_id'];
+					$this->_totalParts = (int)$this->_uploadRow['parts'];
+					$this->_partsUploaded = (int)$this->_uploadRow['parts_uploaded'];
+					$this->_partsRemaining = $this->_totalParts - $this->_partsUploaded;
+					
+				}
+				else {
+					$this->_setError("The upload record could not be found. (" . mysqli_error($this->_dbconn) . ")");
+				}
 				
 			}
 			else {
@@ -96,6 +109,9 @@ class BackupUpload
 			
 			$stmt->close();
 			
+		}
+		else {
+			$this->_setError("There was an error querying for the upload. (" . mysqli_error($this->_dbconn) . ")");
 		}
 		
 	}
@@ -270,9 +286,9 @@ class BackupUpload
 		$this->_contentBytes = $contents;
 		
 		//Get the associated backup file
-		if ( !$this->_file->exists() ) {
+		if ( !$this->_file ) {
 			$this->_setError("File with id " . $this->_fileId . " does not exist");
-			return;
+			return false;
 		}
 		
 		//Check for valid part number
@@ -338,9 +354,17 @@ class BackupUpload
 			$this->_setError("Failed to add upload part to the database (" . mysqli_error($this->_dbconn) . ")");
 			return false;
 		}
+		
+		//Subtract one from partsRemaining for newly uploaded part
+		$this->_partsRemaining = ($this->_totalParts - (++$_partsUploaded));
+		
+		echo "Parts remaining: " . $this->_partsRemaining;
+		flush();
+		return false;
 
-		//Check if all parts have been uploaded
-		$this->completeUpload();
+		//If all parts have been uploaded, complete the upload
+		if ( $this->_partsRemaining <= 0 )
+			$this->completeUpload();
 		
 		return $partId;
 		

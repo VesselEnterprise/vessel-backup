@@ -13,7 +13,7 @@
 #include <cryptopp/hex.h>
 
 #define BACKUP_LARGE_SZ 52428800 //Default size in bytes of what should be considered a larger file (50MB)
-#define BACKUP_CHUNK_SZ 1048576 //Default chunk size if not defined in DB (10MB)
+#define BACKUP_CHUNK_SZ 52428800 //Default chunk size if not defined in DB (10MB)
 
 namespace fs = boost::filesystem;
 
