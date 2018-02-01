@@ -584,7 +584,6 @@ int BackupClient::init_upload ( Backup::File::BackupFile * bf )
     //Default to -1
     int upload_id = -1;
 
-    //std::cout << "Response: " << m_response_data << std::endl;
     std::cout << "Response: \n" << m_response_data << std::endl;
 
     if ( m_http_status == 200 ) {

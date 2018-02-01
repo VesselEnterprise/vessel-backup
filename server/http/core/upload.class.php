@@ -356,11 +356,7 @@ class BackupUpload
 		}
 		
 		//Subtract one from partsRemaining for newly uploaded part
-		$this->_partsRemaining = ($this->_totalParts - (++$_partsUploaded));
-		
-		echo "Parts remaining: " . $this->_partsRemaining;
-		flush();
-		return false;
+		$this->_partsRemaining = ($this->_totalParts - (++$this->_partsUploaded));
 
 		//If all parts have been uploaded, complete the upload
 		if ( $this->_partsRemaining <= 0 )
@@ -409,6 +405,7 @@ class BackupUpload
 		 ** Check if all parts have been uploaded, if so, merge into one file and save into destination directory
 		**/
 		
+		$result = NULL;
 		$query = "SELECT * FROM backup_upload_part WHERE upload_id=? ORDER BY part_number ASC";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
@@ -450,6 +447,7 @@ class BackupUpload
 							return false;
 						}
 
+						//Create the file for writing
 						if ( $writeFile = fopen($filePath, 'w') ) {
 
 							//Get all tmp file parts and merge into one file
@@ -485,9 +483,31 @@ class BackupUpload
 
 							fclose($writeFile);
 							
-							//Mark completed after all parts have been written
-							if ( $this->_setFileUploaded( $this->_uploadRow['file_id'] ) )
-								$this->_uploadComplete=true;
+							//Cleanup and delete upload parts after all operations were previously successful
+							if ( $result ) {
+								
+								$result->data_seek(0);
+								
+								while ( $row = $result->fetch_assoc() ) {
+									
+									$fp = $this->_backupTarget['path'] . "/parts/" . $row['tmp_file_name'];
+									
+									if ( !unlink($fp) ) {
+										$this->_setError("Unable to delete file part: " . $fp);//Non-fatal error
+									}
+									
+								}
+								
+								//Cleanup DB
+								if ( !mysqli_query($this->_dbconn, "DELETE a,b FROM backup_upload AS a INNER JOIN backup_upload_part AS b ON a.upload_id=b.upload_id WHERE a.upload_id=" . $this->_uploadId) ) {
+									$this->_setError("Failed to cleanup upload parts: " . $this->_uploadId . " (" . mysqli_error($this->_dbconn) . ")" ); //Non-fatal error
+								}
+							
+								//Mark completed after all parts have been written
+								if ( $this->_setFileUploaded( $this->_uploadRow['file_id'] ) )
+									$this->_uploadComplete=true;
+								
+							}
 							
 						}
 						else {

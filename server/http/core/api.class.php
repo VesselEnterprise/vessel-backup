@@ -381,10 +381,6 @@ abstract class API
 					return;		
 				}
 				
-				echo "Hello world!";
-				flush();
-				return;
-				
 				$upload = new BackupUpload($metadata);
 				
 				if ( !$upload->uploadPart($_POST['fileContent']) ) {
@@ -422,68 +418,6 @@ abstract class API
 			
 		}
 
-	}
-	
-	private function file_part() {
-		
-		if ( !$this->_session->isAuthenticated() ) {
-			echo $this->_authError("You are not authorized to perform this action", 401 );
-			return;			
-		}
-		
-		//Initiate a new multi part upload
-		if ( $this->method == "POST" ) {
-			
-			$payload = json_decode( $this->rawData );
-			
-			if ( json_last_error() != JSON_ERROR_NONE ) {
-				echo $this->_error("JSON payload is invalid", 400 );
-				return;		
-			}
-			
-			$uploadPart = new BackupUploadPart();
-			if ( !$uploadPart->initialize($payload) ) {
-				echo $this->_error( $uploadPart->getError(), 400 );
-				return;
-			}
-			
-			echo $this->_response( array( "upload_id" => $uploadPart->getUploadId(), "file_id" => $uploadPart->getFileId() ) );
-			
-			return;
-			
-		}
-		
-		if ( $this->method == "PUT" ) {
-			
-			if ( empty($_PUT[0]['metadata']) ) {
-				echo $this->_error("JSON metadata is missing", 400 );
-				return;		
-			}
-			
-			if ( empty($_PUT['fileData']) ) {
-				echo $this->_error("File contents are missing", 400 );
-				return;		
-			}
-			
-			$metadata = json_decode( $_PUT['metadata'] );
-			
-			if ( json_last_error() != JSON_ERROR_NONE ) {
-				echo $this->_error("JSON payload is invalid", 400 );
-				return;		
-			}
-			
-			var_dump($fileData);
-			flush();
-			return;
-			
-			$uploadPart = new BackupUploadPart();
-			if ( !$uploadPart->uploadPart($metadata,$_POST['fileData']) ) {
-				echo $this->_error( $uploadPart->getError(), 400 );
-				return;
-			}
-			
-		}
-		
 	}
 	
 	private function heartbeat() {
