@@ -31,6 +31,7 @@
 
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
+using Backup::File::BackupFile;
 namespace ssl = boost::asio::ssl;
 
 namespace Backup {
@@ -66,6 +67,8 @@ namespace Backup {
                 std::string get_error();
 
                 bool resume_transfer();
+
+                void use_compression(bool flag);
 
             private:
                 std::string m_hostname;
@@ -111,6 +114,7 @@ namespace Backup {
 
                 std::string m_auth_token;
                 bool m_activated;
+                bool m_use_compression; //Send file content compressed
 
         };
 

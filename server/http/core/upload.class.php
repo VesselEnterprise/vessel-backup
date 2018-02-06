@@ -134,8 +134,8 @@ class BackupUpload
 			'hash',
 			'file_path',
 			'parts',
-			'last_modified'
-			//compressed
+			'last_modified',
+			'compressed'
 		);
 		
 		//Verify required fields exist
@@ -174,19 +174,26 @@ class BackupUpload
 			}
 		}
 		
+		//Is file content compressed?
+		$storeCompressed = (bool)$this->_db->getSetting('store_compressed');
+		
+		//Set target filename
+		$targetFileName = $storeCompressed ? ($this->_metadata->{'file_name'} . ".gz") : $this->_metadata->{'file_name'};
+		
 		//Insert a new file
-		$query = "INSERT INTO backup_file (unique_id,file_name,file_size,user_id,file_type,hash,file_path,last_modified,last_backup) VALUES(?,?,?,?,?,?,?,FROM_UNIXTIME(?),NOW()) ON DUPLICATE KEY UPDATE file_id=LAST_INSERT_ID(file_id),file_size=?,last_modified=FROM_UNIXTIME(?),last_backup=NOW()";
+		$query = "INSERT INTO backup_file (unique_id,file_name,file_size,user_id,file_type,hash,file_path,compressed,last_modified,last_backup) VALUES(?,?,?,?,?,?,?,?,FROM_UNIXTIME(?),NOW()) ON DUPLICATE KEY UPDATE file_id=LAST_INSERT_ID(file_id),file_size=?,last_modified=FROM_UNIXTIME(?),last_backup=NOW()";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 
 			$stmt->bind_param(
-				'ssiisssiii',
+				'ssiisssiiii',
 				$uniqueId,
-				$this->_metadata->{'file_name'},
+				$targetFileName,
 				$this->_metadata->{'file_size'},
 				$this->_userId,
 				$this->_metadata->{'file_type'},
 				$this->_metadata->{'hash'},
 				$this->_metadata->{'file_path'},
+				$storeCompressed,
 				$this->_metadata->{'last_modified'},
 				$this->_metadata->{'file_size'},
 				$this->_metadata->{'last_modified'}
@@ -210,10 +217,18 @@ class BackupUpload
 		}
 		
 		//Create new upload and associate it with the file
-		$query = "INSERT INTO backup_upload (file_id,user_id,parts,bytes,hash) VALUES(?,?,?,?,?)";
+		$query = "INSERT INTO backup_upload (file_id,user_id,parts,bytes,hash,compressed) VALUES(?,?,?,?,?,?)";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 		
-			$stmt->bind_param('iiiis', $this->_fileId, $this->_userId, $this->_metadata->{'parts'}, $this->_metadata->{'file_size'}, $this->_metadata->{'hash'} );
+			$stmt->bind_param(
+				'iiiisi',
+				$this->_fileId,
+				$this->_userId,
+				$this->_metadata->{'parts'},
+				$this->_metadata->{'file_size'},
+				$this->_metadata->{'hash'},
+				$storeCompressed
+			);
 			
 			if ( $stmt->execute() ) {
 				$this->_uploadId = mysqli_insert_id( $this->_dbconn );
@@ -246,7 +261,8 @@ class BackupUpload
 			'upload_id',
 			'part_number',
 			'part_size',
-			'hash'
+			'hash',
+			'compressed'
 		);
 		
 		//Verify required fields exist
@@ -282,8 +298,23 @@ class BackupUpload
 			return false;
 		}
 		
-		//Set internal file contents after they have been verified
-		$this->_contentBytes = $contents;
+		//Is file content compressed
+		$compressed = $this->_metadata->{'compressed'};
+		
+		//When the file was initialized, was it flagged as compressed
+		$storeCompressed = (bool)$this->_file->getValue('compressed');
+		
+		/**
+		 ** Set class file contents
+		**/
+		
+		//Determine whether we need to compress or decompress content
+		if ( $storeCompressed && !$compressed )
+			$this->_contentBytes = gzdeflate($contents);
+		else if ( !$storeCompressed && $compressed )
+			$this->_contentBytes = gzinflate($contents);
+		else //No action needed
+			$this->_contentBytes = $contents;
 		
 		//Get the associated backup file
 		if ( !$this->_file ) {
@@ -305,7 +336,7 @@ class BackupUpload
 		//Write file content to storage
 		//Storage Target Handlers here
 		if ( $this->_uploadRow['parts'] <= 1 )
-			$fileName = $this->_file->getValue('file_name');
+			$fileName = $storeCompressed ? ($this->_file->getValue('file_name') . ".gz") : $this->_file->getValue('file_name');
 		else
 			$fileName = $this->_file->getValue('unique_id') . "_" . $this->_metadata->{'part_number'} . ".part";
 		
@@ -330,16 +361,17 @@ class BackupUpload
 		
 		//Add a new part to the database if the write operation was successful
 		$partId = -1;
-		$query = "REPLACE INTO backup_upload_part (upload_id,part_number,bytes,tmp_file_name,hash) VALUES(?,?,?,?,?)";
+		$query = "REPLACE INTO backup_upload_part (upload_id,part_number,bytes,tmp_file_name,hash,compressed) VALUES(?,?,?,?,?,?)";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 			
 			$stmt->bind_param(
-				'iiiss',
+				'iiissi',
 				$this->_uploadId,
 				$this->_metadata->{'part_number'},
 				$contentSize,
 				$fileName,
-				$contentHash
+				$contentHash,
+				$storeCompressed
 			);
 			
 			if ( $stmt->execute() ) {

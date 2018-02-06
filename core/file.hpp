@@ -6,11 +6,14 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <memory>
 #include <boost/filesystem.hpp>
 #include <cryptopp/sha.h>
 #include <cryptopp/files.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
+
+#include "compress.hpp"
 
 #define BACKUP_LARGE_SZ 52428800 //Default size in bytes of what should be considered a larger file (50MB)
 #define BACKUP_CHUNK_SZ 52428800 //Default chunk size if not defined in DB (10MB)
@@ -157,6 +160,11 @@ namespace Backup {
                 */
                 void set_chunk_size( size_t chunk_sz );
 
+                 /*! \fn size_t get_chunk_size();
+                    \brief Returns the chunk size in bytes for multipart uploads
+                */
+                size_t get_chunk_size();
+
                 /*! \fn std::string get_file_part(unsigned int num);
                     \brief
                     \return Returns the bytes of a file for the given part number
@@ -180,7 +188,11 @@ namespace Backup {
                 */
                 unsigned int get_upload_id();
 
-
+                /*! \fn std::shared_ptr<BackupFile> get_compressed_copy();
+                    \brief Creates a compressed copy of the file stored in the tmp directory
+                    \return Returns a BackupFile reference to the tmp compressed copy
+                */
+                std::shared_ptr<BackupFile> get_compressed_copy();
 
             private:
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file

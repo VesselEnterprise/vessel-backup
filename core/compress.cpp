@@ -17,8 +17,18 @@ void Compressor::set_z_level(int level)
     m_z_level = level;
 }
 
+std::string Compressor::compress_str(const std::string& str)
+{
+    return (*this << str);
+}
+
+std::string Compressor::decompress_str(const std::string& str)
+{
+    return (*this >> str);
+}
+
 //Compress data
-std::string Compressor::operator<<(const std::string & s)
+std::string Compressor::operator<<(const std::string& str)
 {
 
     //Buffer
@@ -43,8 +53,8 @@ std::string Compressor::operator<<(const std::string & s)
     if (ret != Z_OK)
         return out_s;
 
-    zs.next_in = (unsigned char*)s.c_str();
-    zs.avail_in = s.size();
+    zs.next_in = (unsigned char*)str.c_str();
+    zs.avail_in = str.size();
 
     //Compress contents
     do
@@ -94,7 +104,7 @@ void Compressor::end_decompression()
 }
 
 //Decompress data
-std::string Compressor::operator>>(const std::string & s)
+std::string Compressor::operator>>(const std::string & str)
 {
 
     //Output string
@@ -106,7 +116,7 @@ std::string Compressor::operator>>(const std::string & s)
     //Output Buffer
     unsigned char out[Z_CHUNK];
 
-    m_zs_decomp.next_in = (unsigned char*)s.c_str();
+    m_zs_decomp.next_in = (unsigned char*)str.c_str();
 
     //Decompress contents
     do
@@ -119,7 +129,7 @@ std::string Compressor::operator>>(const std::string & s)
 
         assert(ret != Z_STREAM_ERROR);
 
-        std::cout << "AVAILOUT: " << m_zs_decomp.avail_out << std::endl;
+        //std::cout << "AVAILOUT: " << m_zs_decomp.avail_out << std::endl;
 
         out_s.append( (char*)out, (Z_CHUNK - m_zs_decomp.avail_out) );
 

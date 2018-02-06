@@ -8,6 +8,7 @@
 using namespace Backup::Networking;
 using namespace Backup::Database;
 using namespace Backup::File;
+using Backup::Compression::Compressor;
 
 int main(int argc, char** argv)
 {
@@ -18,6 +19,7 @@ int main(int argc, char** argv)
     std::string host = ldb->get_setting_str("master_server");
 
     BackupClient* cli = new BackupClient(host);
+    cli->use_compression(true);
 
     //std::string test_file = "C:\\Users\\kett.ky\\Downloads\\FileZilla_3.30.0_win64-setup.exe"; //Windows
     std::string test_file = "/home/kyle/Downloads/ServiceNowCAD.pdf";
@@ -40,8 +42,10 @@ int main(int argc, char** argv)
 
     std::cout << "Multipart size is: " << ldb->get_setting_int("multipart_filesize") << std::endl;
 
+    size_t chunk_size = ldb->get_setting_int("multipart_filesize");
+
     bf = new BackupFile( large_file );
-    bf->set_chunk_size( ldb->get_setting_int("multipart_filesize") );
+    bf->set_chunk_size( chunk_size );
 
     //Get Hash of a Very Large File
     //std::cout << "SHA-1 Hash: " << bf->get_hash() << std::endl;
@@ -58,10 +62,21 @@ int main(int argc, char** argv)
 
     bf->set_upload_id(upload_id);
 
+    //Create a compressed tmp file
+    std::string tmp_file = "tmp/" + bf->get_file_name() + ".tmp";
+    Compressor* c = new Compressor();
+    c->compress_file( bf->get_file_path(), tmp_file );
+
+    //Create a new backup file for the compressed tmp file
+    BackupFile* bfc = new BackupFile(tmp_file);
+    bfc->set_chunk_size( chunk_size );
+
+    int total_parts = bfc->get_total_parts();
+
     //Upload parts of the upload
-    for ( int i=1; i <= bf->get_total_parts(); i++ )
+    for ( int i=1; i <= total_parts; i++ )
     {
-        std::cout << "Uploading part " << i << " of " << bf->get_total_parts() << std::endl;
+        std::cout << "Uploading part " << i << " of " << total_parts << std::endl;
         cli->upload_file_part(bf, i);
     }
 

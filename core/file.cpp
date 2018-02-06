@@ -1,14 +1,14 @@
 #include "file.hpp"
 
 using namespace Backup::File;
-namespace fs = boost::filesystem;
+using namespace Backup::Compression;
 
 BackupFile::BackupFile(const std::string& fp ) : m_file_path(fp), m_chunk_size(BACKUP_CHUNK_SZ)
 {
     update_attributes();
 }
 
-BackupFile::BackupFile(const fs::path& fp ) : m_file_path(fp)
+BackupFile::BackupFile(const fs::path& fp ) : m_file_path(fp), m_chunk_size(BACKUP_CHUNK_SZ)
 {
     update_attributes();
 }
@@ -274,4 +274,21 @@ std::string BackupFile::get_file_part(unsigned int num) {
 
     return file_part;
 
+}
+
+std::shared_ptr<BackupFile> BackupFile::get_compressed_copy()
+{
+    const std::string tmp_file = ("tmp/" + get_file_name() + ".tmp");
+    if ( !fs::exists(tmp_file) )
+    {
+        Compressor* c = new Compressor();
+        c->compress_file( get_file_path(), tmp_file );
+    }
+
+    return std::make_shared<BackupFile>(tmp_file);
+}
+
+size_t BackupFile::get_chunk_size()
+{
+    return m_chunk_size;
 }

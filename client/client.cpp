@@ -547,6 +547,7 @@ int BackupClient::init_upload ( Backup::File::BackupFile * bf )
     jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf->get_parent_path().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf->get_last_modified() ) ) );
     jmap.insert( std::pair<std::string,Value>( "parts", Value( bf->get_total_parts() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "compressed", Value( m_use_compression ) ) );
 
         //Add values to document object
     for ( auto &kv : jmap )
@@ -633,13 +634,25 @@ bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
 
     std::map<std::string,Value> jmap;
 
-    std::string file_part = bf->get_file_part(part_number);
+    std::string file_part;
+
+    if ( m_use_compression )
+    {
+        auto bfc = bf->get_compressed_copy();
+        bfc->set_chunk_size( bf->get_chunk_size() );
+        file_part = bfc->get_file_part(part_number);
+    }
+    else
+    {
+        file_part = bf->get_file_part(part_number);
+    }
 
     //Get Activation Code from DB
     jmap.insert( std::pair<std::string,Value>( "upload_id", Value( bf->get_upload_id() ) ) );
     jmap.insert( std::pair<std::string,Value>( "part_number", Value( part_number) ) );
     jmap.insert( std::pair<std::string,Value>( "part_size", Value( file_part.size() ) ) );
     jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash(file_part).c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "compressed", Value( m_use_compression ) ) );
 
     //Add values to document object
     for ( auto &kv : jmap )
@@ -849,4 +862,9 @@ bool BackupClient::is_activated()
 unsigned int BackupClient::get_http_status()
 {
     return m_http_status;
+}
+
+void BackupClient::use_compression(bool flag)
+{
+    m_use_compression=flag;
 }

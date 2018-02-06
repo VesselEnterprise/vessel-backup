@@ -34,10 +34,12 @@ namespace Backup {
                 ~Compressor();
 
                 //Compression operator
-                std::string operator << ( const std::string& s );
+                std::string operator << ( const std::string& str );
+                std::string compress_str ( const std::string& str ); //Wrapper
 
                 //Decompression operator
-                std::string operator >> ( const std::string& s );
+                std::string operator >> ( const std::string& str );
+                std::string decompress_str ( const std::string& str ); //Wrapper
 
                 //Compress file and save to temp file
                 void compress_file( const std::string & in, const std::string & out );
