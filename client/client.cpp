@@ -14,6 +14,9 @@ BackupClient::BackupClient( const std::string& host ) :
     m_verify_cert(true)
 {
 
+    //Create new log obj
+    m_log = new Log("asio");
+
     //Set SSL Opts
     m_ssl_ctx.set_default_verify_paths();
 
@@ -261,37 +264,39 @@ void BackupClient::handle_response( const boost::system::error_code& e )
 
     m_response_ec = e; //Update error code
 
-    std::cout << "Handled response.." << '\n';
+    //std::cout << "Handled response.." << '\n';
 
     if (!e)
     {
 
         //Set the deadline timer
-        m_deadline_timer.expires_from_now(boost::posix_time::seconds(10));
+        //m_deadline_timer.expires_from_now(boost::posix_time::seconds(10));
 
         //Reset HTTP Status
         m_http_status = 0;
 
-        // Check that response is OK.
+        /** Parse the response headers **/
+
         std::istream response_stream(&m_response_buffer);
 
+        // eg.
         std::string http_version;
         response_stream >> http_version;
         response_stream >> m_http_status;
+
         std::string status_message;
         std::getline(response_stream, status_message);
 
         if (!response_stream || http_version.substr(0, 5) != "HTTP/")
         {
-            std::cout << "Invalid response\n";
+            m_log->add_message("There was an error processing the HTTP response headers: " + e.message(), "ASIO");
             m_response_ec = boost::asio::error::operation_aborted; //Handle status error
             return;
         }
 
-        //Handle a possible redirect
+        /** HTTP Redirects **/
         if ( m_http_status == 301 )
         {
-            //std::cout << "Response: \n" << response_stream.rdbuf() << '\n';
 
             std::string new_location;
 
@@ -302,32 +307,22 @@ void BackupClient::handle_response( const boost::system::error_code& e )
 
                 if ( tmp_response.find("Location:") != std::string::npos )
                 {
-                    /*
-                    response_stream.ignore(9, ' '); //Location:
-                    response_stream >> new_location;
-                    */
                     new_location = tmp_response.substr(10);
                     break;
                 }
             }
 
-            std::cout << "Request is being redirected to: " << new_location << '\n';
+            m_log->add_message("HTTP 301 redirect detected: " + new_location, "ASIO");
 
             //Close Open Socket
-            this->disconnect();
+            disconnect();
 
             //Try to reconnect to new host
-            this->parse_url(new_location.c_str());
-            this->connect();
+            parse_url(new_location.c_str());
+            connect();
 
             return;
-        }
-        else if (m_http_status != 200)
-        {
-            std::cout << "Response returned with status code ";
-            std::cout << m_http_status << "\n";
-            //m_response_ec = boost::asio::error::operation_aborted; //Set static error
-            //return;
+
         }
 
         // Read the response headers, which are terminated by a blank line.
@@ -402,11 +397,31 @@ void BackupClient::handle_read_content( const boost::system::error_code& e )
     }
     else if (e != boost::asio::error::eof)
     {
-        std::cout << "Error: " << e << "\n";
-        m_response_ec = boost::asio::error::eof;
+        /** Some other error occurred while reading the response **/
+        m_log->add_message("Unknown error occurred while reading the HTTP response: " + e.message(), "ASIO");
+        m_response_ec = boost::asio::error::eof; //Signal eof to start reading
     }
     else
+    {
+
+        /** Response should be read at this point **/
         m_response_ec = boost::asio::error::eof;
+
+        /** Handle HTTP Error codes **/
+        if (m_http_status == 401)
+        {
+
+            /** Handle authorization errors **/
+            handle_auth_error();
+
+        }
+        else if ( m_http_status > 200 ) {
+
+            m_log->add_message("There was an error returned by the server. Status code: " + std::to_string(m_http_status), "ASIO" );
+
+        }
+
+    }
 
 }
 
@@ -531,8 +546,6 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 int BackupClient::init_upload ( Backup::File::BackupFile * bf )
 {
 
-    using namespace rapidjson;
-
     Document doc;
     doc.SetObject();
     Document::AllocatorType& alloc = doc.GetAllocator();
@@ -624,8 +637,6 @@ bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
     //Validate upload id
     if ( bf->get_upload_id() < 0 )
         return false;
-
-    using namespace rapidjson;
 
     //Build a JSON payload of the file properties/metadata
     Document doc;
@@ -785,7 +796,6 @@ std::string BackupClient::get_client_settings()
 bool BackupClient::activate()
 {
 
-    using namespace rapidjson;
     using Backup::Database::LocalDatabase;
 
     LocalDatabase* ldb = &LocalDatabase::get_database();
@@ -867,4 +877,49 @@ unsigned int BackupClient::get_http_status()
 void BackupClient::use_compression(bool flag)
 {
     m_use_compression=flag;
+}
+
+bool BackupClient::refresh_token()
+{
+
+}
+
+void BackupClient::handle_auth_error()
+{
+
+    if ( m_http_status != 401 ) //http code should always be 401 for auth errors
+        return;
+
+    //Try to parse the 401 response
+    Document doc;
+    doc.Parse( m_response_data.c_str() );
+
+    if ( !doc.IsObject() || !doc.HasMember("error") )
+    {
+        m_log->add_message("Unable to parse 401 authorization response JSON", "Authentication failure");
+        return;
+    }
+
+    const Value& auth_error = doc["error"];
+
+    //Log an error message if it was returned
+    if ( auth_error.HasMember("message") )
+    {
+        m_log->add_message(auth_error["message"].GetString(), "Authentication failure");
+    }
+
+    if ( auth_error.HasMember("token_expired") )
+    {
+        if ( auth_error["token_expired"].GetBool() == true )
+        {
+            //Try to refresh the token
+            m_log->add_message("Access token is expired. Trying to refresh", "Authentication failure");
+            refresh_token();
+        }
+    }
+    else {
+        //Try to activate the client?
+        //activate();
+    }
+
 }
