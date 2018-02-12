@@ -21,30 +21,31 @@ int main(int argc, char** argv)
     BackupClient* cli = new BackupClient(host);
     cli->use_compression(true);
 
+    /**
+    ** Test User Activation
+    **/
+    cli->activate();
+
+    if ( !cli->is_activated() ) {
+        std::cout << "Error: BackupClient is not activated" << std::endl;
+        return 1;
+    }
+
     //std::string test_file = "C:\\Users\\kett.ky\\Downloads\\FileZilla_3.30.0_win64-setup.exe"; //Windows
-    std::string test_file = "/home/kyle/Downloads/ServiceNowCAD.pdf";
+    //std::string test_file = "/home/kyle/Downloads/ServiceNowCAD.pdf";
+
+    std::string test_file = "/home/kyle/Downloads/codeblocks_17.12_amd64_stable.tar.xz";
 
     BackupFile* bf = new BackupFile(test_file);
 
-    //Test file upload
-    //cli->upload_file_part(bf);
-
-    delete bf;
-
-    //Print response
-    std::cout << cli->get_response() << std::endl;
-
     //Test Multi Part Uploads
-    std::string large_file = "/home/kyle/Downloads/artful-desktop-amd64.iso"; //Linux
+    //std::string large_file = "/home/kyle/Downloads/artful-desktop-amd64.iso"; //Linux
     //std::string large_file = "D:/iso/ubuntu-17.10-server-amd64.iso";
-
-    //std::string large_file = "C:/Users/kett.ky/Pictures/218b17fee6d179f3ac52d1f706e97912.jpg";
 
     std::cout << "Multipart size is: " << ldb->get_setting_int("multipart_filesize") << std::endl;
 
     size_t chunk_size = ldb->get_setting_int("multipart_filesize");
 
-    bf = new BackupFile( large_file );
     bf->set_chunk_size( chunk_size );
 
     //Get Hash of a Very Large File
@@ -55,6 +56,11 @@ int main(int argc, char** argv)
 
     //Initialize upload
     int upload_id = cli->init_upload(bf);
+
+    while ( upload_id < 0 )
+    {
+        upload_id = cli->init_upload(bf);
+    }
 
     std::cout << "Initialized upload id: " << upload_id << std::endl;
 

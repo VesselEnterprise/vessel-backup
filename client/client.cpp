@@ -17,6 +17,9 @@ BackupClient::BackupClient( const std::string& host ) :
     //Create new log obj
     m_log = new Log("asio");
 
+    //Set local database object
+    m_ldb = &Backup::Database::LocalDatabase::get_database();
+
     //Set SSL Opts
     m_ssl_ctx.set_default_verify_paths();
 
@@ -28,10 +31,12 @@ BackupClient::BackupClient( const std::string& host ) :
     //Determine protocol, hostname, etc
     this->parse_url(host);
 
-    //Set auth token from local database
-    Backup::Database::LocalDatabase* ldb = &Backup::Database::LocalDatabase::get_database();
+    //Get user information
+    this->m_auth_token = m_ldb->get_setting_str("auth_token");
+    this->m_user_id = m_ldb->get_setting_int("user_id");
 
-    this->m_auth_token = ldb->get_setting_str("auth_token");
+    //Create the authorization header used for API requests
+    this->m_auth_header = get_auth_header(m_auth_token, m_user_id);
 
     //Timer should not expire until a connection attempt is made
     m_deadline_timer.expires_at(boost::posix_time::pos_infin);
@@ -254,7 +259,7 @@ void BackupClient::handle_write( const boost::system::error_code& e )
     }
     else
     {
-        std::cout << "Error: " << e.message() << "\n";
+        std::cout << "ASIO Write Error: " << e.message() << "\n";
     }
 
 }
@@ -334,7 +339,7 @@ void BackupClient::handle_response( const boost::system::error_code& e )
     }
     else
     {
-        std::cout << "Error: " << e << "\n";
+        std::cout << "ASIO Response Error: " << e << "\n";
     }
 
 }
@@ -367,7 +372,7 @@ void BackupClient::handle_read_headers( const boost::system::error_code& e )
     }
     else
     {
-        std::cout << "Error: " << e << "\n";
+        std::cout << "ASIO Read Header Error: " << e << "\n";
     }
 
     m_response_ec = e;
@@ -406,20 +411,6 @@ void BackupClient::handle_read_content( const boost::system::error_code& e )
 
         /** Response should be read at this point **/
         m_response_ec = boost::asio::error::eof;
-
-        /** Handle HTTP Error codes **/
-        if (m_http_status == 401)
-        {
-
-            /** Handle authorization errors **/
-            handle_auth_error();
-
-        }
-        else if ( m_http_status > 200 ) {
-
-            m_log->add_message("There was an error returned by the server. Status code: " + std::to_string(m_http_status), "ASIO" );
-
-        }
 
     }
 
@@ -473,9 +464,12 @@ void BackupClient::disconnect()
 void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 {
 
-    if ( !m_connected ) {
-        this->connect();
-    }
+    //If client is already connected, disconnect before a new attempt
+    if ( m_connected )
+        this->disconnect();
+
+    //Connect to server
+    this->connect();
 
     if ( !m_connected )
         return;
@@ -494,7 +488,7 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 
     //Send Authorization Header
     if ( this->m_auth_token != "" ) {
-        request_stream << "Authorization: " << this->m_auth_token << "\r\n";
+        request_stream << "Authorization: " << this->m_auth_header << "\r\n";
     }
 
     std::string http_method = r->get_method();
@@ -541,6 +535,17 @@ void BackupClient::send_request( Backup::Networking::HttpRequest* r )
 
     this->disconnect();
 
+    /**
+     ** Handle HTTP Error codes
+     ** The 401 handler is designed to perform a user activation or token refresh on the fly in the event of authorization failures
+    **/
+    if (m_http_status == 401)
+        handle_auth_error();
+    else if ( m_http_status > 200 ) {
+        m_log->add_message("There was an error returned by the server. Status code: " + std::to_string(m_http_status), "ASIO" );
+        handle_api_error();
+    }
+
 }
 
 int BackupClient::init_upload ( Backup::File::BackupFile * bf )
@@ -586,13 +591,21 @@ int BackupClient::init_upload ( Backup::File::BackupFile * bf )
     this->send_request(&r);
 
     //Parse response and get upload id
+    std::cout << "Init upload response: " << m_response_data << std::endl;
 
     //Reset Document
     doc.RemoveAllMembers();
     strbuf.Clear();
     writer.Reset(strbuf);
 
-    doc.Parse( m_response_data.c_str() );
+    ParseResult json_ok = doc.Parse( m_response_data.c_str() );
+
+    if ( !json_ok )
+    {
+        handle_json_error(json_ok);
+        return -1;
+    }
+
     doc.Accept(writer);
 
     //Default to -1
@@ -659,7 +672,7 @@ bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
     }
 
     //Get Activation Code from DB
-    jmap.insert( std::pair<std::string,Value>( "upload_id", Value( bf->get_upload_id() ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_id", Value( bf->get_unique_id().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "part_number", Value( part_number) ) );
     jmap.insert( std::pair<std::string,Value>( "part_size", Value( file_part.size() ) ) );
     jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash(file_part).c_str(), alloc ) ) );
@@ -725,22 +738,16 @@ bool BackupClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
 bool BackupClient::heartbeat()
 {
 
-    this->connect();
-
-    using namespace Backup::Database;
-
     //Create JSON for client heartbeat
     rapidjson::Document doc;
     doc.SetObject();
     rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
 
-    LocalDatabase* ldb = &LocalDatabase::get_database();
-
     std::map<std::string,std::string> jmap;
-    jmap.insert( std::pair<std::string,std::string>("host_name", ldb->get_setting_str("hostname")) );
-    jmap.insert( std::pair<std::string,std::string>("os", ldb->get_setting_str("host_os")) );
-    jmap.insert( std::pair<std::string,std::string>("client_version", ldb->get_setting_str("client_version")) );
-    jmap.insert( std::pair<std::string,std::string>("domain", ldb->get_setting_str("host_domain")) );
+    jmap.insert( std::pair<std::string,std::string>("host_name", m_ldb->get_setting_str("hostname")) );
+    jmap.insert( std::pair<std::string,std::string>("os", m_ldb->get_setting_str("host_os")) );
+    jmap.insert( std::pair<std::string,std::string>("client_version", m_ldb->get_setting_str("client_version")) );
+    jmap.insert( std::pair<std::string,std::string>("domain", m_ldb->get_setting_str("host_domain")) );
 
     for ( auto &kv : jmap )
     {
@@ -796,17 +803,13 @@ std::string BackupClient::get_client_settings()
 bool BackupClient::activate()
 {
 
-    using Backup::Database::LocalDatabase;
-
-    LocalDatabase* ldb = &LocalDatabase::get_database();
-
     Document doc;
     doc.SetObject();
     Document::AllocatorType& alloc = doc.GetAllocator();
 
     //Get Activation Code from DB
-    Value activation_code( ldb->get_setting_str("activation_code").c_str(), alloc );
-    Value user_name( ldb->get_setting_str("username").c_str(), alloc );
+    Value activation_code( m_ldb->get_setting_str("activation_code").c_str(), alloc );
+    Value user_name( m_ldb->get_setting_str("username").c_str(), alloc );
 
     doc.AddMember("user_name", user_name, alloc );
     doc.AddMember("activation_code", activation_code, alloc );
@@ -824,17 +827,22 @@ bool BackupClient::activate()
 
     this->send_request( &r );
 
-    std::cout << strbuf.GetString() << std::endl;
-
     //Reset Document
+    strbuf.Clear();
     doc.RemoveAllMembers();
     writer.Reset(strbuf);
 
-    doc.Parse( m_response_data.c_str() );
+    std::cout << "Activation response: " << m_response_data << std::endl;
+
+    ParseResult json_ok = doc.Parse( m_response_data.c_str() );
+
+    if ( !json_ok )
+    {
+        handle_json_error(json_ok);
+        return false;
+    }
 
     doc.Accept(writer);
-
-    std::cout << strbuf.GetString() << std::endl;
 
     //Check if access token is present
     const Value& response = doc["response"];
@@ -847,20 +855,41 @@ bool BackupClient::activate()
     //Set auth token
     std::string token = response["access_token"].GetString();
 
-    if ( token == "" && !response["is_activated"].GetBool() ) {
-        m_activated=false;
-        return false;
+    //If the access token is empty, and the flag is false, activation failed
+    if ( response["is_activated"].GetBool() ) {
+        m_activated=true;
     }
 
     //Set Auth Token?
-    if ( token != "" ) {
-        ldb->update_setting("auth_token", token );
+    if ( token != "" )
+    {
+        //Update DB w/ new token and set member var
+        m_ldb->update_setting("auth_token", token );
         m_auth_token = token;
+
+         //Set DB User ID provided w/ user activation
+        if ( response.HasMember("user_id") )
+        {
+            int user_id = response["user_id"].GetInt();
+            if ( user_id > 0 )
+            {
+                m_ldb->update_setting("user_id", user_id );
+                m_user_id = user_id;
+            }
+        }
+
+        //Generate a new authorization header for subsequent requests
+        m_auth_header = get_auth_header(token, m_user_id);
+
     }
 
-    m_activated=true;
+    //Set Refresh token
+    if ( response.HasMember("refresh_token") )
+    {
+        m_ldb->update_setting("refresh_token", response["refresh_token"].GetString() );
+    }
 
-    return true;
+    return m_activated;
 
 }
 
@@ -882,6 +911,94 @@ void BackupClient::use_compression(bool flag)
 bool BackupClient::refresh_token()
 {
 
+    //Create new JSON document
+    Document doc;
+    doc.SetObject();
+
+    //Get document allocator
+    Document::AllocatorType& alloc = doc.GetAllocator();
+
+    //Get refresh token from LocalDatabase
+    std::string refresh_token = m_ldb->get_setting_str("refresh_token");
+
+    //Get user ID from LocalDatabase
+    int user_id = m_ldb->get_setting_int("user_id");
+
+    //Prepare JSON request
+    Value refresh_token_v( refresh_token.c_str(), refresh_token.size(), alloc );
+    Value user_id_v( user_id );
+
+    doc.AddMember( "refresh_token", refresh_token_v, alloc );
+    doc.AddMember( "user_id", user_id_v, alloc );
+
+    //Write JSON
+    StringBuffer strbuf;
+    PrettyWriter<StringBuffer> writer(strbuf);
+    doc.Accept(writer);
+
+    //Send Http Request
+    HttpRequest r;
+    r.set_method("POST");
+    r.set_uri("/backup/api/v1/refresh_token");
+    r.set_content_type("application/json");
+    r.set_body( strbuf.GetString() );
+
+    this->send_request( &r );
+
+    //Clear existing JSON document
+    strbuf.Clear();
+    doc.RemoveAllMembers();
+    writer.Reset(strbuf);
+
+    //std::cout << "Refresh response: " << m_response_data << std::endl;
+
+    //Parse response and update database
+    ParseResult json_ok = doc.Parse( m_response_data.c_str() );
+
+    if ( !json_ok )
+    {
+        handle_json_error(json_ok);
+        return false;
+    }
+
+    doc.Accept(writer);
+
+    std::cout << "Check 1" << std::endl;
+
+    //Handle errors
+    if ( m_http_status != 200 )
+        return false;
+    else if ( !doc.HasMember("response") )
+        return false;
+
+    std::cout << "Check 2" << std::endl;
+
+    const Value& response = doc["response"];
+
+    //Invalid JSON
+    if ( !response.HasMember("access_token") )
+    {
+        return false;
+    }
+
+    std::cout << "Check 3" << std::endl;
+
+    std::string token = response["access_token"].GetString();
+
+    std::cout << "Check 3.5" << std::endl;
+
+    //Update LocalDatabase Settings
+    m_ldb->update_setting("auth_token", token );
+    m_ldb->update_setting("refresh_token", response["refresh_token"].GetString() );
+    m_ldb->update_setting("token_expiry", response["token_expiry"].GetInt() );
+
+    std::cout << "Check 4" << std::endl;
+
+    //Update Authorization header
+    m_auth_header = get_auth_header(token, user_id );
+
+    return true;
+
 }
 
 void BackupClient::handle_auth_error()
@@ -892,9 +1009,15 @@ void BackupClient::handle_auth_error()
 
     //Try to parse the 401 response
     Document doc;
-    doc.Parse( m_response_data.c_str() );
+    ParseResult json_ok = doc.Parse( m_response_data.c_str() );
 
-    if ( !doc.IsObject() || !doc.HasMember("error") )
+    if ( !json_ok )
+    {
+        handle_json_error(json_ok);
+        return;
+    }
+
+    if ( !doc.HasMember("error") )
     {
         m_log->add_message("Unable to parse 401 authorization response JSON", "Authentication failure");
         return;
@@ -922,4 +1045,59 @@ void BackupClient::handle_auth_error()
         //activate();
     }
 
+}
+
+std::string BackupClient::get_auth_header(const std::string& token, int user_id)
+{
+
+    using namespace CryptoPP;
+
+    std::string header = std::to_string(user_id) + ":" + token;
+    std::string encoded;
+
+    StringSource ss(header, true,
+        new Base64Encoder(
+            new StringSink(encoded), false
+        )
+    );
+
+    return encoded;
+
+}
+
+void BackupClient::handle_api_error()
+{
+
+    Document doc;
+    ParseResult json_ok = doc.Parse( m_response_data.c_str() );
+
+    if ( !json_ok )
+    {
+        handle_json_error(json_ok);
+        return;
+    }
+
+    if ( !doc.HasMember("error") )
+        return; //Nothing to do
+
+    const Value& error = doc["error"];
+
+    if ( error.HasMember("message") )
+    {
+        std::stringstream ss;
+        ss << "API Error: ";
+        ss << error["message"].GetString();
+        ss << ". Status Code: " << std::to_string(m_http_status);
+        m_log->add_message(ss.str(), "API");
+
+    }
+
+}
+
+void BackupClient::handle_json_error(const ParseResult& res)
+{
+    std::stringstream ss;
+    ss << "JSON parser error: ";
+    ss << GetParseError_En(res.Code());
+    m_log->add_message(ss.str(), "JSON");
 }

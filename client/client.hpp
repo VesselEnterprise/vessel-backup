@@ -13,14 +13,20 @@
 #include <boost/lambda/lambda.hpp>
 #include <boost/algorithm/string.hpp>
 
+//CryptoPP
+#include <cryptopp/base64.h>
+
+//RapidJSON
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/error/en.h>
 
 #ifdef _WIN32
     #include <winsock2.h>
 #endif // _WIN32
 
+//Custom includes
 #include "types.hpp"
 #include "local_db.hpp"
 #include "compress.hpp"
@@ -33,6 +39,7 @@
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
 using Backup::File::BackupFile;
+using Backup::Database::LocalDatabase;
 using Backup::Logging::Log;
 using namespace rapidjson;
 namespace ssl = boost::asio::ssl;
@@ -135,6 +142,7 @@ namespace Backup {
                 void use_compression(bool flag);
 
             private:
+                LocalDatabase* m_ldb;
                 std::string m_hostname;
                 std::string m_uri;
                 std::string m_protocol;
@@ -190,9 +198,19 @@ namespace Backup {
 
                 /** Authorization **/
                 void handle_auth_error();
+
+                /*! \fn bool refresh_token();
+                    \brief Sends a token refresh request to the API
+                    \return Returns true if the token was refreshed successfully, false if otherwise
+                */
                 bool refresh_token();
 
+
+                std::string get_auth_header(const std::string& token, int user_id);
+
+                std::string m_auth_header;
                 std::string m_auth_token;
+                int m_user_id;
                 bool m_activated;
                 bool m_use_compression; //Send file content compressed
 
@@ -200,6 +218,16 @@ namespace Backup {
                 Log* m_log;
                 std::string m_error_message;
                 void set_error(const std::string& msg);
+
+                /*! \fn void handle_api_error();
+                    \brief Parses a JSON error response from the server and saves to log
+                */
+                void handle_api_error();
+
+                /*! \fn void handle_json_error(const ParseResult& res);
+                    \brief Handles a JSON parsing error and saves it to the log
+                */
+                void handle_json_error(const ParseResult& res);
 
         };
 
