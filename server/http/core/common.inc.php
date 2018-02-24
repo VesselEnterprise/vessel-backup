@@ -11,9 +11,12 @@ require_once 'session.class.php';
 require_once 'database.class.php';
 require_once 'log.class.php';
 require_once 'user.class.php';
+require_once 'page_renderer.class.php';
 
-//Start a session
+//Common vars
 $common['session'] = BackupSession::getSession();
+$common['database'] = BackupDatabase::getDatabase();
+$common['dbconn'] = $common['database']->getConnection();
 
 
 ?>

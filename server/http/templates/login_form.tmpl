@@ -1,0 +1,35 @@
+<div id="login_form">
+  <form action="login.php" method="POST">
+  <div>
+    <h2>Authentication is required</h2>
+  </div>
+  <div class="table">
+    <div class="table-row">
+      <div class="table-cell">
+        <label for="user_name">Username</label>
+      </div>
+      <div class="table-cell">
+        <input type="text" size="35" name="user_name" id="user_name">
+      </div>
+    </div>
+    <div class="table-row">
+      <div class="table-cell">
+        <label for="password">Password</label>
+      </div>
+      <div class="table-cell">
+        <input type="password" size="35" name="password" id="password">
+      </div>
+    </div>
+  </div>
+  <div class="table">
+    <div class="table-row">
+      <div class="table-cell"><input type="submit" value="Login"></div>
+    </div>
+  </div>
+  <input type="hidden" name="action" value="login">
+  <input type="hidden" name="http_referer" value="<?=$refererUrl?>">
+  </form>
+  <div>
+    <p>You can <a href="register.php">register</a> if you do not have an account.</p>
+  </div>
+</div>

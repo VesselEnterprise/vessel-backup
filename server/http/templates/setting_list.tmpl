@@ -1,0 +1,18 @@
+
+<div class="">
+  <div><h2>Setting Categories</h2>
+  <?php
+    foreach ( $categories as $category ) {
+      echo "<div>" . $category['type'] . "</div>";
+    }
+  ?>
+</div>
+
+<div class="">
+  <div><h2>Settings</h2>
+  <?php
+    foreach ( $settings as $setting ) {
+      echo "<div>" . $setting['description'] . "</div>";
+    }
+  ?>
+</div>

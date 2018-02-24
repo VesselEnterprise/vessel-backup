@@ -1,16 +1,15 @@
-@import url('https://fonts.googleapis.com/css?family=PT+Sans');
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
 * {
-	font-family: 'PT Sans', sans-serif;
+	font-family: 'Source Sans Pro', sans-serif;
 	margin: 0;
 	padding: 0;
 }
 
 div#header {
 	top: 0;
-	width: 100%;
-	height: 55px;
-	background-color: #700000;
+	height: 60px;
+	background-color: #1c0042;
 	color: #fff;
 	padding: 4px;
 }
@@ -28,6 +27,23 @@ table {
 	border-collapse: collapse;
 }
 
+div#content-section {
+	padding: 20px;
+}
+
+div#app_logo {
+	float: left;
+	background-color: #fff;
+	border-radius: 4px;
+	width: 140px;
+}
+
+div#app_title {
+	float: left;
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
 div.app_menu_link {
 	color: #313131;
 	font-size: 14px;
@@ -37,4 +53,56 @@ div.app_menu_link {
 
 .app_menu_link a {
 	color: #313131;
+}
+
+div#login_form {
+	width: 50%;
+	border: 1px dashed #eee;
+	padding: 4px;
+}
+
+input[type="text"], input[type="password"] {
+	height: 40px;
+	padding: 2px;
+	font-size: 16px;
+	color: #313131;
+}
+
+input[type="submit"] {
+	height: 40px;
+	padding: 2px;
+	font-size: 16px;
+	color: #313131;
+	background-color: #eee;
+	width: 150px;
+}
+
+div.table {
+	display: table;
+}
+
+div.table-row {
+	display: table-row;
+}
+
+div.table-cell {
+	display: table-cell;
+	padding: 8px;
+}
+
+tr.list-head {
+	background-color: #daedd9;
+	color: #313131;
+}
+
+th.list-head {
+	text-align: left;
+	font-weight: bold;
+	padding: 8px;
+}
+
+td.list-cell {
+	padding: 8px;
+	text-align: left;
+	border: 1px solid #eee;
 }

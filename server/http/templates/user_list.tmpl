@@ -1,0 +1,27 @@
+
+<table cellpadding="4" cellspacing="0" width="100%">
+  <tr class="list-head">
+    <th class="list-head">Username</th>
+    <th class="list-head">First name</th>
+    <th class="list-head">Last Name</th>
+    <th class="list-head">Email</th>
+    <th class="list-head">Active</th>
+    <th class="list-head">Activated</th>
+    <th class="list-head">Last Login</th>
+    <th class="list-head">Last Backup</th>
+  </tr>
+
+<?php
+  foreach($users as $user) {
+    echo "<td class=\"list-cell\"><a href=\"user.php?id=" . $user['user_id'] . "&action=edit\">" . $user['user_name'] . "</a></td>";
+    echo "<td class=\"list-cell\">" . $user['first_name'] . "</td>";
+    echo "<td class=\"list-cell\">" . $user['last_name'] . "</td>";
+    echo "<td class=\"list-cell\"><a href=\"mailto:" . $user['email'] . "\">" . $user['email'] . "</a></td>";
+    echo "<td class=\"list-cell\">" . ($user['active'] == 0 ? "Yes" : "No") . "</td>";
+    echo "<td class=\"list-cell\">" . ($user['activated'] == 0 ? "Yes" : "No") . "</td>";
+    echo "<td class=\"list-cell\">" . $user['last_login'] . "</td>";
+    echo "<td class=\"list-cell\">" . $user['last_backup'] . "</td>";
+  }
+?>
+
+</table>
