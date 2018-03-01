@@ -2,23 +2,18 @@
 
 require_once 'core/common.inc.php';
 
+$renderer = new PageRenderer();
+$renderer->addTemplate('header');
+
 //Check if the user is already logged in
 if ( $common['session']->isLoggedIn() ) {
-  die("You are already logged in.");
+  $renderer->addTemplate('generic_message', array("message" => "You are already logged in"));
 }
 
   //Display login form
 if ( !isset($_POST['action']) ) {
 
-  $renderer = new PageRenderer();
-
-  $renderer->addTemplate('header');
-
   $renderer->addTemplate('login_form', array('refererUrl' => $common['session']->getRefererURL()) );
-
-  $renderer->addTemplate('footer');
-
-  $renderer->render();
 
 }
 
@@ -52,5 +47,8 @@ if ( isset($_POST['action']) && $_POST['action'] == "login" ) {
 	}
 
 }
+
+$renderer->addTemplate('footer');
+$renderer->render();
 
 ?>

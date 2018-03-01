@@ -17,8 +17,8 @@
     echo "<td class=\"list-cell\">" . $user['first_name'] . "</td>";
     echo "<td class=\"list-cell\">" . $user['last_name'] . "</td>";
     echo "<td class=\"list-cell\"><a href=\"mailto:" . $user['email'] . "\">" . $user['email'] . "</a></td>";
-    echo "<td class=\"list-cell\">" . ($user['active'] == 0 ? "Yes" : "No") . "</td>";
-    echo "<td class=\"list-cell\">" . ($user['activated'] == 0 ? "Yes" : "No") . "</td>";
+    echo "<td class=\"list-cell\">" . ($user['active'] == 0 ? "No" : "Yes") . "</td>";
+    echo "<td class=\"list-cell\">" . ($user['activated'] == 0 ? "No" : "Yes") . "</td>";
     echo "<td class=\"list-cell\">" . $user['last_login'] . "</td>";
     echo "<td class=\"list-cell\">" . $user['last_backup'] . "</td>";
   }

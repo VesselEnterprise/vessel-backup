@@ -10,6 +10,16 @@
 	<div id="header">
 		<div id="app_logo"><a href="index.php"><img src="images/logo.png" width="120" height="58"></a></div>
 		<div id="app_title"><h2>Enterprise Backup Server</h2></div>
+		<div id="user_greeting">
+			<?php
+				$session = BackupSession::getSession();
+				if ( $session->isLoggedIn() ) {
+					echo "Welcome, <b>" . $session->getSessionUserFullName() . "</b>";
+					echo "<br/>";
+					echo "<a href=\"logout.php\">Logout</a>";
+				}
+			?>
+		</div>
 	</div>
 
 	<div id="app_menu">

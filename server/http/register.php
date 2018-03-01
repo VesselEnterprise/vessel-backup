@@ -2,17 +2,13 @@
 
 require_once 'core/common.inc.php';
 
+$renderer = new PageRenderer();
+$renderer->addTemplate('header');
+
 //Display registration form
 if ( !isset($_POST['action']) ) {
 
-  $renderer = new PageRenderer();
-  $renderer->addTemplate('header');
-
   $renderer->addTemplate('register', array('refererUrl' => $common['session']->getRefererURL()) );
-
-  $renderer->addTemplate('footer');
-
-  $renderer->render();
 
 }
 
@@ -81,6 +77,9 @@ if ( isset($_POST['action']) && $_POST['action'] == "register") {
       $user->createUserActivation();
 
       BackupLog::getLog($userID)->addMessage("User " . $username . " has been registered", "User Registration", 0, true);
+
+      $renderer->addTemplate('generic_message', array("message" => "You have successfully been registered. After your account has been approved, you will receive an email confirmation to activate your account"));
+
     }
 
     $stmt->close();
@@ -88,5 +87,9 @@ if ( isset($_POST['action']) && $_POST['action'] == "register") {
   }
 
 }
+
+
+$renderer->addTemplate('footer');
+$renderer->render();
 
 ?>

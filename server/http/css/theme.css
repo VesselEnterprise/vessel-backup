@@ -14,6 +14,10 @@ div#header {
 	padding: 4px;
 }
 
+div#header a {
+	color: #fff;
+}
+
 div#app_menu {
 	height: 30px;
 	background-color: #ddd;
@@ -90,6 +94,13 @@ div.table-cell {
 	padding: 8px;
 }
 
+div.list-head {
+	background-color: #daedd9;
+	color: #313131;
+	margin-bottom: 8px;
+	padding: 4px;
+}
+
 tr.list-head {
 	background-color: #daedd9;
 	color: #313131;
@@ -105,4 +116,41 @@ td.list-cell {
 	padding: 8px;
 	text-align: left;
 	border: 1px solid #eee;
+}
+
+div.info-box {
+	padding: 8px;
+	color: #313131;
+	border: 1px dashed #eee;
+	width: 50%;
+}
+
+div.content-box-sm {
+	padding: 4px;
+	width: 25%;
+	border: 1px dashed #daedd9;
+}
+
+div.content-box-med {
+	padding: 8px;
+	width: 65%;
+	border: 1px dashed #daedd9;
+}
+
+div.setting-category {
+	padding: 8px;
+	height: 40px;
+	width: 100%;
+	background-color: #eee;
+	font-size: 16px;
+}
+
+div.setting-row {
+	margin-bottom: 4px;
+	clear: both;
+}
+
+div#user_greeting {
+	float: right;
+	margin: 8px;
 }
