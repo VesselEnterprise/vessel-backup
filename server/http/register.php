@@ -76,7 +76,7 @@ if ( isset($_POST['action']) && $_POST['action'] == "register") {
       $user = new BackupUser($userID);
       $user->createUserActivation();
 
-      BackupLog::getLog($userID)->addMessage("User " . $username . " has been registered", "User Registration", 0, true);
+      BackupLog::getLog($userID)->addMessage("User " . $username . " has been registered", "User Registration");
 
       $renderer->addTemplate('generic_message', array("message" => "You have successfully been registered. After your account has been approved, you will receive an email confirmation to activate your account"));
 

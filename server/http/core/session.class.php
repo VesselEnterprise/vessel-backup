@@ -10,10 +10,10 @@ class BackupSession
 	private static $factory;
 	private $_userId = -1;
 	private $_dbconn;
-	private $_loginSuccess;
+	private $_loginSuccess=false;
 	private $_sessionHash;
 	private $_sessionId = -1;
-	private $_sessionExpired;
+	private $_sessionExpired=false;
 	private $_ip_address;
 	private $_log;
 
@@ -129,6 +129,10 @@ class BackupSession
 		session_unset();
 		session_destroy();
 
+		$this->_loginSuccess = false;
+		$this->_sessionExpired = true;
+		$this->_userId = -1;
+
 		return true;
 
 	}
@@ -163,36 +167,51 @@ class BackupSession
 
 	}
 
-	private function _validateSession() {
+	private function _validateSession($hash) {
 
 		$isValid=false;
 
-		$query = "SELECT session_id,UNIX_TIMESTAMP(last_accessed),user_id FROM backup_user_session WHERE session_hash = '" . $this->_sessionHash . "' AND expired=0";
-		if ( $result = mysqli_query($this->_dbconn, $query) ) {
+		$query = "SELECT session_id,UNIX_TIMESTAMP(last_accessed) AS last_accessed,user_id FROM backup_user_session WHERE session_hash=? AND expired=0";
+		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
-			if ( $row = mysqli_fetch_row($result) ) {
+			$stmt->bind_param('s', $hash);
+			if ( $stmt->execute() ) {
 
-				$d = new DateTime();
-				$d->setTimestamp( $row[1] );
-				$d->add( new DateInterval('P1D') );
+				if ( $result = $stmt->get_result() ) {
 
-				//Check if session is >= 24 hours old
-				if ( time() >= $d->getTimestamp() ) {
+					if ( $row = $result->fetch_assoc() ) {
 
-					$this->_expireSession($this->_sessionHash);
+						$d = new DateTime();
+						$d->setTimestamp( $row['last_accessed'] );
+						$d->add( new DateInterval('P1D') );
 
-					$isValid=false;
-				}
-				else {
-					$isValid=true;
-					/* If session hash is valid, not expired, and user Id is > 0, user is logged in */
-					if ( $row[2] > 0 )
-						$this->_loginSuccess=true; //User is logged in
+						//Check if session is >= 24 hours old
+						if ( time() >= $d->getTimestamp() ) {
+
+							$this->_expireSession($this->_sessionHash);
+							$isValid=false;
+							$this->_loginSuccess=false; //User is NOT logged in
+
+						}
+						else {
+
+							//Session is invalid if it's not expired
+							$isValid=true;
+
+							/* If session hash is valid, not expired, and user Id is > 0, user is logged in */
+							if ( $row['user_id'] > 0 ) {
+								$this->_loginSuccess=true; //User is logged in
+							}
+
+						}
+
+					}
+
 				}
 
 			}
 
-			$result->close();
+			$stmt->close();
 
 		}
 
@@ -242,17 +261,18 @@ class BackupSession
 			}
 
 			//Validate session
-			if ( $this->_validateSession() ) {
+			if ( $this->_validateSession($this->_sessionHash) ) {
 
 				//User is already logged in
 				//Update last access time
-
 				$this->_updateLastAccessed();
 				return;
+
 			}
 			else {
 				//Clear cookies and force login
 				$this->_clearCookies();
+				$this->_userId = -1;
 			}
 
 		}

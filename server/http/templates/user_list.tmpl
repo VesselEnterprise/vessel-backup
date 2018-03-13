@@ -13,6 +13,7 @@
 
 <?php
   foreach($users as $user) {
+    echo "<tr>";
     echo "<td class=\"list-cell\"><a href=\"user.php?id=" . $user['user_id'] . "&action=edit\">" . $user['user_name'] . "</a></td>";
     echo "<td class=\"list-cell\">" . $user['first_name'] . "</td>";
     echo "<td class=\"list-cell\">" . $user['last_name'] . "</td>";
@@ -21,6 +22,7 @@
     echo "<td class=\"list-cell\">" . ($user['activated'] == 0 ? "No" : "Yes") . "</td>";
     echo "<td class=\"list-cell\">" . $user['last_login'] . "</td>";
     echo "<td class=\"list-cell\">" . $user['last_backup'] . "</td>";
+    echo "</tr>";
   }
 ?>
 

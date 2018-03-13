@@ -525,6 +525,30 @@ void LocalDatabase::update_client_settings(const std::string& s )
 
 }
 
+std::string LocalDatabase::get_mime_type( const std::string& ext )
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "SELECT mime FROM backup_mime_type WHERE ext=?1";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return "";
+
+    sqlite3_bind_text(stmt, 1, ext.c_str(), ext.size(), 0 );
+
+    std::string val="";
+
+    if ( sqlite3_step(stmt) == SQLITE_ROW )
+    {
+        val = (char*)sqlite3_column_text(stmt,0);
+    }
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    return val;
+}
+
 void LocalDatabase::build_queue()
 {
 

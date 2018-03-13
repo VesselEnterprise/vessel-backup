@@ -125,10 +125,21 @@ div.info-box {
 	width: 50%;
 }
 
+div.info-box-error {
+	padding: 8px;
+	color: red;
+	border: 1px dashed red;
+	width: 50%;
+}
+
 div.content-box-sm {
 	padding: 4px;
 	width: 25%;
 	border: 1px dashed #daedd9;
+}
+
+.content-box-sm a {
+	color: #313131;
 }
 
 div.content-box-med {
@@ -147,6 +158,7 @@ div.setting-category {
 
 div.setting-row {
 	margin-bottom: 4px;
+	height: 60px;
 	clear: both;
 }
 

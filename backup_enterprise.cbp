@@ -5,9 +5,10 @@
 		<Option title="backup_enterprise" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Tests\;" />
+		<Option virtualFolders="Tests/;" />
 		<Build>
 			<Target title="win64-client-debug">
+				<Option platforms="Windows;" />
 				<Option output="bin/Debug/win64/client/backup_client" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -31,6 +32,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-client">
+				<Option platforms="Windows;" />
 				<Option output="bin/win64/client/backup_client" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -58,6 +60,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-compress_test">
+				<Option platforms="Windows;" />
 				<Option output="bin/tests/win64/compression/compress_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -78,6 +81,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-tarball_test">
+				<Option platforms="Windows;" />
 				<Option output="bin/tests/win64/tarball/tarball_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -98,6 +102,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-db_test">
+				<Option platforms="Windows;" />
 				<Option output="bin/tests/win64/db/db_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -118,6 +123,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-file_test">
+				<Option platforms="Windows;" />
 				<Option output="bin/tests/win64/file_iterator/file_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -138,6 +144,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-server">
+				<Option platforms="Windows;" />
 				<Option output="bin/win64/server/backup_server" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -158,6 +165,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-client_test">
+				<Option platforms="Windows;" />
 				<Option output="bin/tests/win64/client/client_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -183,6 +191,7 @@
 				</Linker>
 			</Target>
 			<Target title="win64-upload_test">
+				<Option platforms="Windows;" />
 				<Option output="bin/tests/win64/client/upload_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -208,6 +217,7 @@
 				</Linker>
 			</Target>
 			<Target title="linux-server">
+				<Option platforms="Unix;" />
 				<Option output="bin/linux/server/backup_server" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
@@ -226,13 +236,11 @@
 				</Linker>
 			</Target>
 			<Target title="linux-client_test">
+				<Option platforms="Unix;" />
 				<Option output="bin/tests/linux/client/client_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Compiler>
-					<Add directory="client" />
-				</Compiler>
 				<Linker>
 					<Add option="-lssl" />
 					<Add option="-lcrypto" />
@@ -252,13 +260,11 @@
 				</Linker>
 			</Target>
 			<Target title="linux-client">
+				<Option platforms="Unix;" />
 				<Option output="bin/linux/client/backup_client" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Compiler>
-					<Add directory="client" />
-				</Compiler>
 				<Linker>
 					<Add option="-lssl" />
 					<Add option="-lcrypto" />
@@ -277,13 +283,59 @@
 				</Linker>
 			</Target>
 			<Target title="linux-upload_test">
+				<Option platforms="Unix;" />
 				<Option output="bin/tests/linux/client/upload_test" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="run" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Compiler>
-					<Add directory="client" />
-				</Compiler>
+				<Linker>
+					<Add option="-lssl" />
+					<Add option="-lcrypto" />
+					<Add option="-ldl" />
+					<Add option="-lboost_system" />
+					<Add option="-lboost_filesystem" />
+					<Add option="-lboost_date_time" />
+					<Add option="-lboost_timer" />
+					<Add option="-lboost_thread" />
+					<Add option="-lboost_log" />
+					<Add option="-lboost_log_setup" />
+					<Add option="-larchive" />
+					<Add option="-lsqlite3" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz" />
+					<Add option="-lpthread" />
+				</Linker>
+			</Target>
+			<Target title="linux-awsS3_test">
+				<Option platforms="Unix;" />
+				<Option output="bin/tests/linux/client/awsS3_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-lssl" />
+					<Add option="-lcrypto" />
+					<Add option="-ldl" />
+					<Add option="-lboost_system" />
+					<Add option="-lboost_filesystem" />
+					<Add option="-lboost_date_time" />
+					<Add option="-lboost_timer" />
+					<Add option="-lboost_thread" />
+					<Add option="-lboost_log" />
+					<Add option="-lboost_log_setup" />
+					<Add option="-larchive" />
+					<Add option="-lsqlite3" />
+					<Add option="-lcryptopp" />
+					<Add option="-lz" />
+					<Add option="-lpthread" />
+				</Linker>
+			</Target>
+			<Target title="mime_test">
+				<Option platforms="Windows;Unix;" />
+				<Option output="bin/tests/linux/mime/mime_test" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="run" />
+				<Option type="1" />
+				<Option compiler="gcc" />
 				<Linker>
 					<Add option="-lssl" />
 					<Add option="-lcrypto" />
@@ -318,6 +370,7 @@
 			<Add directory="core" />
 			<Add directory="../../lib/openssl-1.1.0e/include" />
 			<Add directory="../../lib/rapidjson/include" />
+			<Add directory="client" />
 		</Compiler>
 		<Linker>
 			<Add directory="../../lib/zlib-1.2.11/lib" />
@@ -328,28 +381,30 @@
 			<Add directory="/usr/local/lib" />
 			<Add directory="../../lib/openssl-1.1.0e/lib" />
 		</Linker>
-		<Unit filename="client/client.cpp">
-			<Option target="win64-client-debug" />
-			<Option target="win64-client" />
-			<Option target="win64-client_test" />
-			<Option target="linux-client_test" />
-			<Option target="linux-client" />
-			<Option target="linux-upload_test" />
-			<Option target="win64-upload_test" />
-		</Unit>
-		<Unit filename="client/client.hpp">
-			<Option target="win64-client-debug" />
-			<Option target="win64-client" />
-			<Option target="win64-client_test" />
-			<Option target="linux-client_test" />
-			<Option target="linux-client" />
-			<Option target="linux-upload_test" />
-			<Option target="win64-upload_test" />
-		</Unit>
 		<Unit filename="client/main.cpp">
 			<Option target="win64-client-debug" />
 			<Option target="win64-client" />
 			<Option target="linux-client" />
+		</Unit>
+		<Unit filename="client/vessel_client.cpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-client_test" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
+			<Option target="linux-awsS3_test" />
+		</Unit>
+		<Unit filename="client/vessel_client.hpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-client_test" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="win64-upload_test" />
+			<Option target="linux-awsS3_test" />
 		</Unit>
 		<Unit filename="core/compress.cpp" />
 		<Unit filename="core/compress.hpp" />
@@ -360,6 +415,8 @@
 			<Option target="linux-client" />
 			<Option target="linux-upload_test" />
 			<Option target="win64-upload_test" />
+			<Option target="linux-awsS3_test" />
+			<Option target="mime_test" />
 		</Unit>
 		<Unit filename="core/file.hpp">
 			<Option target="win64-client" />
@@ -368,9 +425,51 @@
 			<Option target="linux-client" />
 			<Option target="linux-upload_test" />
 			<Option target="win64-upload_test" />
+			<Option target="linux-awsS3_test" />
+			<Option target="mime_test" />
 		</Unit>
-		<Unit filename="core/file_iterator.cpp" />
-		<Unit filename="core/file_iterator.hpp" />
+		<Unit filename="core/file_iterator.cpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-compress_test" />
+			<Option target="win64-tarball_test" />
+			<Option target="win64-db_test" />
+			<Option target="win64-file_test" />
+			<Option target="win64-server" />
+			<Option target="win64-client_test" />
+			<Option target="win64-upload_test" />
+			<Option target="linux-server" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+		</Unit>
+		<Unit filename="core/file_iterator.hpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-compress_test" />
+			<Option target="win64-tarball_test" />
+			<Option target="win64-db_test" />
+			<Option target="win64-file_test" />
+			<Option target="win64-server" />
+			<Option target="win64-client_test" />
+			<Option target="win64-upload_test" />
+			<Option target="linux-server" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+		</Unit>
+		<Unit filename="core/http_client.cpp">
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="linux-awsS3_test" />
+		</Unit>
+		<Unit filename="core/http_client.hpp">
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="linux-awsS3_test" />
+		</Unit>
 		<Unit filename="core/http_request.cpp">
 			<Option target="win64-client" />
 			<Option target="win64-client_test" />
@@ -378,6 +477,7 @@
 			<Option target="linux-client" />
 			<Option target="linux-upload_test" />
 			<Option target="win64-upload_test" />
+			<Option target="linux-awsS3_test" />
 		</Unit>
 		<Unit filename="core/http_request.hpp">
 			<Option target="win64-client" />
@@ -386,14 +486,64 @@
 			<Option target="linux-client" />
 			<Option target="linux-upload_test" />
 			<Option target="win64-upload_test" />
+			<Option target="linux-awsS3_test" />
 		</Unit>
 		<Unit filename="core/local_db.cpp" />
 		<Unit filename="core/local_db.hpp" />
 		<Unit filename="core/log.cpp" />
 		<Unit filename="core/log.hpp" />
-		<Unit filename="core/tarball.cpp" />
-		<Unit filename="core/tarball.hpp" />
-		<Unit filename="core/types.hpp" />
+		<Unit filename="core/s3client.cpp">
+			<Option target="linux-awsS3_test" />
+		</Unit>
+		<Unit filename="core/s3client.hpp">
+			<Option target="linux-awsS3_test" />
+		</Unit>
+		<Unit filename="core/tarball.cpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-compress_test" />
+			<Option target="win64-tarball_test" />
+			<Option target="win64-db_test" />
+			<Option target="win64-file_test" />
+			<Option target="win64-server" />
+			<Option target="win64-client_test" />
+			<Option target="win64-upload_test" />
+			<Option target="linux-server" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+		</Unit>
+		<Unit filename="core/tarball.hpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-compress_test" />
+			<Option target="win64-tarball_test" />
+			<Option target="win64-db_test" />
+			<Option target="win64-file_test" />
+			<Option target="win64-server" />
+			<Option target="win64-client_test" />
+			<Option target="win64-upload_test" />
+			<Option target="linux-server" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+		</Unit>
+		<Unit filename="core/types.hpp">
+			<Option target="win64-client-debug" />
+			<Option target="win64-client" />
+			<Option target="win64-compress_test" />
+			<Option target="win64-tarball_test" />
+			<Option target="win64-db_test" />
+			<Option target="win64-file_test" />
+			<Option target="win64-server" />
+			<Option target="win64-client_test" />
+			<Option target="win64-upload_test" />
+			<Option target="linux-server" />
+			<Option target="linux-client_test" />
+			<Option target="linux-client" />
+			<Option target="linux-upload_test" />
+			<Option target="mime_test" />
+		</Unit>
 		<Unit filename="core/version.hpp">
 			<Option target="win64-client" />
 			<Option target="win64-client_test" />
@@ -401,10 +551,14 @@
 			<Option target="linux-client" />
 			<Option target="linux-upload_test" />
 			<Option target="win64-upload_test" />
+			<Option target="mime_test" />
 		</Unit>
 		<Unit filename="tests/client/client_test.cpp">
 			<Option target="win64-client_test" />
 			<Option target="linux-client_test" />
+		</Unit>
+		<Unit filename="tests/client/s3upload_test.cpp">
+			<Option target="linux-awsS3_test" />
 		</Unit>
 		<Unit filename="tests/client/upload_test.cpp">
 			<Option target="linux-upload_test" />
@@ -421,6 +575,9 @@
 		<Unit filename="tests/file_iterator/file_test.cpp">
 			<Option virtualFolder="Tests/" />
 			<Option target="win64-file_test" />
+		</Unit>
+		<Unit filename="tests/mime/mime.cpp">
+			<Option target="mime_test" />
 		</Unit>
 		<Unit filename="tests/tarball/tarball_test.cpp">
 			<Option virtualFolder="Tests/" />

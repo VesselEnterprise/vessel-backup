@@ -64,6 +64,8 @@ namespace Backup{
 
                 std::string get_last_err();
 
+                std::string get_mime_type(const std::string& ext);
+
                 void update_global_settings();
 
                 void update_client_settings( const std::string& s );
@@ -73,7 +75,7 @@ namespace Backup{
 
                 void build_queue();
 
-            protected:
+            //protected:
                 sqlite3* get_handle();
 
             private:

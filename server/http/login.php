@@ -32,18 +32,16 @@ if ( isset($_POST['action']) && $_POST['action'] == "login" ) {
   //Attempt to login
 	if ( $common['session']->login($user_name,$password) ) {
 
-		echo "Login was successful!<br/>";
-
 		if ( !empty($_POST['http_referer']) ) {
 
-			echo "You will now be redirected in 3 seconds...";
-
-			echo "<script>setTimeout(function() { window.location = \"" . $_POST['http_referer'] . "\"; }, 3000 );</script>";
+			$renderer->addTemplate('login_success', array("message" => "Login successful. You will now be redirected - please wait..."));
 
 		}
 	}
 	else {
-		die("Error: Failed to authenticate. Please check your username or password.");
+		$renderer->addTemplate("generic_error", array("message" => "Error: Failed to authenticate. Please check your username or password.") );
+    $renderer->addContent("<br/>");
+    $renderer->addTemplate("login_form", array('refererUrl' => $common['session']->getRefererURL()) );
 	}
 
 }

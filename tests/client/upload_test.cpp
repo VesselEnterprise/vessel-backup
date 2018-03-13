@@ -1,6 +1,6 @@
 #include "local_db.hpp"
 #include "file.hpp"
-#include "client.hpp"
+#include "vessel_client.hpp"
 
 #include <sstream>
 #include <boost/timer/timer.hpp>
@@ -18,8 +18,13 @@ int main(int argc, char** argv)
 
     std::string host = ldb->get_setting_str("master_server");
 
-    BackupClient* cli = new BackupClient(host);
+    VesselClient* cli = new VesselClient(host + "/some_resource/hodor/bodor php");
     cli->use_compression(true);
+
+    std::cout << "URI path: " << cli->get_uri_path() << "\n";
+    std::cout << "Encoded URL: " << cli->encode_uri(cli->get_uri_path()) << "\n";
+
+    return 0;
 
     /**
     ** Test User Activation
@@ -34,7 +39,7 @@ int main(int argc, char** argv)
     //std::string test_file = "C:\\Users\\kett.ky\\Downloads\\FileZilla_3.30.0_win64-setup.exe"; //Windows
     //std::string test_file = "/home/kyle/Downloads/ServiceNowCAD.pdf";
 
-    std::string test_file = "/home/kyle/Downloads/codeblocks_17.12_amd64_stable.tar.xz";
+    std::string test_file = "/home/kyle/Downloads/VRRENEWAL.pdf";
 
     BackupFile* bf = new BackupFile(test_file);
 
@@ -57,9 +62,10 @@ int main(int argc, char** argv)
     //Initialize upload
     int upload_id = cli->init_upload(bf);
 
-    while ( upload_id < 0 )
+    if ( upload_id < 0 )
     {
-        upload_id = cli->init_upload(bf);
+        std::cout << "There was an error intializing the file upload" << std::endl;
+        return 1;
     }
 
     std::cout << "Initialized upload id: " << upload_id << std::endl;
