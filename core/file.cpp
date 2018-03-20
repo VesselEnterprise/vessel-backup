@@ -25,6 +25,7 @@ void BackupFile::update_attributes()
         m_file_attrs.parent_path = m_file_path.parent_path().string();
         m_file_attrs.file_type = m_file_path.extension().string();
         m_file_attrs.file_size = fs::file_size( m_file_path );
+        m_file_attrs.mime_type = &Backup::Database::LocalDatabase::get_database()->get_mime_type(m_file_attrs.file_type);
         m_unique_id = calculate_unique_id();
 
         try
@@ -72,6 +73,11 @@ std::string BackupFile::get_file_type()
     return m_file_attrs.file_type;
 }
 
+std::string BackupFile::get_mime_type()
+{
+    return m_file_attrs.mime_type;
+}
+
 std::string BackupFile::get_file_path()
 {
     return m_file_attrs.file_path;
@@ -92,7 +98,7 @@ unsigned long BackupFile::get_last_modified()
     return m_file_attrs.last_write_time;
 }
 
-std::string BackupFile::get_hash()
+std::string BackupFile::get_hash_sha1()
 {
 
     using namespace CryptoPP;
@@ -136,12 +142,70 @@ std::string BackupFile::get_hash()
 
 }
 
-std::string BackupFile::get_hash( const std::string& data )
+std::string BackupFile::get_hash_sha256()
+{
+
+    using namespace CryptoPP;
+
+    SHA256 hash;
+    std::string digest;
+
+    //Use this method for larger files
+    if ( get_file_size() > BACKUP_LARGE_SZ )
+    {
+        /**
+        * This peforms about 20% slower than reading the file manually and passing to StringSource
+        */
+        FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+    }
+    else
+    {
+
+        if ( m_content.empty() )
+        {
+
+            //Read file contents
+            std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
+            if ( !infile.is_open() )
+                return ""; //No hash
+
+            infile.seekg( 0, std::ios::end );
+            auto file_size = infile.tellg();
+            m_content.resize( file_size ); //Pre-allocate memory
+            infile.seekg( 0, std::ios::beg );
+            infile.read( &m_content[0], m_content.size() ); //Read contents
+            infile.close(); //Close file
+
+        }
+
+        StringSource s(m_content, true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+
+    }
+
+    return digest;
+
+}
+
+std::string BackupFile::get_hash_sha1( const std::string& data )
 {
 
     using namespace CryptoPP;
 
     SHA1 hash;
+    std::string digest;
+
+    StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+
+    return digest;
+
+}
+
+std::string BackupFile::get_hash_sha256( const std::string& data )
+{
+
+    using namespace CryptoPP;
+
+    SHA256 hash;
     std::string digest;
 
     StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );

@@ -13,6 +13,7 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
+#include "local_db.hpp"
 #include "compress.hpp"
 
 #define BACKUP_LARGE_SZ 52428800 //Default size in bytes of what should be considered a larger file (50MB)
@@ -37,6 +38,7 @@ namespace Backup {
                 std::string file_path;
                 std::string parent_path;
                 std::string relative_path;
+                std::string mime_type;
                 size_t file_size;
                 unsigned long last_write_time;
             };
@@ -73,6 +75,11 @@ namespace Backup {
                 */
                 std::string get_file_type();
 
+                /*! \fn std::string get_mime_type();
+                    \return Returns the MIME type for the file extension (if it exists)
+                */
+                std::string get_mime_type();
+
                 /*! \fn std::string get_file_contents();
                     \return Returns the file contents
                 */
@@ -84,17 +91,23 @@ namespace Backup {
                 */
                 std::string get_unique_id();
 
-                /*! \fn std::string get_hash();
+                /*! \fn std::string get_hash_sha1();
                     \brief
                     \return Returns a SHA-1 hash of the file contents
                 */
-                std::string get_hash();
+                std::string get_hash_sha1();
 
-                /*! \fn std::string get_hash(const std::string& content);
+                /*! \fn std::string get_hash_sha1(const std::string& content);
                     \brief
                     \return Returns a SHA-1 hash of the provided data
                 */
-                std::string get_hash(const std::string& data);
+                std::string get_hash_sha1(const std::string& data);
+
+                /*! \fn std::string get_hash_sha256();
+                    \brief
+                    \return Returns a SHA-256 hash of the file contents
+                */
+                std::string get_hash_sha256();
 
                 /*! \fn unsigned int get_directory_id();
                     \brief

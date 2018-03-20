@@ -127,7 +127,7 @@ int VesselClient::init_upload ( Backup::File::BackupFile * bf )
     jmap.insert( std::pair<std::string,Value>( "file_name", Value( bf->get_file_name().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "file_size", Value( bf->get_file_size() ) ) );
     jmap.insert( std::pair<std::string,Value>( "file_type", Value( bf->get_file_type().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash_sha1().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf->get_parent_path().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf->get_last_modified() ) ) );
     jmap.insert( std::pair<std::string,Value>( "parts", Value( bf->get_total_parts() ) ) );
@@ -235,7 +235,7 @@ bool VesselClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
     jmap.insert( std::pair<std::string,Value>( "file_id", Value( bf->get_unique_id().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "part_number", Value( part_number) ) );
     jmap.insert( std::pair<std::string,Value>( "part_size", Value( file_part.size() ) ) );
-    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash(file_part).c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash_sha1(file_part).c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "compressed", Value( m_use_compression ) ) );
 
     //Add values to document object
