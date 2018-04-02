@@ -10,6 +10,9 @@ VesselClient::VesselClient( const std::string& host ) : HttpClient(host)
     //Set local database object
     m_ldb = &Backup::Database::LocalDatabase::get_database();
 
+    //Get log
+    m_log = new Backup::Logging::Log("vessel_cli");
+
     //Get user information
     this->m_auth_token = m_ldb->get_setting_str("auth_token");
     this->m_user_id = m_ldb->get_setting_int("user_id");
@@ -97,6 +100,8 @@ void VesselClient::send_request( Backup::Networking::HttpRequest* r )
 
     unsigned int http_status = get_http_status();
 
+     std::cout << "HTTP Status: " << http_status << "\n";
+
     /**
      ** Handle HTTP Error codes
      ** The 401 handler is designed to perform a user activation or token refresh on the fly in the event of authorization failures
@@ -123,12 +128,14 @@ int VesselClient::init_upload ( Backup::File::BackupFile * bf )
 
     std::map<std::string,Value> jmap;
 
+    std::string parent_path = Backup::File::BackupDirectory(bf->get_parent_path()).get_canonical_path();
+
     //Get Activation Code from DB
     jmap.insert( std::pair<std::string,Value>( "file_name", Value( bf->get_file_name().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "file_size", Value( bf->get_file_size() ) ) );
     jmap.insert( std::pair<std::string,Value>( "file_type", Value( bf->get_file_type().c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash_sha1().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "file_path", Value( bf->get_parent_path().c_str(), alloc ) ) );
+    jmap.insert( std::pair<std::string,Value>( "file_path", Value( parent_path.c_str(), alloc ) ) );
     jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf->get_last_modified() ) ) );
     jmap.insert( std::pair<std::string,Value>( "parts", Value( bf->get_total_parts() ) ) );
     jmap.insert( std::pair<std::string,Value>( "compressed", Value( m_use_compression ) ) );
@@ -508,15 +515,11 @@ bool VesselClient::refresh_token()
 
     doc.Accept(writer);
 
-    std::cout << "Check 1" << std::endl;
-
     //Handle errors
     if ( get_http_status() != 200 )
         return false;
     else if ( !doc.HasMember("response") )
         return false;
-
-    std::cout << "Check 2" << std::endl;
 
     const Value& response = doc["response"];
 
@@ -526,18 +529,12 @@ bool VesselClient::refresh_token()
         return false;
     }
 
-    std::cout << "Check 3" << std::endl;
-
     std::string token = response["access_token"].GetString();
-
-    std::cout << "Check 3.5" << std::endl;
 
     //Update LocalDatabase Settings
     m_ldb->update_setting("auth_token", token );
     m_ldb->update_setting("refresh_token", response["refresh_token"].GetString() );
     m_ldb->update_setting("token_expiry", response["token_expiry"].GetInt() );
-
-    std::cout << "Check 4" << std::endl;
 
     //Update Authorization header
     m_auth_header = get_auth_header(token, user_id );

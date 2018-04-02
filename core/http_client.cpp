@@ -398,6 +398,8 @@ void HttpClient::handle_read_content( const boost::system::error_code& e )
     else
     {
 
+        std::cout << m_response_data << "\n";
+
         /** Response should be read at this point **/
         m_response_ec = boost::asio::error::eof;
 

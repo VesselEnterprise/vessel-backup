@@ -19,12 +19,12 @@ int main(int argc, char** argv)
     std::string host = ldb->get_setting_str("master_server");
 
     VesselClient* cli = new VesselClient(host + "/some_resource/hodor/bodor php");
-    cli->use_compression(true);
+    cli->use_compression(false);
 
     std::cout << "URI path: " << cli->get_uri_path() << "\n";
     std::cout << "Encoded URL: " << cli->encode_uri(cli->get_uri_path()) << "\n";
 
-    return 0;
+    //return 0;
 
     /**
     ** Test User Activation
@@ -39,9 +39,11 @@ int main(int argc, char** argv)
     //std::string test_file = "C:\\Users\\kett.ky\\Downloads\\FileZilla_3.30.0_win64-setup.exe"; //Windows
     //std::string test_file = "/home/kyle/Downloads/ServiceNowCAD.pdf";
 
-    std::string test_file = "/home/kyle/Downloads/VRRENEWAL.pdf";
+    std::string test_file = "test_files/test.txt";
 
     BackupFile* bf = new BackupFile(test_file);
+
+    std::cout << "File Unique ID: " << bf->get_unique_id() << "\n";
 
     //Test Multi Part Uploads
     //std::string large_file = "/home/kyle/Downloads/artful-desktop-amd64.iso"; //Linux
@@ -92,6 +94,7 @@ int main(int argc, char** argv)
         cli->upload_file_part(bf, i);
     }
 
+    delete bfc;
     delete bf;
     delete cli;
 

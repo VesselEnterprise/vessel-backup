@@ -3,23 +3,26 @@
 #include "log.hpp"
 
 using std::cout;
-using namespace Backup;
+using namespace Backup::File;
+using namespace Backup::Logging;
+using namespace Backup::Database;
 
 int main()
 {
 
-    Logging::Log* log = new Logging::Log("output");
-    Database::LocalDatabase* ldb = new Database::LocalDatabase("local.db");
+    Log* log = new Log("output");
+    LocalDatabase* ldb = &LocalDatabase::get_database();
 
-    FileIterator* fi = new FileIterator( ldb->get_setting_str("home_folder") );
-    fi->set_local_db(ldb);
+    BackupDirectory bd( "test_files" );
+
+    FileIterator* fi = new FileIterator(bd);
 
     cout << fi->get_base_path() << std::endl;
 
     fi->scan();
     ldb->clean();
 
-    log->set_level( Logging::info );
+    log->set_level( Backup::Logging::info );
     log->add_message("This is some test text", "File Backup");
 
     delete fi;

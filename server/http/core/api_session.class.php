@@ -1,6 +1,7 @@
 <?php
 
 require_once 'database.class.php';
+require_once 'api_exception.class.php';
 
 class BackupAPISession
 {
@@ -55,8 +56,7 @@ class BackupAPISession
 		$authParts = explode(":", $headerDecoded, 2);
 
 		if ( count($authParts) < 2 ) {
-			$this->_setError("Authorization header is invalid");
-			return;
+			throw new APIException("Authorization header is invalid");
 		}
 
 		$this->_userId = (int)$authParts[0];

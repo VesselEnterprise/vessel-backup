@@ -3,13 +3,10 @@
 using namespace Backup::File;
 using namespace Backup::Compression;
 
-BackupFile::BackupFile(const std::string& fp ) : m_file_path(fp), m_chunk_size(BACKUP_CHUNK_SZ)
-{
-    update_attributes();
-}
-
 BackupFile::BackupFile(const fs::path& fp ) : m_file_path(fp), m_chunk_size(BACKUP_CHUNK_SZ)
 {
+    m_directory_id=-1;
+    m_upload_id=-1;
     update_attributes();
 }
 
@@ -23,10 +20,19 @@ void BackupFile::update_attributes()
         m_file_attrs.file_path = m_file_path.string();
         m_file_attrs.relative_path = m_file_path.relative_path().string();
         m_file_attrs.parent_path = m_file_path.parent_path().string();
+        m_file_attrs.canonical_path = boost::filesystem::canonical(m_file_path).string();
         m_file_attrs.file_type = m_file_path.extension().string();
-        m_file_attrs.file_size = fs::file_size( m_file_path );
-        m_file_attrs.mime_type = &Backup::Database::LocalDatabase::get_database()->get_mime_type(m_file_attrs.file_type);
+        m_file_attrs.mime_type = find_mime_type(m_file_attrs.file_type);
         m_unique_id = calculate_unique_id();
+
+        try
+        {
+            m_file_attrs.file_size = fs::file_size( m_file_path );
+        }
+        catch (const fs::filesystem_error& e )
+        {
+            m_file_attrs.file_size = 0;
+        }
 
         try
         {
@@ -34,7 +40,8 @@ void BackupFile::update_attributes()
         }
         catch (const fs::filesystem_error & e )
         {
-            //Add error log here
+            m_file_attrs.last_write_time = 0;
+            //Add error log here?
         }
 
     }
@@ -58,48 +65,57 @@ bool BackupFile::exists()
     return fs::exists(m_file_path);
 }
 
-std::string BackupFile::get_file_name()
+std::string BackupFile::get_file_name() const
 {
     return m_file_attrs.file_name;
 }
 
-size_t BackupFile::get_file_size()
+size_t BackupFile::get_file_size() const
 {
     return m_file_attrs.file_size;
 }
 
-std::string BackupFile::get_file_type()
+std::string BackupFile::get_file_type() const
 {
     return m_file_attrs.file_type;
 }
 
-std::string BackupFile::get_mime_type()
+std::string BackupFile::get_mime_type() const
 {
     return m_file_attrs.mime_type;
 }
 
-std::string BackupFile::get_file_path()
+std::string BackupFile::get_file_path() const
 {
     return m_file_attrs.file_path;
 }
 
-std::string BackupFile::get_parent_path()
+std::string BackupFile::get_parent_path() const
 {
     return m_file_attrs.parent_path;
 }
 
-std::string BackupFile::get_relative_path()
+std::string BackupFile::get_relative_path() const
 {
     return m_file_attrs.relative_path;
 }
 
-unsigned long BackupFile::get_last_modified()
+std::string BackupFile::get_canonical_path() const
+{
+    return m_file_attrs.canonical_path;
+}
+
+unsigned long BackupFile::get_last_modified() const
 {
     return m_file_attrs.last_write_time;
 }
 
 std::string BackupFile::get_hash_sha1()
 {
+
+    //If SHA-1 has already been generated, return the hash
+    if ( !m_file_attrs.content_sha1.empty() )
+        return m_file_attrs.content_sha1;
 
     using namespace CryptoPP;
 
@@ -145,6 +161,10 @@ std::string BackupFile::get_hash_sha1()
 std::string BackupFile::get_hash_sha256()
 {
 
+    //If SHA-256 has already been generated, return the hash
+    if ( !m_file_attrs.content_sha256.empty() )
+        return m_file_attrs.content_sha256;
+
     using namespace CryptoPP;
 
     SHA256 hash;
@@ -186,7 +206,7 @@ std::string BackupFile::get_hash_sha256()
 
 }
 
-std::string BackupFile::get_hash_sha1( const std::string& data )
+std::string BackupFile::get_hash_sha1( const std::string& data ) const
 {
 
     using namespace CryptoPP;
@@ -194,13 +214,13 @@ std::string BackupFile::get_hash_sha1( const std::string& data )
     SHA1 hash;
     std::string digest;
 
-    StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+    StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
 
     return digest;
 
 }
 
-std::string BackupFile::get_hash_sha256( const std::string& data )
+std::string BackupFile::get_hash_sha256( const std::string& data ) const
 {
 
     using namespace CryptoPP;
@@ -208,7 +228,7 @@ std::string BackupFile::get_hash_sha256( const std::string& data )
     SHA256 hash;
     std::string digest;
 
-    StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+    StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
 
     return digest;
 
@@ -240,24 +260,30 @@ std::string BackupFile::get_file_contents()
 
 }
 
-std::string BackupFile::calculate_unique_id()
+std::string BackupFile::calculate_unique_id() const
 {
         using namespace CryptoPP;
 
         SHA1 hash;
         std::string digest;
 
-        StringSource s(m_file_path.string(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest) ) ) );
+        StringSource s(get_canonical_path(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
 
         return digest;
 }
 
-std::string BackupFile::get_unique_id()
+std::string BackupFile::get_unique_id() const
 {
     return m_unique_id;
 }
 
-unsigned int BackupFile::get_directory_id()
+std::unique_ptr<unsigned char*> BackupFile::get_unique_id_raw() const
+{
+    using namespace Backup::Utilities;
+    return Hash::get_sha1_hash_raw(get_canonical_path());
+}
+
+unsigned int BackupFile::get_directory_id() const
 {
     return m_directory_id;
 }
@@ -267,7 +293,7 @@ void BackupFile::set_directory_id(unsigned int id)
     m_directory_id = id;
 }
 
-unsigned int BackupFile::get_file_id()
+unsigned int BackupFile::get_file_id() const
 {
     return m_file_id;
 }
@@ -282,7 +308,7 @@ void BackupFile::set_chunk_size(size_t chunk_sz)
     m_chunk_size = chunk_sz;
 }
 
-unsigned int BackupFile::get_total_parts()
+unsigned int BackupFile::get_total_parts() const
 {
     return std::ceil( get_file_size() / (double)m_chunk_size );
 }
@@ -292,7 +318,7 @@ void BackupFile::set_upload_id(unsigned int id)
     m_upload_id = id;
 }
 
-unsigned int BackupFile::get_upload_id()
+unsigned int BackupFile::get_upload_id() const
 {
     return m_upload_id;
 }
@@ -352,7 +378,35 @@ std::shared_ptr<BackupFile> BackupFile::get_compressed_copy()
     return std::make_shared<BackupFile>(tmp_file);
 }
 
-size_t BackupFile::get_chunk_size()
+size_t BackupFile::get_chunk_size() const
 {
     return m_chunk_size;
+}
+
+std::string BackupFile::find_mime_type( const std::string& ext )
+{
+
+    using namespace Backup::Database;
+
+    LocalDatabase* ldb = &LocalDatabase::get_database();
+
+    sqlite3_stmt* stmt;
+    std::string query = "SELECT mime FROM backup_mime_type WHERE ext=LOWER(?1)";
+
+    if ( sqlite3_prepare_v2(ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return "";
+
+    sqlite3_bind_text(stmt, 1, ext.c_str(), ext.size(), 0 );
+
+    std::string val="";
+
+    if ( sqlite3_step(stmt) == SQLITE_ROW )
+    {
+        val = (char*)sqlite3_column_text(stmt,0);
+    }
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    return val;
 }

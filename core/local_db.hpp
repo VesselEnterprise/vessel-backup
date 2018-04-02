@@ -47,9 +47,6 @@ namespace Backup{
                 LocalDatabase(LocalDatabase const&) = delete;
                 void operator=(LocalDatabase const&) = delete;
 
-                bool is_ignore_dir(const boost::filesystem::path& p, int level);
-                bool is_ignore_ext(const std::string& ext);
-
                 std::string get_setting_str(const std::string& s);
                 int get_setting_int(const std::string&s );
 
@@ -59,12 +56,7 @@ namespace Backup{
                 //Update file extension count
                 bool update_ext_count( const std::string& ext, int total );
 
-                unsigned int add_file( Backup::File::BackupFile* fd );
-                unsigned int add_directory( Backup::Types::file_directory* fd );
-
                 std::string get_last_err();
-
-                std::string get_mime_type(const std::string& ext);
 
                 void update_global_settings();
 
@@ -74,6 +66,9 @@ namespace Backup{
                 void clean();
 
                 void build_queue();
+
+                void start_transaction();
+                void end_transaction();
 
             //protected:
                 sqlite3* get_handle();

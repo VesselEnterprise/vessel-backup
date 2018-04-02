@@ -27,7 +27,7 @@ class BackupFile
 
 	public function queryFile($fileId, $userId) {
 
-		$query = "SELECT * FROM backup_file WHERE file_id=? AND user_id=?";
+		$query = "SELECT * FROM backup_file WHERE file_id=UNHEX(?) AND user_id=?";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
 			$stmt->bind_param('si', $fileId, $userId);
@@ -38,6 +38,8 @@ class BackupFile
 				if ( $this->_fileRow = $result->fetch_assoc() ) {
 					$this->_fileId = $fileId;
 					$this->_fileExists = true;
+					$this->_fileRow['file_id'] = bin2hex($this->_fileRow['file_id']);
+					$this->_fileRow['hash'] = bin2hex($this->_fileRow['hash']);
 				}
 				else {
 					$this->_fileExists = false;

@@ -29,6 +29,7 @@
 #include "compress.hpp"
 #include "http_request.hpp"
 #include "file.hpp"
+#include "directory.hpp"
 #include "log.hpp"
 #include "http_client.hpp"
 

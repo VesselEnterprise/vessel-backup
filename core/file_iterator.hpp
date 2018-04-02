@@ -3,33 +3,39 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 #include <boost/filesystem.hpp>
+
 #include "local_db.hpp"
 #include "types.hpp"
 #include "log.hpp"
 #include "file.hpp"
+#include "directory.hpp"
 
 namespace fs = boost::filesystem;
 using namespace Backup::Database;
 
 namespace Backup {
-
     namespace File {
-
         class FileIterator
         {
-
             public:
-                FileIterator(const std::string& path);
+                FileIterator(const BackupDirectory& bd);
                 ~FileIterator();
 
                 void scan();
 
                 std::string get_base_path();
 
+                bool is_ignore_dir(const boost::filesystem::path& p, int level);
+                bool is_ignore_ext(const std::string& ext);
+
+                int add_file( const BackupFile& bf );
+                int add_directory( const BackupDirectory& bd );
+
             private:
-                fs::path m_base_path;
-                Backup::Types::file_directory m_current_dir;
+                BackupDirectory m_base_dir;
+                BackupDirectory m_current_dir;
                 fs::recursive_directory_iterator m_itr;
                 fs::recursive_directory_iterator m_itr_end; //Never changes
                 LocalDatabase* m_ldb;
