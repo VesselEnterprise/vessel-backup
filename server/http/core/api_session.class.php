@@ -9,7 +9,7 @@ class BackupAPISession
 	private static $factory;
 	private $_db;
 	private $_dbconn;
-	private $_userId = -1;
+	private $_userId = null;
 	private $_errorMsg;
 	private $_tokenExpired=false;
 	private $_tokenMatches=false;
@@ -59,14 +59,14 @@ class BackupAPISession
 			throw new APIException("Authorization header is invalid");
 		}
 
-		$this->_userId = (int)$authParts[0];
+		$this->_userId = $authParts[0];
 		$accessToken = $authParts[1];
 
 		//Validate access token
-		$query = "SELECT access_token,UNIX_TIMESTAMP(token_expiry) FROM backup_user WHERE user_id=?";
+		$query = "SELECT access_token,UNIX_TIMESTAMP(token_expiry) FROM backup_user WHERE user_id=UNHEX(?)";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 
-			$stmt->bind_param('i', $this->_userId );
+			$stmt->bind_param('s', $this->_userId );
 			if ( $stmt->execute() ) {
 
 				if ( $result = $stmt->get_result() ) {
@@ -115,10 +115,10 @@ class BackupAPISession
 
 		$ip = $_SERVER['REMOTE_ADDR'];
 
-		$query = "INSERT INTO backup_api_session (user_id,endpoint,http_method,ip_address) VALUES(?,?,?,?)";
+		$query = "INSERT INTO backup_api_session (user_id,endpoint,http_method,ip_address) VALUES(UNHEX(?),?,?,?)";
 		if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
 
-			$stmt->bind_param('isss', $this->_userId, $endpoint, $http_method, $ip);
+			$stmt->bind_param('ssss', $this->_userId, $endpoint, $http_method, $ip);
 			$stmt->execute();
 			$stmt->close();
 

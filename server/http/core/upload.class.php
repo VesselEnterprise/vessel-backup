@@ -18,9 +18,9 @@ class BackupUpload
     private $_errorMsg;
     private $_uploadId = -1;
     private $_fileId = null;
-    private $_userId = -1;
-    private $_uploadRow;         //Associated array of backup_upload row
-    private $_file;              //BackupFile object
+    private $_userId = null;
+    private $_uploadRow = null;         //Associated array of backup_upload row
+    private $_file = null;              //BackupFile object
     private $_backupTarget;
     private $_metadata;
     private $_contentBytes;
@@ -41,12 +41,13 @@ class BackupUpload
         //If upload id exists in the metadata, preload the upload row
         if (isset($metadata->{'file_id'})) {
             $this->_fileId = $metadata->{'file_id'};
-            $this->_getUpload($metadata->{'file_id'});
+            $this->_getUpload($this->_fileId);
         }
 
         //If upload row was found, pre-load the file data
         if ($this->_uploadId > -1) {
-            if ( !$this->_file = new BackupFile($this->_uploadRow['file_id'], $this->_userId) ) {
+            $this->_file = new BackupFile($this->_uploadRow['file_id'], $this->_userId);
+            if ( !$this->_file->exists() ) {
 							throw new APIException("Invalid upload id was specified. File id does not exist");
 						}
         }
@@ -98,11 +99,12 @@ class BackupUpload
                 if ($result = $stmt->get_result()) {
 
                     $this->_uploadRow = $result->fetch_assoc();
+                    $this->_uploadRow['file_id'] = bin2hex($this->_uploadRow['file_id']);
 										$this->_uploadRow['hash'] = bin2hex($this->_uploadRow['hash']);
 
                     //Set internal member vars
                     $this->_uploadId = $this->_uploadRow['upload_id'];
-                    $this->_fileId = bin2hex($this->_uploadRow['file_id']);
+                    $this->_fileId = $this->_uploadRow['file_id'];
                     $this->_totalParts = (int)$this->_uploadRow['parts'];
                     $this->_partsUploaded = (int)$this->_uploadRow['parts_uploaded'];
                     $this->_partsRemaining = $this->_totalParts - $this->_partsUploaded;
@@ -203,10 +205,10 @@ class BackupUpload
         $targetFileName = $storeCompressed ? ($this->_metadata->{'file_name'} . ".gz") : $this->_metadata->{'file_name'};
 
         //Insert a new file
-        $query = "REPLACE INTO backup_file (file_id,file_name,file_size,user_id,file_type,hash,file_path,compressed,last_modified,last_backup) VALUES(UNHEX(?),?,?,?,?,UNHEX(?),?,?,FROM_UNIXTIME(?),NOW())";
+        $query = "REPLACE INTO backup_file (file_id,file_name,file_size,user_id,file_type,hash,file_path,compressed,last_modified,last_backup) VALUES(UNHEX(?),?,?,UNHEX(?),?,UNHEX(?),?,?,FROM_UNIXTIME(?),NOW())";
         if ($stmt = mysqli_prepare($this->_dbconn, $query)) {
             $stmt->bind_param(
-                'ssiisssii',
+                'ssissssii',
                 $fileId,
                 $targetFileName,
                 $this->_metadata->{'file_size'},
@@ -232,10 +234,10 @@ class BackupUpload
         }
 
         //Create new upload and associate it with the file
-        $query = "INSERT INTO backup_upload (file_id,user_id,parts,bytes,hash,compressed) VALUES(UNHEX(?),?,?,?,UNHEX(?),?)";
+        $query = "INSERT INTO backup_upload (file_id,user_id,parts,bytes,hash,compressed) VALUES(UNHEX(?),UNHEX(?),?,?,UNHEX(?),?)";
         if ($stmt = mysqli_prepare($this->_dbconn, $query)) {
             $stmt->bind_param(
-                'siiisi',
+                'ssiisi',
                 $this->_fileId,
                 $this->_userId,
                 $this->_metadata->{'parts'},
@@ -322,7 +324,7 @@ class BackupUpload
         }
 
         //Get the associated backup file
-        if (!$this->_file) {
+        if ( !$this->_file->exists() ) {
             throw new APIException("File with id " . $this->_fileId . " does not exist");
         }
 
@@ -355,10 +357,6 @@ class BackupUpload
             }
 
             $filePath .= "/" . $fileName;
-
-						echo "Filepath is: " . $filePath . "\n";
-						echo "File ID is: " . $this->_file->getValue('file_id') . "\n";
-						flush();
 
             if (!$this->_writeLocalFile($filePath)) {
                 throw new APIException("Failed to write file to local storage. Please check the path and folder permissions (" . $this->getError() . ")");
@@ -566,7 +564,7 @@ class BackupUpload
     {
         $query = "UPDATE backup_file SET uploaded=1 WHERE file_id=UNHEX(?) AND user_id=?";
         if ($stmt = mysqli_prepare($this->_dbconn, $query)) {
-            $stmt->bind_param('si', $fileId, $this->_userId);
+            $stmt->bind_param('ss', $fileId, $this->_userId);
             if (!$stmt->execute()) {
                 throw new APIException("Failed to set file to uploaded=1 (" . mysqli_error($this->_dbconn) . ")");
             }
@@ -619,7 +617,7 @@ class BackupUpload
         $hasUserTarget = false;
 
         //Check if there are any individual user targets configured
-        $query = "SELECT a.* FROM backup_target AS a INNER JOIN backup_user_target AS b ON a.target_id=b.target_id WHERE b.user_id=" . $this->_userId;
+        $query = "SELECT a.* FROM backup_target AS a INNER JOIN backup_user_target AS b ON a.target_id=b.target_id WHERE b.user_id=UNHEX('" . $this->_userId . "')";
         if ($result = mysqli_query($this->_dbconn, $query)) {
             if ($backupTarget = mysqli_fetch_array($result)) {
                 $hasUserTarget=true;

@@ -359,7 +359,17 @@ abstract class API
 
         $settings = array();
 
-        if ($result = mysqli_query($this->_db->getConnection(), "SELECT a.setting_id,a.name,a.value,a.data_type,b.setting_id,b.value AS override_value FROM backup_client_setting AS a LEFT JOIN backup_user_setting AS b ON a.setting_id = b.setting_id AND b.user_id = " . $this->_session->getUserId())) {
+        $query = "SELECT a.setting_id,a.name,a.value,a.data_type,b.setting_id,b.value AS override_value FROM backup_client_setting AS a LEFT JOIN backup_user_setting AS b ON a.setting_id = b.setting_id AND b.user_id=UNHEX(?)";
+        if ( $stmt = mysqli_prepare($this->_db->getConnection(), $query) ) {
+
+          $userId = $this->_session->getUserId();
+
+          $stmt->bind_param('s', $userId);
+
+          if ( $stmt->execute() ) {
+
+            $result = $stmt->get_result();
+
             while ($row = mysqli_fetch_array($result)) {
                 $val = !$row['override_value'] ? $row['value'] : $row['override_value'];
 
@@ -369,7 +379,10 @@ abstract class API
                 $settings[$row['name']]['user_override'] = !$row['override_value'] ? false : true;
             }
 
-            $result->close();
+          }
+
+          $stmt->close();
+
         }
 
         echo $this->_response(array( "settings" => $settings ), 200);
@@ -517,9 +530,9 @@ abstract class API
         $userId = $this->_session->getUserId();
 
         //Add or update user => machine association
-        $query = "INSERT INTO backup_user_machine (machine_id,user_id,last_check_in) VALUES (?,?,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE last_check_in=FROM_UNIXTIME(?)";
+        $query = "INSERT INTO backup_user_machine (machine_id,user_id,last_check_in) VALUES (?,UNHEX(?),FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE last_check_in=FROM_UNIXTIME(?)";
         if ($stmt = mysqli_prepare($this->_db->getConnection(), $query)) {
-            $stmt->bind_param('iiii', $machineId, $userId, $ts, $ts);
+            $stmt->bind_param('isii', $machineId, $userId, $ts, $ts);
             $stmt->execute();
             $stmt->close();
         }

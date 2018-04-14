@@ -49,12 +49,15 @@ if ( isset($_POST['action']) && $_POST['action'] == "register") {
   //Insert a new user
   $dbconn = BackupDatabase::getDatabase()->getConnection();
 
-  $query = "INSERT INTO backup_user (user_name,first_name,last_name,email,address,city,state,zip,title,office,password,password_set) VALUES(?,?,?,?,?,?,?,?,?,?,?,NOW())";
+  $query = "INSERT INTO backup_user (user_id,user_name,first_name,last_name,email,address,city,state,zip,title,office,password,password_set) VALUES(UNHEX(?),?,?,?,?,?,?,?,?,?,?,?,NOW())";
 
   if ( $stmt = mysqli_prepare($dbconn,$query) ) {
 
+    $generatedUserId = sha1( $username . ":" . $email );
+
     $stmt->bind_param(
-      "sssssssssss",
+      "ssssssssssss",
+      $generatedUserId,
       $username,
       $first_name,
       $last_name,
@@ -71,12 +74,11 @@ if ( isset($_POST['action']) && $_POST['action'] == "register") {
     if ( $stmt->execute() ) {
 
       //Add new user activation
-      $userID = mysqli_insert_id($dbconn);
 
-      $user = new BackupUser($userID);
+      $user = new BackupUser($generatedUserId);
       $user->createUserActivation();
 
-      BackupLog::getLog($userID)->addMessage("User " . $username . " has been registered", "User Registration");
+      BackupLog::getLog($generatedUserId)->addMessage("User " . $username . " has been registered", "User Registration");
 
       $renderer->addTemplate('generic_message', array("message" => "You have successfully been registered. After your account has been approved, you will receive an email confirmation to activate your account"));
 

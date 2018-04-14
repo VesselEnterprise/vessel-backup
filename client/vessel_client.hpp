@@ -117,11 +117,12 @@ namespace Backup {
                 */
                 bool refresh_token();
 
-                std::string get_auth_header(const std::string& token, int user_id);
+                std::string get_auth_header(const std::string& token, const std::string& user_id);
 
                 std::string m_auth_header;
                 std::string m_auth_token;
-                int m_user_id;
+                std::string m_api_path;
+                std::string m_user_id;
                 bool m_activated;
                 bool m_use_compression; //Send file content compressed
 

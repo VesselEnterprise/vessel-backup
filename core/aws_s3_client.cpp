@@ -39,7 +39,6 @@ std::string AwsS3Client::get_string_to_sign()
     std::string cr_hash = Hash::get_sha256_hash(get_canonical_request());
 
     std::ostringstream oss;
-
     oss << "AWS4-HMAC-SHA256\n";
     oss << m_amzdate << "\n";
     oss << m_amzdate_short << "/" << m_region << "/s3/aws4_request\n";
@@ -49,7 +48,7 @@ std::string AwsS3Client::get_string_to_sign()
 
 }
 
-std::string AwsS3Client::get_signature_v4()
+std::string AwsS3Client::get_signing_key()
 {
     using namespace Backup::Utilities;
 
@@ -59,8 +58,38 @@ std::string AwsS3Client::get_signature_v4()
     std::string key_service = Hash::get_hmac_256(key_region, "s3", false);
     std::string key_signing = Hash::get_hmac_256(key_service, "aws4_request", false);
 
+    return key_signing;
+}
+
+std::string AwsS3Client::get_signature_v4()
+{
+    using namespace Backup::Utilities;
+
     //Signature calculation from signing key
-    return Hash::get_hmac_256(key_signing, get_string_to_sign());
+    return Hash::get_hmac_256(get_signing_key(), get_string_to_sign());
+
+}
+
+std::string AwsS3Client::get_chunk_signature_v4(const std::string& prev_signature)
+{
+    using namespace Backup::Utilities;
+
+    //If it's the first chunk use the seed signature
+    if ( m_current_chunk <= 1 ) {
+        return get_signature_v4();
+    }
+
+    //String to sign for Chunked uploads
+    std::ostringstream oss;
+    oss << "AWS4-HMAC-SHA256-PAYLOAD\n";
+    oss << m_amzdate << "\n";
+    oss << m_amzdate_short << "/" << m_region << "/s3/aws4_request\n";
+    oss << prev_signature << "\n";
+    oss << Hash::get_sha256_hash("") << "\n";
+    oss << Hash::get_sha256_hash(&m_file->get_file_part(m_current_chunk)[0]);
+
+    //Return the signature using the chunked version of the string to sign
+    return Hash::get_hmac_256(get_signing_key(), oss.str());
 
 }
 
@@ -69,7 +98,14 @@ void AwsS3Client::set_file(Backup::File::BackupFile* bf )
     m_file = bf;
 
     //Get the SHA-256 hash of the file contents and save locally
-    m_content_sha256 = m_file->get_hash_sha256();
+    //If we are using a multippart upload, the signature only covers the header and no payload
+    if ( !m_chunked ) {
+        m_content_sha256 = m_file->get_hash_sha256();
+    }
+    else {
+        m_content_sha256 = "STREAMING-AWS4-HMAC-SHA256-PAYLOAD";
+    }
+
 }
 
 void AwsS3Client::build_request_headers()
@@ -83,9 +119,9 @@ void AwsS3Client::build_request_headers()
 
     if ( m_chunked )
     {
-        m_headers.insert ( std::pair<std::string,std::string>("Content-Encoding", "aws-chunked") );
+        m_headers.insert ( std::pair<std::string,std::string>("Content-Encoding", (m_file->get_mime_type().empty() ? "aws-chunked" : ("aws-chunked," + m_file->get_mime_type()) ) ) );
         m_headers.insert ( std::pair<std::string,std::string>("Expect", "100-continue") );
-        m_headers.insert ( std::pair<std::string,std::string>("x-amz-decoded-content-length", std::to_string(m_file->get_file_size()) ) );
+        m_headers.insert ( std::pair<std::string,std::string>("x-amz-decoded-content-length", std::to_string(get_current_part_size()) ) );
     }
 
 
@@ -162,6 +198,7 @@ void AwsS3Client::init_amz_date()
 void AwsS3Client::set_chunked(bool flag)
 {
     m_chunked=flag;
+    m_content_sha256 = "STREAMING-AWS4-HMAC-SHA256-PAYLOAD";
 }
 
 bool AwsS3Client::upload()
@@ -178,14 +215,68 @@ bool AwsS3Client::upload()
     ss << "Authorization: AWS4-HMAC-SHA256 Credential=" << AWS_ACCESS_ID << "/" << m_amzdate_short << "/" << m_region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << get_signature_v4() << "\r\n";
     ss << "Content-Length: " << m_file->get_file_size() << "\r\n";
 
-    if ( !m_file->get_mime_type().empty() )
+    if ( !m_file->get_mime_type().empty() ) {
         ss << "Content-Type: " << m_file->get_mime_type() << "\r\n";
+    }
 
     ss << "x-amz-content-sha256: " << m_content_sha256 << "\r\n";
     ss << "x-amz-date: " << m_amzdate << "\r\n";
-    //ss << "Accept: application/json\r\n";
     ss << "Connection: close\r\n\r\n";
-    ss.write( &m_file->get_file_contents()[0], m_file->get_file_size() );
+    ss.write(&m_file->get_file_contents()[0], m_file->get_file_size() );
+
+    std::cout << "Sending AWS Request:\n" << ss.str() << "\n";
+
+    //Connect to socket
+    connect();
+
+    //Write to socket
+    write_socket(&ss.str()[0]);
+
+    do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
+
+    disconnect();
+}
+
+bool AwsS3Client::upload_part(int part, const std::string& prev_signature)
+{
+
+    //Set chunk index
+    m_current_chunk = part;
+
+    //Refresh the date/time vars
+    init_amz_date();
+
+    //Set the previous signature
+    m_previous_signature = get_chunk_signature_v4(prev_signature);
+
+    //Build the request payload for the chunk
+    std::string m_payload;
+    std::stringstream hfs; //hex file size
+    hfs << std::hex << get_current_part_size();
+    m_payload += (hfs.str() + ";chunk-signature=" + m_previous_signature + "\r\n");
+    m_payload += m_file->get_file_part(m_current_chunk);
+
+    //Build the raw request
+    std::stringstream ss;
+
+    ss << m_http_verb << " /" << m_file->get_file_name() << " HTTP/1.1\r\n";
+    ss << "Host: " << get_hostname() << "\r\n";
+    ss << "Date: " << m_amzdate_clean << "\r\n";
+    ss << "Authorization: AWS4-HMAC-SHA256 Credential=" << AWS_ACCESS_ID << "/" << m_amzdate_short << "/" << m_region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << get_signature_v4() << "\r\n";
+    ss << "Content-Length: " << m_payload.size() << "\r\n";
+
+    ss << "Content-Type: " << "aws-chunked";
+
+    if ( !m_file->get_mime_type().empty() ) {
+        ss << "," << m_file->get_mime_type();
+    }
+
+    ss << "\r\n";
+
+    ss << "x-amz-content-sha256: " << m_content_sha256 << "\r\n";
+    ss << "x-amz-date: " << m_amzdate << "\r\n";
+    ss << "Connection: close\r\n\r\n";
+    ss.write(&m_payload[0], m_payload.size() );
 
     std::cout << "Sending AWS Request:\n" << ss.str() << "\n";
 
@@ -205,11 +296,17 @@ size_t AwsS3Client::get_current_part_size()
 
     if ( m_chunked )
     {
-        size_t chunk_size = m_file->get_chunk_size();
-        size_t remainder_bytes = m_file->get_file_size() - (chunk_size * m_file->get_total_parts());
-        return (chunk_size-remainder_bytes);
+        size_t chunk_size = (m_chunk_size > 0) ? m_chunk_size : m_file->get_chunk_size();
+        size_t byte_index = chunk_size * m_current_chunk;
+        size_t overflow = (byte_index > m_file->get_file_size()) ? byte_index-m_file->get_file_size() : 0;
+        return (chunk_size - overflow);
     }
 
     return m_file->get_file_size(); //Default
 
+}
+
+std::string AwsS3Client::get_last_signature()
+{
+    return m_previous_signature;
 }

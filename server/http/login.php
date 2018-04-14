@@ -6,7 +6,7 @@ $renderer = new PageRenderer();
 $renderer->addTemplate('header');
 
 //Check if the user is already logged in
-if ( $common['session']->isLoggedIn() ) {
+if ( !isset($_POST['action']) && $common['session']->isLoggedIn() ) {
   $renderer->addTemplate('generic_message', array("message" => "You are already logged in"));
 }
 

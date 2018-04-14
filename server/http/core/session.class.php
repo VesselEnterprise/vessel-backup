@@ -8,7 +8,7 @@ class BackupSession
 {
 
 	private static $factory;
-	private $_userId = -1;
+	private $_userId = '';
 	private $_dbconn;
 	private $_loginSuccess=false;
 	private $_sessionHash;
@@ -52,7 +52,7 @@ class BackupSession
 	public function login($username,$pwd) {
 
 		//Get User Password Hash
-		if ( $stmt = mysqli_prepare($this->_dbconn, "SELECT user_id, password FROM backup_user WHERE user_name=? AND active=1 AND activated=1") ) {
+		if ( $stmt = mysqli_prepare($this->_dbconn, "SELECT LOWER(HEX(user_id)) AS user_id, password FROM backup_user WHERE user_name=? AND active=1 AND activated=1") ) {
 
 			$stmt->bind_param('s', $username);
 			$stmt->execute();
@@ -69,9 +69,6 @@ class BackupSession
 					//Update user Id for the current session
 					$this->_updateSessionUserId($this->_userId);
 
-					//Create new session
-					//$this->_initSession();
-
 					//Password is correct, login successful
 					$this->_updateLastLogin();
 
@@ -80,6 +77,7 @@ class BackupSession
 				}
 				else {
 					$this->_loginSuccess=false;
+					$this->_log->addError("Authentication failed (Username=" . $username . ")", "Authentication");
 				}
 
 			}
@@ -96,21 +94,21 @@ class BackupSession
 		return $this->_loginSuccess;
 	}
 
-	private function _updateSessionUserId($user_id) {
+	private function _updateSessionUserId($userId) {
 
-		$query = "UPDATE backup_user_session SET user_id=? WHERE session_hash=?";
+		$query = "UPDATE backup_user_session SET user_id=UNHEX(?) WHERE session_hash=?";
 
 		if ( $stmt = mysqli_prepare($this->_dbconn,$query) ) {
 
-			$stmt->bind_param('is', $user_id, $this->_sessionHash );
+			$stmt->bind_param('ss', $userId, $this->_sessionHash );
 
 			if ( $stmt->execute() ) {
-				$this->_log->addMessage("Updated session user Id (" . $user_id . ")", "Authentication");
+				$this->_log->addMessage("Updated session user Id (" . $userId . ")", "Authentication");
 			}
 
 			$stmt->close();
 
-			setcookie('user_id', $user_id );
+			setcookie('user_id', $userId );
 
 		}
 
@@ -131,7 +129,7 @@ class BackupSession
 
 		$this->_loginSuccess = false;
 		$this->_sessionExpired = true;
-		$this->_userId = -1;
+		$this->_userId = null;
 
 		return true;
 
@@ -146,7 +144,7 @@ class BackupSession
 		if ( !$this->_userId )
 			return;
 
-		mysqli_query($this->_dbconn, "UPDATE backup_user SET last_login = NOW() WHERE user_id=" . $this->_userId);
+		mysqli_query($this->_dbconn, "UPDATE backup_user SET last_login = NOW() WHERE user_id=UNHEX('" . $this->_userId . "')");
 
 	}
 
@@ -171,7 +169,7 @@ class BackupSession
 
 		$isValid=false;
 
-		$query = "SELECT session_id,UNIX_TIMESTAMP(last_accessed) AS last_accessed,user_id FROM backup_user_session WHERE session_hash=? AND expired=0";
+		$query = "SELECT session_id,UNIX_TIMESTAMP(last_accessed) AS last_accessed,LOWER(HEX(user_id)) AS user_id FROM backup_user_session WHERE session_hash=? AND expired=0";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
 			$stmt->bind_param('s', $hash);
@@ -198,8 +196,8 @@ class BackupSession
 							//Session is invalid if it's not expired
 							$isValid=true;
 
-							/* If session hash is valid, not expired, and user Id is > 0, user is logged in */
-							if ( $row['user_id'] > 0 ) {
+							/* If session hash is valid, not expired, and user id is not null, user is logged in */
+							if ( !empty($row['user_id']) ) {
 								$this->_loginSuccess=true; //User is logged in
 							}
 
@@ -272,25 +270,25 @@ class BackupSession
 			else {
 				//Clear cookies and force login
 				$this->_clearCookies();
-				$this->_userId = -1;
+				$this->_userId = null;
 			}
 
 		}
 
 		//Create new session
 		if ( !$this->_userId )
-			$this->_userId = -1; //User is not logged in
+			$this->_userId = ''; //User is not logged in
 
 		$sessionKey = $this->_createSessionKey();
 		$this->_sessionHash = $this->_hashSessionKey($sessionKey);
 		$ip = $this->getIPAddr();
 
-		$query = "INSERT INTO backup_user_session (user_id,session_hash,ip_address) VALUES(?,?,?)";
+		$query = "INSERT INTO backup_user_session (user_id,session_hash,ip_address) VALUES(UNHEX(?),?,?)";
 
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 
 			$stmt->bind_param(
-				"iss",
+				"sss",
 				$this->_userId,
 				$this->_sessionHash,
 				$ip
@@ -299,15 +297,21 @@ class BackupSession
 			if ( $stmt->execute() ) {
 
 				$this->_sessionId = mysqli_insert_id($this->_dbconn);
-				$this->_sessionHash = $this->_hashSessionKey($sessionKey);
 
+				//Set client cookies
 				setcookie("session_key", $sessionKey);
 				setcookie("user_id", $this->_userId );
 
 			}
+			else {
+				$this->_log->addError("Failed to insert user session (SessionHash=" . $this->_sessionHash . ")", "Authentication");
+			}
 
 			$stmt->close();
 
+		}
+		else {
+				$this->_log->addError("Failed to insert user session (SessionHash=" . $this->_sessionHash . ")", "Authentication");
 		}
 
 	}
@@ -343,10 +347,10 @@ class BackupSession
 
 			$userName = '';
 
-			$query = "SELECT user_name FROM backup_user WHERE user_id=?";
+			$query = "SELECT user_name FROM backup_user WHERE user_id=UNHEX(?)";
 			if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
-					$stmt->bind_param('i', $this->_userId);
+					$stmt->bind_param('s', $this->_userId);
 					if ( $stmt->execute() ) {
 
 						$result = $stmt->get_result();
@@ -369,10 +373,10 @@ class BackupSession
 
 			$fullName = '';
 
-			$query = "SELECT first_name,last_name FROM backup_user WHERE user_id=?";
+			$query = "SELECT first_name,last_name FROM backup_user WHERE user_id=UNHEX(?)";
 			if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
-					$stmt->bind_param('i', $this->_userId);
+					$stmt->bind_param('s', $this->_userId);
 					if ( $stmt->execute() ) {
 
 						$result = $stmt->get_result()->fetch_row();

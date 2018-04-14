@@ -14,11 +14,12 @@ VesselClient::VesselClient( const std::string& host ) : HttpClient(host)
     m_log = new Backup::Logging::Log("vessel_cli");
 
     //Get user information
-    this->m_auth_token = m_ldb->get_setting_str("auth_token");
-    this->m_user_id = m_ldb->get_setting_int("user_id");
+    m_auth_token = m_ldb->get_setting_str("auth_token");
+    m_user_id = m_ldb->get_setting_str("user_id");
+    m_api_path = m_ldb->get_setting_str("vessel_api_path");
 
     //Create the authorization header used for API requests
-    this->m_auth_header = get_auth_header(m_auth_token, m_user_id);
+    m_auth_header = get_auth_header(m_auth_token, m_user_id);
 
 }
 
@@ -54,8 +55,8 @@ void VesselClient::send_request( Backup::Networking::HttpRequest* r )
     request_stream << "Accept: */*\r\n";
 
     //Send Authorization Header
-    if ( this->m_auth_token != "" ) {
-        request_stream << "Authorization: " << this->m_auth_header << "\r\n";
+    if ( m_auth_token != "" ) {
+        request_stream << "Authorization: " << m_auth_header << "\r\n";
     }
 
     std::string http_method = r->get_method();
@@ -157,14 +158,13 @@ int VesselClient::init_upload ( Backup::File::BackupFile * bf )
     r.add_header("Content-Type: application/json");
     r.set_body(strbuf.GetString());
     r.set_method("POST");
-    r.set_uri("/backup/api/v1/file?action=init");
+    r.set_uri(m_api_path + "/file?action=init");
 
     //std::cout << "Example body:\n" << r.get_body() << std::endl;
 
-    this->send_request(&r);
+    send_request(&r);
 
     //Parse response and get upload id
-    std::cout << "Init upload response: " << get_response() << std::endl;
 
     //Reset Document
     doc.RemoveAllMembers();
@@ -282,7 +282,7 @@ bool VesselClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
     //Write a boundary
     body << "--BackupFile--\r\n\r\n";
 
-    //std::cout << "Body:\n" << body.str() << std::endl;
+    std::cout << "Body:\n" << body.str() << std::endl;
 
     //Create a new HTTP request
     HttpRequest r;
@@ -290,11 +290,11 @@ bool VesselClient::upload_file_part( Backup::File::BackupFile * bf, int part_num
     r.add_header("Content-Type: multipart/form-data; boundary=BackupFile");
     r.set_body(body.str());
     r.set_method("POST");
-    r.set_uri("/backup/api/v1/file");
+    r.set_uri(m_api_path + "/file");
 
     //std::cout << "Example body:\n" << r.get_body() << std::endl;
 
-    this->send_request(&r);
+    send_request(&r);
 
     std::cout << "File part response: " << get_response() << std::endl;
 
@@ -331,10 +331,10 @@ bool VesselClient::heartbeat()
     HttpRequest r;
     r.set_content_type("application/json");
     r.set_method("POST");
-    r.set_uri("/backup/api/v1/heartbeat");
+    r.set_uri(m_api_path + "/heartbeat");
     r.set_body( strbuf.GetString() );
 
-    this->send_request(&r);
+    send_request(&r);
 
     return true;
 
@@ -349,11 +349,11 @@ std::string VesselClient::get_client_settings()
     HttpRequest r;
     r.set_content_type("application/json");
     r.set_method("GET");
-    r.set_uri("/backup/api/v1/settings");
+    r.set_uri(m_api_path + "/settings");
 
-    this->send_request(&r);
+    send_request(&r);
 
-    return this->get_response();
+    return get_response();
 
 }
 
@@ -378,11 +378,11 @@ bool VesselClient::activate()
 
     HttpRequest r;
     r.set_method("POST");
-    r.set_uri("/backup/api/v1/activate");
+    r.set_uri(m_api_path + "/activate");
     r.set_content_type("application/json");
     r.set_body( strbuf.GetString() );
 
-    this->send_request( &r );
+    send_request( &r );
 
     //Reset Document
     strbuf.Clear();
@@ -427,8 +427,8 @@ bool VesselClient::activate()
          //Set DB User ID provided w/ user activation
         if ( response.HasMember("user_id") )
         {
-            int user_id = response["user_id"].GetInt();
-            if ( user_id > 0 )
+            std::string user_id = response["user_id"].GetString();
+            if ( !user_id.empty() )
             {
                 m_ldb->update_setting("user_id", user_id );
                 m_user_id = user_id;
@@ -474,11 +474,11 @@ bool VesselClient::refresh_token()
     std::string refresh_token = m_ldb->get_setting_str("refresh_token");
 
     //Get user ID from LocalDatabase
-    int user_id = m_ldb->get_setting_int("user_id");
+    std::string user_id = m_ldb->get_setting_str("user_id");
 
     //Prepare JSON request
     Value refresh_token_v( refresh_token.c_str(), refresh_token.size(), alloc );
-    Value user_id_v( user_id );
+    Value user_id_v( user_id.c_str(), user_id.size(), alloc );
 
     doc.AddMember( "refresh_token", refresh_token_v, alloc );
     doc.AddMember( "user_id", user_id_v, alloc );
@@ -491,11 +491,11 @@ bool VesselClient::refresh_token()
     //Send Http Request
     HttpRequest r;
     r.set_method("POST");
-    r.set_uri("/backup/api/v1/refresh_token");
+    r.set_uri(m_api_path + "/refresh_token");
     r.set_content_type("application/json");
     r.set_body( strbuf.GetString() );
 
-    this->send_request( &r );
+    send_request( &r );
 
     //Clear existing JSON document
     strbuf.Clear();
@@ -589,12 +589,12 @@ void VesselClient::handle_auth_error()
 
 }
 
-std::string VesselClient::get_auth_header(const std::string& token, int user_id)
+std::string VesselClient::get_auth_header(const std::string& token, const std::string& user_id)
 {
 
     using namespace CryptoPP;
 
-    std::string header = std::to_string(user_id) + ":" + token;
+    std::string header = user_id + ":" + token;
     std::string encoded;
 
     StringSource ss(header, true,

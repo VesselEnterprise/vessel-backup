@@ -28,7 +28,7 @@ int main( int argc, char** argv )
     std::cout << "File path: " << bf.get_canonical_path() << "\n";
     std::cout << "File Sha-1 hash: " << Backup::Utilities::Hash::get_sha1_hash( bf.get_canonical_path() ) << "\n";
 
-    unsigned char* ptrhash = bf.get_unique_id_raw();
+    unsigned char* ptrhash = *bf.get_unique_id_raw();
     std::cout << "File Sha-1 hash raw:\r\n" << ptrhash << "\n";
 
     delete ptrhash;

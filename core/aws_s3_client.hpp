@@ -49,6 +49,11 @@ namespace Backup {
                 */
                 void set_chunked(bool flag);
 
+                /*! \fn void set_chunk_size(size_t chunk_size);
+                    \brief Sets the chunk size in bytes for multipart uploads
+                */
+                void set_chunk_size(size_t chunk_size);
+
                 /*! \fn std::string get_canonical_request();
                     \brief Returns the AWS S3 canonical request
                     \return Returns the AWS S3 canonical request
@@ -67,11 +72,30 @@ namespace Backup {
                 */
                 std::string get_signature_v4();
 
+                /*! \fn std::string get_chunk_signature_v4(const std::string& prev_signature);
+                    \param prev_signature The signature of the previous chunk or the seed signature if the first chunk
+                    \brief Returns the AWS V4 signature for a chunked upload
+                    \return Returns the AWS V4 signature for a chunked upload
+                */
+                std::string get_chunk_signature_v4(const std::string& prev_signature);
+
                 /*! \fn bool upload();
                     \brief Uploads a single file to the AWS S3 REST API
                     \return Returns true if the upload was successful, or false if there was an error
                 */
                 bool upload();
+
+                /*! \fn bool upload_part();
+                    \brief Uploads a single file to the AWS S3 REST API
+                    \return Returns true if the upload was successful, or false if there was an error
+                */
+                bool upload_part(int part_number, const std::string& prev_signature);
+
+                /*! \fn std::string get_last_signature();
+                    \brief Returns the signature for the previous upload chunk
+                    \return Returns the signature for the previous upload chunk
+                */
+                std::string get_last_signature();
 
             private:
                 Backup::Database::LocalDatabase* m_ldb;
@@ -84,8 +108,11 @@ namespace Backup {
                 std::string m_amzdate_short; //Shortened version of the AMZ date eg. 20130524
                 std::string m_amzdate_clean; //Example: Fri, 24 May 2013 00:00:00 GMT
                 std::string m_content_sha256; //SHA-256 hash of the file contents
+                std::string m_previous_signature; //The previous signature used for multipart uploads
+                std::string m_request_payload;
                 int m_current_chunk; //For multipart uploads, the current chunk index
                 bool m_chunked; //Indicates whether or not a multipart upload
+                size_t m_chunk_size; //Chunk size bytes for multipart uploads
                 Backup::Networking::HttpRequest* m_http_request;
 
                 /*! \fn std::string get_amz_headers();
@@ -99,6 +126,12 @@ namespace Backup {
                     \return Returns the signed amz headers used for the canonical request
                 */
                 std::string get_signed_headers();
+
+                /*! \fn std::string get_signing_key();
+                    \brief Returns the key used to sign AWS S3 requests
+                    \return Returns the key used to sign AWS S3 requests
+                */
+                std::string get_signing_key();
 
                 /*! \fn void build_request_headers();
                     \brief Internal call to store request headers in a std::map

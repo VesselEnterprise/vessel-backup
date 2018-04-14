@@ -7,7 +7,7 @@ class BackupUser
 
 	private static $factory;
 
-	private $_userId;
+	private $_userId=null;
 	private $_db;
 	private $_dbconn;
 	private $_log;
@@ -35,15 +35,14 @@ class BackupUser
 
 		$row = array();
 
-		$userName = (string)$userId;
-
-		$query = "SELECT * FROM backup_user WHERE user_id=? OR user_name=?";
+		$query = "SELECT * FROM backup_user WHERE user_id=UNHEX(?) OR user_name=?";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
-			$stmt->bind_param('is', $userId, $userName );
+			$stmt->bind_param('ss', $userId, $userId );
 			if ( $stmt->execute() ) {
 				if ( $result = $stmt->get_result() ) {
 					$row = $result->fetch_assoc();
-					$this->_userId = $row['user_id'];
+					$this->_userId = bin2hex($row['user_id']);
+					$row['user_id'] = $this->_userId;
 					$this->_exists=true;
 				}
 			}
@@ -79,9 +78,9 @@ class BackupUser
 		$hash = password_hash( $pwd, PASSWORD_DEFAULT );
 
 		//Update user password
-		if ( $stmt = mysqli_prepare("UPDATE backup_user SET password=?,password_set=NOW() WHERE userId=?") ) {
+		if ( $stmt = mysqli_prepare("UPDATE backup_user SET password=?,password_set=NOW() WHERE user_id=UNHEX(?)") ) {
 
-			$stmt->bind_param('si', $hash, $this->_userId );
+			$stmt->bind_param('ss', $hash, $this->_userId );
 			$stmt->execute();
 			$stmt->close();
 
@@ -102,11 +101,11 @@ class BackupUser
 		if ( !$code )
 			$code = $this->generateAccessToken();
 
-		$query = "INSERT INTO backup_user_activation (user_id,code,expiry) VALUES(?,?,(NOW() + INTERVAL 7 DAY))";
+		$query = "INSERT INTO backup_user_activation (user_id,code,expiry) VALUES(UNHEX(?),?,(NOW() + INTERVAL 7 DAY))";
 
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 
-			$stmt->bind_param('is', $this->_userId, $code );
+			$stmt->bind_param('ss', $this->_userId, $code );
 			if ( $stmt->execute() ) {
 				$status=true;
 			}
@@ -126,10 +125,10 @@ class BackupUser
 		$refreshToken = $this->generateAccessToken();
 		$refreshTokenHashed = password_hash($refreshToken, PASSWORD_DEFAULT);
 
-		$query = "REPLACE INTO backup_refresh_token (user_id,refresh_token) VALUES(?,?)";
+		$query = "REPLACE INTO backup_refresh_token (user_id,refresh_token) VALUES(UNHEX(?),?)";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
-			$stmt->bind_param('is', $this->_userId, $refreshTokenHashed);
+			$stmt->bind_param('ss', $this->_userId, $refreshTokenHashed);
 			if ( !$stmt->execute() ) {
 				$this->_log->addError("Failed to add refresh token (user_id=" . $this->_userId . ") (" . mysqli_error($this->_dbconn) . ")", "Authentication");
 			}
@@ -146,11 +145,11 @@ class BackupUser
 
 		$accessToken = '';
 
-		$query = "SELECT user_id FROM backup_user_activation WHERE user_id=? AND code=? AND expiry >= NOW()";
+		$query = "SELECT user_id FROM backup_user_activation WHERE user_id=UNHEX(?) AND code=? AND expiry >= NOW()";
 
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query ) ) {
 
-			$stmt->bind_param('is', $this->_userId, $activationCode );
+			$stmt->bind_param('ss', $this->_userId, $activationCode );
 
 			if ( $stmt->execute() ) {
 
@@ -162,12 +161,12 @@ class BackupUser
 					$accessTokenHashed = password_hash( $accessToken, PASSWORD_DEFAULT );
 
 					//Set the user's access key
-					if ( $s2 = mysqli_prepare($this->_dbconn, "UPDATE backup_user SET access_token=?,token_expiry=(NOW()+INTERVAL ? HOUR),activated=1 WHERE user_id=?") ) {
+					if ( $s2 = mysqli_prepare($this->_dbconn, "UPDATE backup_user SET access_token=?,token_expiry=(NOW()+INTERVAL ? HOUR),activated=1 WHERE user_id=UNHEX(?)") ) {
 
 						//Get token lifetime
 						$tokenExpiry = (int)$this->_db->getSetting('token_expiry');
 
-						$s2->bind_param('sii', $accessTokenHashed, $tokenExpiry, $this->_userId);
+						$s2->bind_param('sis', $accessTokenHashed, $tokenExpiry, $this->_userId);
 						if ( $s2->execute() ) {
 							$this->_log->addMessage("Successfully activated user (user_id=" . $this->_userId . ")", "User Activation");
 						}
@@ -175,7 +174,7 @@ class BackupUser
 						$s2->close();
 
 						//Remove the user activation record
-						@mysqli_query($this->_dbconn, "DELETE FROM backup_user_activation WHERE user_id=" . $this->_userId );
+						@mysqli_query($this->_dbconn, "DELETE FROM backup_user_activation WHERE user_id=UNHEX('" . $this->_userId . "')" );
 					}
 					else {
 						$this->_log->addError("Error: Failed to activate user (user_id=" . $this->_userId . ") (" . mysqli_error($this->_dbconn) . ")", "User Activation");
@@ -205,10 +204,10 @@ class BackupUser
 		$accessToken = '';
 
 		//Find the associated refresh token for the associated user
-		$query = "SELECT refresh_token FROM backup_refresh_token WHERE user_id=?";
+		$query = "SELECT refresh_token FROM backup_refresh_token WHERE user_id=UNHEX(?)";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
-			$stmt->bind_param('i', $this->_userId);
+			$stmt->bind_param('s', $this->_userId);
 			if ( $stmt->execute() ) {
 				if ( $result = $stmt->get_result() ) {
 					$row = $result->fetch_assoc();
@@ -227,13 +226,13 @@ class BackupUser
 
 			$accessTokenHashed = password_hash($accessToken, PASSWORD_DEFAULT);
 
-			$query = "UPDATE backup_user SET access_token=?,token_expiry=(NOW()+INTERVAL ? HOUR) WHERE user_id=?";
+			$query = "UPDATE backup_user SET access_token=?,token_expiry=(NOW()+INTERVAL ? HOUR) WHERE user_id=UNHEX(?)";
 			if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
 				//Get token lifetime
 				$tokenExpiry = (int)$this->_db->getSetting('token_expiry');
 
-				$stmt->bind_param('sii', $accessTokenHashed, $tokenExpiry, $this->_userId);
+				$stmt->bind_param('sis', $accessTokenHashed, $tokenExpiry, $this->_userId);
 				if ( !$stmt->execute() ) {
 					$this->_log->addError("Failed to update user access token (user_id=" . $this->_userId . "(" . mysqli_error($this->_dbconn) . ")", "Authentication");
 				}
@@ -242,7 +241,7 @@ class BackupUser
 			}
 
 			//Delete the existing refresh token
-			@mysqli_query($this->_dbconn, "DELETE FROM backup_refresh_token WHERE user_id=" . $this->_userId);
+			@mysqli_query($this->_dbconn, "DELETE FROM backup_refresh_token WHERE user_id=UNHEX('" . $this->_userId . "')");
 		}
 
 		return $accessToken;
@@ -253,10 +252,10 @@ class BackupUser
 
 		$tokenExpiry=0;
 
-		$query = "SELECT UNIX_TIMESTAMP(token_expiry) FROM backup_user WHERE user_id=?";
+		$query = "SELECT UNIX_TIMESTAMP(token_expiry) FROM backup_user WHERE user_id=UNHEX(?)";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
-			$stmt->bind_param('i', $this->_userId);
+			$stmt->bind_param('s', $this->_userId);
 			if ( $stmt->execute() ) {
 				if ( $result = $stmt->get_result() ) {
 					$row = $result->fetch_row();

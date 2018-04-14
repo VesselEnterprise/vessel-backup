@@ -11,15 +11,15 @@ class BackupFile
 	private $_fileId = NULL;
 	private $_fileRow = array();
 	private $_fileExists=false;
-	private $_userId = -1;
+	private $_userId = null;
 
-	public function __construct($fileId=NULL,$userId=-1) {
+	public function __construct($fileId=NULL,$userId=null) {
 
 		$this->_db = BackupDatabase::getDatabase();
 		$this->_dbconn = $this->_db->getConnection();
 		$this->_log = BackupLog::getLog();
 
-		if ( !empty($fileId) && $userId > 0 ) {
+		if ( !empty($fileId) && !empty($userId) ) {
 			$this->queryFile($fileId,$userId);
 		}
 
@@ -27,10 +27,10 @@ class BackupFile
 
 	public function queryFile($fileId, $userId) {
 
-		$query = "SELECT * FROM backup_file WHERE file_id=UNHEX(?) AND user_id=?";
+		$query = "SELECT * FROM backup_file WHERE file_id=UNHEX(?) AND user_id=UNHEX(?)";
 		if ( $stmt = mysqli_prepare($this->_dbconn, $query) ) {
 
-			$stmt->bind_param('si', $fileId, $userId);
+			$stmt->bind_param('ss', $fileId, $userId);
 			if ( $stmt->execute() ) {
 
 				$result = $stmt->get_result();
