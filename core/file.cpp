@@ -3,7 +3,9 @@
 using namespace Backup::File;
 using namespace Backup::Compression;
 
-BackupFile::BackupFile(const fs::path& fp ) : m_file_path(fp), m_chunk_size(BACKUP_CHUNK_SZ)
+size_t BackupFile::m_chunk_size = BACKUP_CHUNK_SZ;
+
+BackupFile::BackupFile(const fs::path& fp ) : m_file_path(fp)
 {
     m_directory_id=-1;
     m_upload_id=-1;
@@ -337,11 +339,14 @@ std::string BackupFile::get_file_part(unsigned int num) {
         end_pos = get_file_size()-1;
 
     std::string file_part;
-    file_part.resize( m_chunk_size ); //Optimize string alloc
 
     //If file is > 50 MB, we do not want to store all the contents in memory
     if ( total_bytes > BACKUP_LARGE_SZ )
     {
+
+        size_t bytes_to_read = (end_pos - start_pos) + 1;
+
+        file_part.resize( bytes_to_read ); //Optimize string alloc
 
         //Read file contents
         std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
@@ -349,7 +354,7 @@ std::string BackupFile::get_file_part(unsigned int num) {
             return "";
 
         infile.seekg( start_pos, std::ios::beg );
-        infile.read( &file_part[0], m_chunk_size ); //Read contents
+        infile.read( &file_part[0], bytes_to_read ); //Read contents
 
         infile.close(); //Close file
 
@@ -378,7 +383,7 @@ std::shared_ptr<BackupFile> BackupFile::get_compressed_copy()
     return std::make_shared<BackupFile>(tmp_file);
 }
 
-size_t BackupFile::get_chunk_size() const
+size_t BackupFile::get_chunk_size()
 {
     return m_chunk_size;
 }

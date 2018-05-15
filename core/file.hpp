@@ -195,15 +195,15 @@ namespace Backup {
                 */
                 bool is_compressed();
 
-                /*! \fn void set_chunk_size( size_t chunk_sz );
+                /*! \fn static void set_chunk_size( size_t chunk_sz );
                     \brief Sets the size of chunks of bytes returned from a file part for multi part uploads
                 */
-                void set_chunk_size( size_t chunk_sz );
+                static void set_chunk_size( size_t chunk_sz );
 
-                 /*! \fn size_t get_chunk_size();
+                 /*! \fn static size_t get_chunk_size();
                     \brief Returns the chunk size in bytes for multipart uploads
                 */
-                size_t get_chunk_size() const;
+                static size_t get_chunk_size();
 
                 /*! \fn std::string get_file_part(unsigned int num);
                     \brief
@@ -245,7 +245,7 @@ namespace Backup {
                 unsigned int m_file_id; //!< Database ID of the file
                 unsigned int m_directory_id; //!< Database ID of the parent directory
                 unsigned int m_upload_id; //!< Server Upload ID of the file
-                size_t m_chunk_size; //!< Size in bytes in a file part for multi part uploads
+                static size_t m_chunk_size; //!< Size in bytes in a file part for multi part uploads
 
                 /*! \fn void update_attributes()
                     \brief Updates private member variables for file properties. Called in constructor and when assigning an object a new file path

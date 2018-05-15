@@ -9,6 +9,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "local_db.hpp"
 #include "log.hpp"
@@ -105,14 +106,16 @@ namespace Backup {
                 bool m_use_ssl;
                 bool m_verify_cert;
                 boost::posix_time::time_duration m_timeout;
-                boost::asio::io_service m_io_service;
                 boost::asio::ssl::context m_ssl_ctx;
-                boost::asio::ip::tcp::socket m_socket;
-                boost::asio::ssl::stream<boost::asio::ip::tcp::socket> m_ssl_socket;
-                boost::asio::deadline_timer m_deadline_timer;
+                boost::asio::io_service m_io_service;
+                boost::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
+                boost::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> m_ssl_socket;
+                boost::shared_ptr<boost::asio::deadline_timer> m_deadline_timer;
 
+                std::ostream m_transfer_stream; //Data to send
                 boost::asio::streambuf m_response_buffer;
                 boost::asio::streambuf m_request_buffer;
+                boost::asio::streambuf m_transfer_buffer; //Buffer containing data to send
                 std::string m_request_data;
 
                 unsigned int m_http_status;
@@ -131,7 +134,7 @@ namespace Backup {
                 void handle_connect( const boost::system::error_code& e );
                 void handle_handshake(const boost::system::error_code& e );
                 void handle_response( const boost::system::error_code& e );
-                void handle_write( const boost::system::error_code& e );
+                void handle_write( const boost::system::error_code& e, size_t bytes_transferred );
                 void handle_read_content( const boost::system::error_code& e );
                 void handle_read_headers( const boost::system::error_code& e );
 

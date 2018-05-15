@@ -4,7 +4,6 @@ using namespace Backup::Utilities;
 
 std::string Hash::get_sha1_hash(const std::string& data)
 {
-    using namespace CryptoPP;
 
     SHA1 hash;
     std::string digest;
@@ -16,7 +15,6 @@ std::string Hash::get_sha1_hash(const std::string& data)
 
 std::unique_ptr<unsigned char*> Hash::get_sha1_hash_raw(const std::string& data)
 {
-    using namespace CryptoPP;
 
     unsigned char* digest = new unsigned char[CryptoPP::SHA1::DIGESTSIZE];
 
@@ -28,7 +26,6 @@ std::unique_ptr<unsigned char*> Hash::get_sha1_hash_raw(const std::string& data)
 
 std::string Hash::get_sha256_hash(const std::string& data)
 {
-    using namespace CryptoPP;
 
     SHA256 hash;
     std::string digest;
@@ -38,10 +35,53 @@ std::string Hash::get_sha256_hash(const std::string& data)
     return digest;
 }
 
-std::string Hash::get_hmac_256( const std::string& key, const std::string& data, bool hex )
+std::string Hash::get_md5_hash(const std::string& data, bool base64)
 {
 
-    using namespace CryptoPP;
+    /*
+
+    unsigned char digest[ Weak::MD5::DIGESTSIZE ];
+
+    Weak::MD5 hash;
+    hash.CalculateDigest( digest, (const unsigned char*)data.c_str(), data.length() );
+
+    HexEncoder encoder;
+    std::string output;
+
+    encoder.Attach( new StringSink( output ) );
+    encoder.Put( digest, sizeof(digest) );
+    encoder.MessageEnd();
+
+    boost::algorithm::to_lower(output);
+
+    */
+
+    Weak::MD5 hash;
+    std::string digest;
+
+    if ( !base64 ) {
+        StringSource s(data, true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+    }
+    else {
+        StringSource s(data, true, new HashFilter(hash, new Base64Encoder( new StringSink(digest), false ) ) );
+    }
+
+    return digest;
+}
+
+std::string Hash::get_base64( const std::string& data )
+{
+
+    //unsigned char* decoded = (unsigned char*)data.c_str();
+    std::string encoded;
+
+    StringSource ss(data, true, new Base64Encoder( new StringSink(encoded), false ) );
+
+    return encoded;
+}
+
+std::string Hash::get_hmac_256( const std::string& key, const std::string& data, bool hex )
+{
 
     std::string mac;
     std::string encoded;

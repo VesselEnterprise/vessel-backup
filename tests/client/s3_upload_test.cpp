@@ -7,31 +7,65 @@
 
 using namespace Backup::Networking;
 using namespace Backup::File;
+using namespace Backup::Database;
+
 
 int main( int argc, char** argv )
 {
 
-    BackupFile bf( boost::filesystem::path("test_files/test.txt") );
+    using Backup::Networking::AwsS3Client;
+
+    std::string upload_type;
+    std::string file_path;
+
+    std::cout << "Upload a file in one part or multiparts (single/multi): " << '\n';
+    std::cin >> upload_type;
+
+    std::cin.ignore();
+
+    std::cout << "Enter the full path to the file: " << '\n';
+    std::getline( std::cin, file_path );
+
+    BackupFile bf( boost::filesystem::path(file_path.c_str()) );
+
+    std::cout << "Testing " << upload_type << " File Upload..." << '\n';
 
     AwsS3Client* aws = new AwsS3Client("https://vessel-backup.s3-us-east-2.amazonaws.com");
-    aws->set_file(&bf);
+    AwsS3Client::AwsFlags flags = AwsS3Client::AwsFlags::ReducedRedundancy;
 
-    std::cout << "Canonical Request:\n" << aws->get_canonical_request() << "\n\n";
-    std::cout << "String to sign:\n" << aws->get_string_to_sign() << "\n";
-    std::cout << "AWS V4 Signature:\n" << aws->get_signature_v4() << "\n";
+    if ( upload_type == "multi" ) {
+        flags = flags | AwsS3Client::AwsFlags::Multipart | AwsS3Client::AwsFlags::SkipMultiInit;
+    }
 
-    //aws->upload();
+    aws->init_upload(&bf, flags );
 
-    std::cout << "HTTP Status: " << aws->get_http_status() << "\n";
-    std::cout << "Response from server:\n" << aws->get_response() << "\n";
+    if ( upload_type != "multi" ) {
+        aws->upload();
+        std::cout << "HTTP Status: " << aws->get_http_status() << "\n";
+        std::cout << "Response from server:\n" << aws->get_response() << "\n";
+    }
+    else {
 
-    std::cout << "File path: " << bf.get_canonical_path() << "\n";
-    std::cout << "File Sha-1 hash: " << Backup::Utilities::Hash::get_sha1_hash( bf.get_canonical_path() ) << "\n";
+        std::cout << "HTTP Status: " << aws->get_http_status() << "\n";
+        std::cout << "Response from server:\n" << aws->get_response() << "\n";
 
-    unsigned char* ptrhash = *bf.get_unique_id_raw();
-    std::cout << "File Sha-1 hash raw:\r\n" << ptrhash << "\n";
+        int total_parts = bf.get_total_parts();
 
-    delete ptrhash;
+        std::string upload_id = aws->get_upload_id();
+
+        std::cout << "Uploading file part for upload id " << upload_id << '\n';
+
+        for ( auto i=1; i <= total_parts; i++ )
+
+        {
+            std::cout << "Uploading file part " << i << " of " << total_parts << '\n';
+            std::string etag = aws->upload_part(i, upload_id );
+            std::cout << "HTTP Status: " << aws->get_http_status() << "\n";
+            std::cout << "Response from server:\n" << aws->get_response() << "\n";
+            std::cout << "ETag: " << etag << '\n';
+            std::cin.get();
+        }
+    }
 
     return 0;
 
