@@ -2,8 +2,8 @@
 #include <string>
 #include <functional>
 
-#include "aws_s3_client.hpp"
-#include "file.hpp"
+#include <vessel/aws/aws_s3_client.hpp>
+#include <vessel/filesystem/file.hpp>
 
 using namespace Backup::Networking;
 using namespace Backup::File;
@@ -34,7 +34,7 @@ int main( int argc, char** argv )
     AwsS3Client::AwsFlags flags = AwsS3Client::AwsFlags::ReducedRedundancy;
 
     if ( upload_type == "multi" ) {
-        flags = flags | AwsS3Client::AwsFlags::Multipart | AwsS3Client::AwsFlags::SkipMultiInit;
+        flags = flags | AwsS3Client::AwsFlags::Multipart; // | AwsS3Client::AwsFlags::SkipMultiInit;
     }
 
     aws->init_upload(&bf, flags );
@@ -55,16 +55,27 @@ int main( int argc, char** argv )
 
         std::cout << "Uploading file part for upload id " << upload_id << '\n';
 
-        for ( auto i=1; i <= total_parts; i++ )
+        //ETag storage
+        std::vector<AwsS3Client::etag_pair> etags;
 
+        for ( auto i=1; i <= total_parts; i++ )
         {
             std::cout << "Uploading file part " << i << " of " << total_parts << '\n';
             std::string etag = aws->upload_part(i, upload_id );
             std::cout << "HTTP Status: " << aws->get_http_status() << "\n";
             std::cout << "Response from server:\n" << aws->get_response() << "\n";
             std::cout << "ETag: " << etag << '\n';
-            std::cin.get();
+            //std::cin.get();
+
+            //Store the etags
+            AwsS3Client::etag_pair tag = {i, etag};
+            etags.push_back( tag );
         }
+
+        //Complete the Multipart upload
+        std::string complete_etag = aws->complete_multipart_upload(etags, upload_id);
+
+        std::cout << "Multipart upload was successful with ETag " << complete_etag << '\n';
     }
 
     return 0;

@@ -24,14 +24,14 @@
 #endif // _WIN32
 
 //Custom includes
-#include "types.hpp"
-#include "local_db.hpp"
-#include "compress.hpp"
-#include "http_request.hpp"
-#include "file.hpp"
-#include "directory.hpp"
-#include "log.hpp"
-#include "http_client.hpp"
+#include <vessel/types.hpp>
+#include <vessel/database/local_db.hpp>
+#include <vessel/compression/compress.hpp>
+#include <vessel/network/http_request.hpp>
+#include <vessel/filesystem/file.hpp>
+#include <vessel/filesystem/directory.hpp>
+#include <vessel/log/log.hpp>
+#include <vessel/network/http_client.hpp>
 
 //#define BOOST_NETWORK_ENABLE_HTTPS 1
 

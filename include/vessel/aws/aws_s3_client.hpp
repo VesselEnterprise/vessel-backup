@@ -19,10 +19,11 @@
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
-#include "http_client.hpp"
-#include "http_request.hpp"
-#include "file.hpp"
-#include "hash_util.hpp"
+#include <vessel/network/http_client.hpp>
+#include <vessel/network/http_request.hpp>
+#include <vessel/filesystem/file.hpp>
+#include <vessel/crypto/hash_util.hpp>
+#include <vessel/aws/aws_exception.hpp>
 
 #define AWS_ACCESS_ID ""
 #define AWS_SECRET_KEY ""

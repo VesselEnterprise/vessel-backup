@@ -56,7 +56,7 @@ int main()
     ** Test File Techniques
     **/
 
-    std::string test_file = "/home/kyle/Downloads/The.Nightmare.Before.Christmas.1993.720p.BRRip.750MB.MkvCage.mkv";
+    std::string test_file = "";
 
     BackupFile* bf = new BackupFile(test_file);
 

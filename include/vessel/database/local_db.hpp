@@ -13,10 +13,10 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
-#include "types.hpp"
-#include "log.hpp"
-#include "version.hpp"
-#include "file.hpp"
+#include <vessel/types.hpp>
+#include <vessel/log/log.hpp>
+#include <vessel/version.hpp>
+#include <vessel/filesystem/file.hpp>
 
 #ifdef _WIN32
     #include <winsock2.h>

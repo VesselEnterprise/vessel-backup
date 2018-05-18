@@ -11,8 +11,8 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "local_db.hpp"
-#include "log.hpp"
+#include <vessel/database/local_db.hpp>
+#include <vessel/log/log.hpp>
 
 namespace Backup {
 

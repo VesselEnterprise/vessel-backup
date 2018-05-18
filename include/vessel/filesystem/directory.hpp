@@ -9,7 +9,7 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
-#include "hash_util.hpp"
+#include <vessel/crypto/hash_util.hpp>
 
 namespace fs = boost::filesystem;
 

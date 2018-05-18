@@ -7,7 +7,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <boost/filesystem.hpp>
-#include "compress.hpp"
+#include <vessel/compression/compress.hpp>
 
 namespace Backup {
     namespace Compression {

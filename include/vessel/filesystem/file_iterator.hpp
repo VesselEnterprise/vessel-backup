@@ -6,11 +6,11 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 
-#include "local_db.hpp"
-#include "types.hpp"
-#include "log.hpp"
-#include "file.hpp"
-#include "directory.hpp"
+#include <vessel/database/local_db.hpp>
+#include <vessel/types.hpp>
+#include <vessel/log/log.hpp>
+#include <vessel/filesystem/file.hpp>
+#include <vessel/filesystem/directory.hpp>
 
 namespace fs = boost::filesystem;
 using namespace Backup::Database;

@@ -1,11 +1,11 @@
-#include "http_client.hpp"
+#include <vessel/network/http_client.hpp>
 
 using namespace Backup::Networking;
 
 HttpClient::HttpClient(const std::string& uri) :
     m_use_ssl(false),
     m_ssl_ctx(boost::asio::ssl::context::tlsv12),
-    m_timeout(boost::posix_time::seconds(15)),
+    m_timeout(boost::posix_time::seconds(60)),
     m_transfer_stream(&m_transfer_buffer),
     m_verify_cert(true)
 {
@@ -182,20 +182,27 @@ bool HttpClient::connect()
 
 void HttpClient::disconnect()
 {
+
+    boost::system::error_code disconnect_ec;
     try
     {
         if ( m_socket->is_open() ) {
-            m_socket->shutdown( boost::asio::ip::tcp::socket::shutdown_both, m_conn_status );
+            m_socket->shutdown( boost::asio::ip::tcp::socket::shutdown_both, disconnect_ec );
             m_socket->close();
         }
 
         if ( m_ssl_socket->lowest_layer().is_open() ) {
             //m_ssl_socket->shutdown(); //Shutdown the SSL stream
-            m_ssl_socket->lowest_layer().shutdown( boost::asio::ip::tcp::socket::shutdown_both, m_conn_status );
+            m_ssl_socket->lowest_layer().shutdown( boost::asio::ip::tcp::socket::shutdown_both, disconnect_ec );
             m_ssl_socket->lowest_layer().close(); //Close the TCP socket
         }
         //Cancel the deadline
         m_deadline_timer->cancel();
+
+        if ( disconnect_ec ) {
+            //Handle disconnect error
+            //m_log->....
+        }
     }
     catch ( const boost::system::system_error & e )
     {
@@ -349,7 +356,7 @@ void HttpClient::handle_response( const boost::system::error_code& e )
             boost::asio::async_read_until(*m_ssl_socket, m_response_buffer, "\r\n\r\n", boost::bind(&HttpClient::handle_read_headers, this, boost::asio::placeholders::error));
 
     }
-    else
+    else if ( e != boost::asio::error::eof )
     {
         std::cout << "ASIO Response Error: " << e << "\n";
     }
@@ -372,11 +379,11 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         }
 
         std::cout << "Read headers: " << '\n' << m_header_data << '\n';
-        std::cin.get();
+        //std::cin.get();
 
         //There may be some data in the buffer to consume
         if (m_response_buffer.size() > 0) {
-            m_response_data.append( std::istream_iterator<char>(response_stream), std::istream_iterator<char>() );
+            m_response_data.append( (std::istreambuf_iterator<char>(&m_response_buffer)), std::istreambuf_iterator<char>() );
         }
 
         // Start reading remaining data until EOF.
@@ -402,8 +409,11 @@ void HttpClient::handle_read_content( const boost::system::error_code& e )
     if (!e)
     {
 
+        //std::stringstream ss;
+        //ss << &m_response_buffer;
+
         std::string data( (std::istreambuf_iterator<char>(&m_response_buffer)), std::istreambuf_iterator<char>() );
-        m_response_data.append(data);
+        m_response_data.append( data );
 
         // Continue reading remaining data until EOF.
         if ( !m_use_ssl )
@@ -520,7 +530,7 @@ void HttpClient::write_socket(const std::string& data)
     m_transfer_stream.write( &m_request_data[0], m_request_data.size() );
 
     std::cout << "Transfer buffer size: " << m_transfer_buffer.size() << '\n';
-    std::cin.get();
+    //std::cin.get();
 
     if ( !m_use_ssl )
         boost::asio::async_write(*m_socket, m_transfer_buffer, boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;

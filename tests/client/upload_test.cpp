@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
     std::string host = ldb->get_setting_str("master_server");
 
-    VesselClient* cli = new VesselClient(host + "/some_resource/hodor/bodor php");
+    VesselClient* cli = new VesselClient(host);
     cli->use_compression(false);
 
     std::cout << "URI path: " << cli->get_uri_path() << "\n";
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     //std::string test_file = "C:\\Users\\kett.ky\\Downloads\\FileZilla_3.30.0_win64-setup.exe"; //Windows
     //std::string test_file = "/home/kyle/Downloads/ServiceNowCAD.pdf";
 
-    std::string test_file = "test_files/test.txt";
+    std::string test_file = "";
 
     BackupFile* bf = new BackupFile(test_file);
 

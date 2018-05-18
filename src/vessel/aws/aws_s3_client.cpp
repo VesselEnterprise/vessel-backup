@@ -1,4 +1,4 @@
-#include "aws_s3_client.hpp"
+#include <vessel/aws/aws_s3_client.hpp>
 
 using namespace Backup::Networking;
 using namespace Backup::Utilities;
@@ -295,7 +295,7 @@ bool AwsS3Client::upload()
 
     std::cout << "Sending AWS Request:\n" << ss.str() << "\n";
 
-    std::cin.get();
+    //std::cin.get();
 
     ss.write(&m_file_content[0], m_file_content.size() );
 
@@ -345,7 +345,7 @@ void AwsS3Client::init_multipart_upload()
     ss << "Connection: close\r\n\r\n";
 
     std::cout << "Sending AWS Request:\n" << ss.str() << "\n";
-    std::cin.get();
+    //std::cin.get();
 
     //Connect to socket
     connect();
@@ -427,7 +427,7 @@ std::string AwsS3Client::upload_part(int part, const std::string& upload_id )
     ss << "\r\n";
 
     std::cout << "Sending AWS Request:\n" << ss.str() << "\n";
-    std::cin.get();
+    //std::cin.get();
 
     //ss << m_file_content;
 
@@ -516,8 +516,6 @@ std::string AwsS3Client::parse_upload_id(const std::string& response)
 
     std::string xml = response.substr( start_pos, (end_pos-start_pos)+1 );
 
-    std::cout << "Parsing XML: " << xml << '\n';
-
     std::string upload_id;
 
     //Read response into a stream
@@ -566,10 +564,15 @@ std::string AwsS3Client::parse_etag(const std::string& response)
     while ( getline(iss, header) && header != "\r" )
     {
         if ( header.find("ETag: ") != std::string::npos ) {
-            etag = header.substr(6); //Everything after ETag:<space>
+            etag = header.substr(6); //Everything after "ETag: "
             break;
         }
     }
+
+    //Replace any remaining spaces or carriage returns
+    boost::algorithm::replace_all(etag, " ", "");
+    boost::algorithm::replace_all(etag, "\r", "");
+    boost::algorithm::replace_all(etag, "\n", "");
 
     return etag;
 
@@ -578,6 +581,9 @@ std::string AwsS3Client::parse_etag(const std::string& response)
 std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>& etags, const std::string& upload_id)
 {
 
+    using namespace boost::property_tree;
+
+    //ETag returned from the API for the final upload
     std::string etag;
 
     /*Example Payload
@@ -598,8 +604,95 @@ std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>&
     </CompleteMultipartUpload>
     */
 
-    //Parse response and return ETag for file upload
+    //XML storage
+    ptree pt;
+    auto& root_node = pt.add("CompleteMultipartUpload", "");
 
+    //XML Output
+    std::ostringstream oss;
+
+    //Iterate through the Etags and build the XML payload
+    for ( int i=0; i < etags.size(); i++ )
+    {
+        auto& node = root_node.add_child("Part", ptree{});
+        node.put("PartNumber", etags[i].part_number );
+        node.put("ETag", etags[i].etag );
+    }
+
+    write_xml(oss, pt, xml_parser::xml_writer_make_settings<std::string>(' ',4) );
+
+    //XMl payload to send to the API
+    std::string payload = oss.str();
+
+    std::cout << "CompleteMultipartUploadRequest:\n" << payload << '\n';
+
+    //Send XML payload to the API and complete the upload
+
+    m_current_part = -1; //Skip additional headers
+
+    //Set HTTP verb for part upload
+    m_http_verb = "POST";
+
+    //Set the MD5 of the current part
+    m_file_content = payload;
+    m_content_sha256 =  Hash::get_sha256_hash(m_file_content);
+    m_query_str = "uploadId=" + encode_uri(upload_id);
+
+    //Refresh the date/time vars
+    init_amz_date();
+
+    //Rebuild the request headers
+    build_request_headers();
+
+    //Build the raw request
+    std::stringstream ss( std::stringstream::out );
+
+    ss << m_http_verb << " /" << encode_uri(m_file->get_file_name()) << "?uploadId=" << encode_uri(upload_id) << " HTTP/1.1\r\n";
+    ss << "Host: " << get_hostname() << "\r\n";
+    ss << "Date: " << m_amzdate_clean << "\r\n";
+    ss << "Authorization: AWS4-HMAC-SHA256 Credential=" << AWS_ACCESS_ID << "/" << m_amzdate_short << "/" << m_region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << get_signature_v4() << "\r\n";
+    ss << "Content-Length: " << m_file_content.size() << "\r\n";
+    ss << "x-amz-content-sha256: " << m_content_sha256 << "\r\n";
+    ss << "x-amz-date: " << m_amzdate << "\r\n";
+    ss << "Connection: close\r\n\r\n";
+    ss << m_file_content; //XML payload
+
+    //Connect to socket
+    connect();
+
+    //Write to socket
+    write_socket( ss.str() );
+
+    do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
+
+    disconnect();
+
+    //Clear content
+    m_file_content.clear();
+
+    std::cout << "Complete Multipart Upload Response:\n" << get_response() << '\n';
+
+    //Parse the response and return the ETag
+    std::string response = get_response();
+
+    //Handle Empty Response
+    if ( response.empty() ) {
+        //Throw some error
+        return "";
+    }
+
+    int xmlStart = response.find("<CompleteMultipartUploadResult");
+    int xmlEnd = response.find_last_of(">")+1;
+
+    std::stringstream iss; //Response stream
+    iss << response.substr(xmlStart, xmlEnd-xmlStart);
+
+    std::cout << "Test response:\n" << iss.str() << '\n';
+
+    ptree rt;
+    boost::property_tree::read_xml(iss, rt);
+
+    etag = rt.get<std::string>("CompleteMultipartUploadResult.ETag");
 
     return etag;
 
