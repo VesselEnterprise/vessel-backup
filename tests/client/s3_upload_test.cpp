@@ -28,16 +28,22 @@ int main( int argc, char** argv )
 
     BackupFile bf( boost::filesystem::path(file_path.c_str()) );
 
+    std::cin.get();
+
     std::cout << "Testing " << upload_type << " File Upload..." << '\n';
 
     AwsS3Client* aws = new AwsS3Client("https://vessel-backup.s3-us-east-2.amazonaws.com");
     AwsS3Client::AwsFlags flags = AwsS3Client::AwsFlags::ReducedRedundancy;
+
+    std::cin.get();
 
     if ( upload_type == "multi" ) {
         flags = flags | AwsS3Client::AwsFlags::Multipart; // | AwsS3Client::AwsFlags::SkipMultiInit;
     }
 
     aws->init_upload(&bf, flags );
+
+    std::cin.get();
 
     if ( upload_type != "multi" ) {
         aws->upload();
@@ -65,7 +71,8 @@ int main( int argc, char** argv )
             std::cout << "HTTP Status: " << aws->get_http_status() << "\n";
             std::cout << "Response from server:\n" << aws->get_response() << "\n";
             std::cout << "ETag: " << etag << '\n';
-            //std::cin.get();
+
+            std::cin.get();
 
             //Store the etags
             AwsS3Client::etag_pair tag = {i, etag};

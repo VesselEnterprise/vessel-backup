@@ -7,25 +7,29 @@
 
 class AwsException : public std::exception
 {
-
-    enum ErrorCodes
-    {
-        NoError = 0,
-        InitFailed,
-        UploadFailed,
-        XmlParseError
-    };
-
-    std::string _msg;
-
     public:
 
-        AwsException(const std::string& msg) : _msg(msg){}
+        typedef enum ErrorCode
+        {
+            NoError = 0,
+            InitFailed,
+            UploadFailed,
+            BadResponse,
+            XmlParseError
+        };
 
-    virtual const char* what() const noexcept override
-    {
-        return _msg.c_str();
-    }
+        AwsException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
+
+        ErrorCode get_code() { return _code; }
+
+        virtual const char* what() const noexcept override
+        {
+            return _msg.c_str();
+        }
+
+    private:
+        std::string _msg;
+        ErrorCode _code;
 
 };
 

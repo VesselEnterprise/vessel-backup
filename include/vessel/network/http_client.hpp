@@ -10,9 +10,11 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include <vessel/database/local_db.hpp>
 #include <vessel/log/log.hpp>
+#include <vessel/network/http_stream.hpp>
 
 namespace Backup {
 
@@ -112,11 +114,9 @@ namespace Backup {
                 boost::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> m_ssl_socket;
                 boost::shared_ptr<boost::asio::deadline_timer> m_deadline_timer;
 
-                std::ostream m_transfer_stream; //Data to send
-                boost::asio::streambuf m_response_buffer;
-                boost::asio::streambuf m_request_buffer;
-                boost::asio::streambuf m_transfer_buffer; //Buffer containing data to send
-                std::string m_request_data;
+                //Member Vars for Data Transfer
+                boost::shared_ptr<boost::asio::streambuf> m_response_buffer;
+                std::string m_request_data; //Response Data
 
                 unsigned int m_http_status;
                 std::string m_header_data;
@@ -137,6 +137,8 @@ namespace Backup {
                 void handle_write( const boost::system::error_code& e, size_t bytes_transferred );
                 void handle_read_content( const boost::system::error_code& e );
                 void handle_read_headers( const boost::system::error_code& e );
+
+                void cleanup();
 
                 /** Logging and errors **/
                 Backup::Logging::Log* m_log;
@@ -163,7 +165,7 @@ namespace Backup {
 
                 void clear_error_code();
 
-                void write_socket( const std::string& data );
+                void write_socket( const std::string& str );
 
                 void run_io_service();
 

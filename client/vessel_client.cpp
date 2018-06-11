@@ -92,7 +92,7 @@ void VesselClient::send_request( Backup::Networking::HttpRequest* r )
     clear_error_code();
 
     //Write HTTP request to socket
-    write_socket(&request_stream.str()[0]);
+    //write_socket(request_stream);
 
     //Run the handlers until the response sets the status code or EOF
     do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );

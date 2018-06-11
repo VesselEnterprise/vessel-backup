@@ -14,6 +14,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/hmac.h>
@@ -21,6 +22,7 @@
 
 #include <vessel/network/http_client.hpp>
 #include <vessel/network/http_request.hpp>
+#include <vessel/network/http_stream.hpp>
 #include <vessel/filesystem/file.hpp>
 #include <vessel/crypto/hash_util.hpp>
 #include <vessel/aws/aws_exception.hpp>
@@ -28,7 +30,6 @@
 #define AWS_ACCESS_ID ""
 #define AWS_SECRET_KEY ""
 #define AWS_REGION "us-east-2"
-
 
 namespace Backup {
     namespace Networking {
@@ -133,7 +134,7 @@ namespace Backup {
                 std::string m_amzdate_short; //Shortened version of the AMZ date eg. 20130524
                 std::string m_amzdate_clean; //Example: Fri, 24 May 2013 00:00:00 GMT
                 std::string m_content_sha256; //SHA-256 hash of the file contents
-                std::string m_file_content; //Content of the current file or part
+                boost::shared_ptr<std::string> m_file_content; //Content of the current file or part
                 std::string m_content_md5; //MD5 hash of the current file or part
                 std::string m_previous_signature; //The previous signature used for streaming uploads
                 std::string m_request_payload;

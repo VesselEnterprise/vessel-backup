@@ -6,7 +6,6 @@ HttpClient::HttpClient(const std::string& uri) :
     m_use_ssl(false),
     m_ssl_ctx(boost::asio::ssl::context::tlsv12),
     m_timeout(boost::posix_time::seconds(60)),
-    m_transfer_stream(&m_transfer_buffer),
     m_verify_cert(true)
 {
 
@@ -235,6 +234,7 @@ void HttpClient::handle_connect(const boost::system::error_code& e)
         }
         else //SSL client must perform handshake
         {
+            m_ssl_good=false; //Reset flag
             m_ssl_socket->async_handshake(boost::asio::ssl::stream_base::client,boost::bind(&HttpClient::handle_handshake, this, boost::asio::placeholders::error) );
 
             //Do not return until handshake is complete
@@ -301,7 +301,7 @@ void HttpClient::handle_response( const boost::system::error_code& e )
 
         /** Parse the response headers **/
 
-        std::istream response_stream(&m_response_buffer);
+        std::istream response_stream( m_response_buffer.get() );
 
         // eg.
         std::string http_version;
@@ -351,9 +351,9 @@ void HttpClient::handle_response( const boost::system::error_code& e )
 
         // Read the response headers, which are terminated by a blank line.
         if ( !m_use_ssl )
-            boost::asio::async_read_until(*m_socket, m_response_buffer, "\r\n\r\n", boost::bind(&HttpClient::handle_read_headers, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(*m_socket, *m_response_buffer, "\r\n\r\n", boost::bind(&HttpClient::handle_read_headers, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read_until(*m_ssl_socket, m_response_buffer, "\r\n\r\n", boost::bind(&HttpClient::handle_read_headers, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(*m_ssl_socket, *m_response_buffer, "\r\n\r\n", boost::bind(&HttpClient::handle_read_headers, this, boost::asio::placeholders::error));
 
     }
     else if ( e != boost::asio::error::eof )
@@ -371,7 +371,7 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
     if (!e)
     {
         //Read header data
-        std::istream response_stream(&m_response_buffer);
+        std::istream response_stream( m_response_buffer.get() );
         std::noskipws( response_stream ); //Don't skip white spaces
         std::string header;
         while (std::getline(response_stream, header) && header != "\r") {
@@ -382,15 +382,15 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         //std::cin.get();
 
         //There may be some data in the buffer to consume
-        if (m_response_buffer.size() > 0) {
-            m_response_data.append( (std::istreambuf_iterator<char>(&m_response_buffer)), std::istreambuf_iterator<char>() );
+        if (m_response_buffer->size() > 0) {
+            m_response_data.append( (std::istreambuf_iterator<char>( m_response_buffer.get() )), std::istreambuf_iterator<char>() );
         }
 
         // Start reading remaining data until EOF.
         if ( !m_use_ssl )
-            boost::asio::async_read( *m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error) );
+            boost::asio::async_read( *m_socket, *m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error) );
         else
-            boost::asio::async_read( *m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error) );
+            boost::asio::async_read( *m_ssl_socket, *m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error) );
 
     }
     else
@@ -408,18 +408,14 @@ void HttpClient::handle_read_content( const boost::system::error_code& e )
 
     if (!e)
     {
-
-        //std::stringstream ss;
-        //ss << &m_response_buffer;
-
-        std::string data( (std::istreambuf_iterator<char>(&m_response_buffer)), std::istreambuf_iterator<char>() );
-        m_response_data.append( data );
+        //Add to response data
+        m_response_data.append( (std::istreambuf_iterator<char>(m_response_buffer.get()) ), std::istreambuf_iterator<char>() );
 
         // Continue reading remaining data until EOF.
         if ( !m_use_ssl )
-            boost::asio::async_read(*m_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error));
+            boost::asio::async_read(*m_socket, *m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read(*m_ssl_socket, m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error));
+            boost::asio::async_read(*m_ssl_socket, *m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error));
 
     }
     else if (e != boost::asio::error::eof)
@@ -430,10 +426,8 @@ void HttpClient::handle_read_content( const boost::system::error_code& e )
     }
     else
     {
-
         /** Response should be read at this point **/
         m_response_ec = boost::asio::error::eof;
-
     }
 
 }
@@ -518,33 +512,30 @@ bool HttpClient::is_https()
     return m_use_ssl;
 }
 
-void HttpClient::write_socket(const std::string& data)
+void HttpClient::write_socket( const std::string& http_request)
 {
 
-    m_request_data = data;
+    //Cleanup buffers / data
+    cleanup();
 
     m_deadline_timer->expires_at(boost::posix_time::pos_infin); //Transfer indefinitely
 
-    m_response_data.clear();
-    m_transfer_stream.clear();
-    m_transfer_stream.write( &m_request_data[0], m_request_data.size() );
+    std::cout << "Transferring " << http_request.size() << " bytes..." << '\n';
 
-    std::cout << "Transfer buffer size: " << m_transfer_buffer.size() << '\n';
-    //std::cin.get();
+    //TODO: Implement bandwidth throttling, limit transfer speed somewhere in here
 
     if ( !m_use_ssl )
-        boost::asio::async_write(*m_socket, m_transfer_buffer, boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
+        boost::asio::async_write(*m_socket, boost::asio::buffer(http_request), boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
     else
-        boost::asio::async_write(*m_ssl_socket, m_transfer_buffer, boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
-        //size_t bytes_written = m_ssl_socket.lowest_layer().write_some(m_transfer_buffer);
-        //std::cout << "Bytes written:" << bytes_written << "\n";
+        boost::asio::async_write(*m_ssl_socket, boost::asio::buffer(http_request), boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
+
 }
 
 void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_transferred )
 {
 
     //std::cout << "Sent " << bytes_transferred << " bytes" << '\n';
-    //std::cout << "Buffer size: " << m_transfer_buffer.size() << " bytes" << '\n';
+    //std::cout << "Buffer size: " << m_request_buffer->size() << " bytes" << '\n';
 
     if (!e)
     {
@@ -556,9 +547,9 @@ void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_
         // automatically grow to accommodate the entire line. The growth may be
         // limited by passing a maximum size to the streambuf constructor.
         if ( !m_use_ssl )
-            boost::asio::async_read_until(*m_socket, m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(*m_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
         else
-            boost::asio::async_read_until(*m_ssl_socket, m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+            boost::asio::async_read_until(*m_ssl_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
 
     }
     else
@@ -587,6 +578,13 @@ bool HttpClient::is_connected()
 std::string HttpClient::get_uri_path()
 {
     return m_uri;
+}
+
+void HttpClient::cleanup()
+{
+    //Refresh buffer(s)
+    m_response_buffer.reset( new boost::asio::streambuf() );
+    m_response_data.clear();
 }
 
 /*
