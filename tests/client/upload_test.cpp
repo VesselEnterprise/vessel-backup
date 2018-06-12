@@ -5,10 +5,10 @@
 #include <sstream>
 #include <boost/timer/timer.hpp>
 
-using namespace Backup::Networking;
-using namespace Backup::Database;
-using namespace Backup::File;
-using Backup::Compression::Compressor;
+using namespace Vessel::Networking;
+using namespace Vessel::Database;
+using namespace Vessel::File;
+using Vessel::Compression::Compressor;
 
 int main(int argc, char** argv)
 {

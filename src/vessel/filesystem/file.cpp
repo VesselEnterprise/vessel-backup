@@ -1,7 +1,7 @@
 #include <vessel/filesystem/file.hpp>
 
-using namespace Backup::File;
-using namespace Backup::Compression;
+using namespace Vessel::File;
+using namespace Vessel::Compression;
 
 size_t BackupFile::m_chunk_size = BACKUP_CHUNK_SZ;
 
@@ -281,7 +281,7 @@ std::string BackupFile::get_unique_id() const
 
 std::unique_ptr<unsigned char*> BackupFile::get_unique_id_raw() const
 {
-    using namespace Backup::Utilities;
+    using namespace Vessel::Utilities;
     return Hash::get_sha1_hash_raw(get_canonical_path());
 }
 
@@ -391,7 +391,7 @@ size_t BackupFile::get_chunk_size()
 std::string BackupFile::find_mime_type( const std::string& ext )
 {
 
-    using namespace Backup::Database;
+    using namespace Vessel::Database;
 
     LocalDatabase* ldb = &LocalDatabase::get_database();
 

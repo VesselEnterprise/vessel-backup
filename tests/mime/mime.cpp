@@ -20,7 +20,7 @@ int main(int argc, char* argv[] )
     }
 
     //Get Local Database Handle
-    Backup::Database::LocalDatabase* ldb = &Backup::Database::LocalDatabase::get_database();
+    Vessel::Database::LocalDatabase* ldb = &Vessel::Database::LocalDatabase::get_database();
     sqlite3* db = ldb->get_handle();
 
     std::string tmp_line;

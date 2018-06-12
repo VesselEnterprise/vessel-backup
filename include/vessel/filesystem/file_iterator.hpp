@@ -13,9 +13,9 @@
 #include <vessel/filesystem/directory.hpp>
 
 namespace fs = boost::filesystem;
-using namespace Backup::Database;
+using namespace Vessel::Database;
 
-namespace Backup {
+namespace Vessel {
     namespace File {
         class FileIterator
         {
@@ -40,7 +40,7 @@ namespace Backup {
                 fs::recursive_directory_iterator m_itr_end; //Never changes
                 LocalDatabase* m_ldb;
                 bool m_skip_dir_periods; //Directories that start with a period
-                Backup::Logging::Log* m_log;
+                Vessel::Logging::Log* m_log;
 
                 bool skip_dir(const fs::path& p, int level);
                 unsigned long get_last_write_t( const fs::path& p );

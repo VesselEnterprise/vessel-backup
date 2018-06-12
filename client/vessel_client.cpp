@@ -2,16 +2,16 @@
 
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
-using namespace Backup::Networking;
+using namespace Vessel::Networking;
 
 VesselClient::VesselClient( const std::string& host ) : HttpClient(host)
 {
 
     //Set local database object
-    m_ldb = &Backup::Database::LocalDatabase::get_database();
+    m_ldb = &Vessel::Database::LocalDatabase::get_database();
 
     //Get log
-    m_log = new Backup::Logging::Log("vessel_cli");
+    m_log = new Vessel::Logging::Log("vessel_cli");
 
     //Get user information
     m_auth_token = m_ldb->get_setting_str("auth_token");
@@ -28,7 +28,7 @@ VesselClient::~VesselClient()
 
 }
 
-void VesselClient::send_request( Backup::Networking::HttpRequest* r )
+void VesselClient::send_request( Vessel::Networking::HttpRequest* r )
 {
 
     //If client is already connected, disconnect before a new attempt
@@ -116,7 +116,7 @@ void VesselClient::send_request( Backup::Networking::HttpRequest* r )
 
 }
 
-int VesselClient::init_upload ( Backup::File::BackupFile * bf )
+int VesselClient::init_upload ( Vessel::File::BackupFile * bf )
 {
 
     //Verify that file size is > 0
@@ -129,7 +129,7 @@ int VesselClient::init_upload ( Backup::File::BackupFile * bf )
 
     std::map<std::string,Value> jmap;
 
-    std::string parent_path = Backup::File::BackupDirectory(bf->get_parent_path()).get_canonical_path();
+    std::string parent_path = Vessel::File::BackupDirectory(bf->get_parent_path()).get_canonical_path();
 
     //Get Activation Code from DB
     jmap.insert( std::pair<std::string,Value>( "file_name", Value( bf->get_file_name().c_str(), alloc ) ) );
@@ -207,7 +207,7 @@ int VesselClient::init_upload ( Backup::File::BackupFile * bf )
 
 }
 
-bool VesselClient::upload_file_part( Backup::File::BackupFile * bf, int part_number=1 )
+bool VesselClient::upload_file_part( Vessel::File::BackupFile * bf, int part_number=1 )
 {
 
     //Validate upload id

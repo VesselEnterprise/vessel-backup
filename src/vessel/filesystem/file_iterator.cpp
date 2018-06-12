@@ -1,12 +1,12 @@
 #include <vessel/filesystem/file_iterator.hpp>
 
-using namespace Backup::File;
+using namespace Vessel::File;
 
 FileIterator::FileIterator(const BackupDirectory& dir) : m_base_dir(dir), m_current_dir(dir)
 {
 
     //Get Local Database Instance
-    m_ldb = &Backup::Database::LocalDatabase::get_database();
+    m_ldb = &Vessel::Database::LocalDatabase::get_database();
 
     //Update some setting(s)
     if ( m_ldb->get_setting_int("skip_period_dirs") > 0 )
@@ -15,7 +15,7 @@ FileIterator::FileIterator(const BackupDirectory& dir) : m_base_dir(dir), m_curr
         m_skip_dir_periods=false;
 
     //Init log
-    m_log = new Backup::Logging::Log("scan");
+    m_log = new Vessel::Logging::Log("scan");
 
     //If Path is blank, try to find home folder
     if ( dir.get_path().empty() )
@@ -318,7 +318,7 @@ int FileIterator::add_directory( const BackupDirectory& bd )
     sqlite3_bind_int(stmt, 3, bd.get_file_size() );
     sqlite3_bind_int(stmt, 4, bd.get_last_modified() );
 
-    int rc = sqlite3_step(stmt);
+    sqlite3_step(stmt);
 
     //Cleanup
     sqlite3_finalize(stmt);

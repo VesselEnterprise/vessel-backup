@@ -1,28 +1,23 @@
-#ifndef AWSEXCEPTION_H
-#define AWSEXCEPTION_H
+#ifndef HTTPEXCEPTION_H
+#define HTTPEXCEPTION_H
 
 #include <iostream>
 #include <string>
 #include <exception>
 
 namespace Vessel {
-    namespace Exception {
+namespace Exception {
 
-        class AwsException : public std::exception
+        class HttpException : public std::exception
         {
             public:
 
                 enum ErrorCode
                 {
                     NoError = 0,
-                    InitFailed,
-                    UploadFailed,
-                    BadResponse,
-                    XmlParseError,
-                    InvalidCredentials
                 };
 
-                AwsException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
+                HttpException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
 
                 ErrorCode get_code() { return _code; }
 
@@ -41,4 +36,5 @@ namespace Vessel {
 }
 
 #endif
+
 

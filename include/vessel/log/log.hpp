@@ -20,7 +20,7 @@ namespace src = boost::log::sources;
 namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 
-namespace Backup {
+namespace Vessel {
     namespace Logging {
 
         enum severity_level
@@ -32,7 +32,7 @@ namespace Backup {
             critical
         };
 
-        BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", Backup::Logging::severity_level )
+        BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", Vessel::Logging::severity_level )
         BOOST_LOG_ATTRIBUTE_KEYWORD(category, "Category", std::string)
         BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", std::string)
 
@@ -69,8 +69,8 @@ namespace Backup {
                 void set_level ( unsigned int level );
 
             private:
-                src::severity_channel_logger< Backup::Logging::severity_level, std::string > m_logger;
                 std::string m_filename;
+                src::severity_channel_logger< Vessel::Logging::severity_level, std::string > m_logger;
                 unsigned int m_level;
         };
 

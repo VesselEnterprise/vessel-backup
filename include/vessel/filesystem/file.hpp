@@ -22,7 +22,7 @@
 
 namespace fs = boost::filesystem;
 
-namespace Backup {
+namespace Vessel {
     namespace File {
 
         class BackupFile

@@ -36,5 +36,8 @@
 *.depend
 *.layout
 
-/bin
-/run
+# Creds and certs
+*.key
+
+bin/
+run/

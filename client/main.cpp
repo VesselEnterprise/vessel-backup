@@ -8,8 +8,8 @@
 #include "file_iterator.hpp"
 
 using namespace std;
-using namespace Backup::Compression;
-using namespace Backup::Database;
+using namespace Vessel::Compression;
+using namespace Vessel::Database;
 
 int main(int argc, char** argv)
 {

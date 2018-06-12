@@ -15,8 +15,9 @@
 #include <vessel/database/local_db.hpp>
 #include <vessel/log/log.hpp>
 #include <vessel/network/http_stream.hpp>
+#include <vessel/network/http_exception.hpp>
 
-namespace Backup {
+namespace Vessel {
 
     namespace Networking {
 
@@ -99,16 +100,16 @@ namespace Backup {
 
             private:
 
-                Backup::Database::LocalDatabase* m_ldb;
+                Vessel::Database::LocalDatabase* m_ldb;
                 std::string m_hostname;
                 std::string m_uri;
                 std::string m_protocol;
                 unsigned int m_port; //or service name
                 bool m_connected;
                 bool m_use_ssl;
-                bool m_verify_cert;
-                boost::posix_time::time_duration m_timeout;
                 boost::asio::ssl::context m_ssl_ctx;
+                boost::posix_time::time_duration m_timeout;
+                bool m_verify_cert;
                 boost::asio::io_service m_io_service;
                 boost::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
                 boost::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> m_ssl_socket;
@@ -141,7 +142,7 @@ namespace Backup {
                 void cleanup();
 
                 /** Logging and errors **/
-                Backup::Logging::Log* m_log;
+                Vessel::Logging::Log* m_log;
                 std::string m_error_message;
 
             protected:

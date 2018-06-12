@@ -1,6 +1,6 @@
 #include <vessel/crypto/hash_util.hpp>
 
-using namespace Backup::Utilities;
+using namespace Vessel::Utilities;
 
 std::string Hash::get_sha1_hash(const std::string& data)
 {

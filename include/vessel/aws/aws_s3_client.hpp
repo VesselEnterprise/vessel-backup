@@ -27,11 +27,9 @@
 #include <vessel/crypto/hash_util.hpp>
 #include <vessel/aws/aws_exception.hpp>
 
-#define AWS_ACCESS_ID ""
-#define AWS_SECRET_KEY ""
-#define AWS_REGION "us-east-2"
+using namespace Vessel::Exception;
 
-namespace Backup {
+namespace Vessel {
     namespace Networking {
 
         class AwsS3Client : public HttpClient
@@ -52,6 +50,12 @@ namespace Backup {
                     SkipMultiInit = 8 //Skips the initialization of a multipart upload if the upload id already exists
                 };
 
+                enum AuthProfile
+                {
+                    Local,
+                    Remote
+                };
+
                 struct etag_pair
                 {
                     int part_number;
@@ -65,12 +69,12 @@ namespace Backup {
                 friend AwsFlags operator&(AwsFlags a, AwsFlags b)
                 {return static_cast<AwsFlags>(static_cast<int>(a) & static_cast<int>(b));}
 
-                void set_http_request( Backup::Networking::HttpRequest* r );
+                void set_http_request( Vessel::Networking::HttpRequest* r );
 
-                /*! \fn void init_upload( Backup::File::BackupFile* bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
+                /*! \fn void init_upload( Vessel::File::BackupFile* bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
                     \brief Initializes the AWS S3 upload
                 */
-                void init_upload( Backup::File::BackupFile* bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
+                void init_upload( Vessel::File::BackupFile* bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
 
                 /*! \fn void set_part_size(size_t part_size);
                     \brief Sets the part size in bytes for multipart uploads
@@ -118,14 +122,19 @@ namespace Backup {
                 */
                 void set_upload_id(const std::string& upload_id);
 
-                /*! \fn void set_file(Backup::File::BackupFile* bf);
+                /*! \fn void set_file(Vessel::File::BackupFile* bf);
                     \brief Sets a pointer to the BackupFile
                 */
-                void set_file(Backup::File::BackupFile* bf);
+                void set_file(Vessel::File::BackupFile* bf);
+
+                /*! \fn void set_auth_profile(AuthProfile profile);
+                    \brief Sets the authentication profile for AWS requests. Local for aws.key method and remote signing
+                */
+                void set_auth_profile(AuthProfile profile);
 
             private:
-                Backup::Database::LocalDatabase* m_ldb;
-                Backup::File::BackupFile* m_file;
+                Vessel::Database::LocalDatabase* m_ldb;
+                Vessel::File::BackupFile* m_file;
                 std::map<std::string,std::string> m_headers;
                 std::string m_http_verb;
                 std::string m_query_str;
@@ -143,8 +152,15 @@ namespace Backup {
                 bool m_multipart; //Indicates whether or not a multipart upload
                 bool m_streaming; //Indicates whether or not a streaming upload (for unknown filesizes)
                 bool m_reduced_redundancy; //Default = False
+                bool m_remote_signing; //Remote sign S3 requests via Vessel REST API
                 size_t m_part_size; //part size bytes for multipart uploads
-                Backup::Networking::HttpRequest* m_http_request;
+                Vessel::Networking::HttpRequest* m_http_request;
+
+                /**
+                 ** Used only if remote signing is disabled (will be read from aws.key file)
+                **/
+                std::string m_access_id;
+                std::string m_secret_key;
 
                 /*! \fn std::string get_canonical_request();
                     \brief Returns the AWS S3 canonical request
@@ -227,6 +243,11 @@ namespace Backup {
                     \return Returns the etag for a file part upload returned from the S3 API
                 */
                 std::string parse_etag( const std::string& response );
+
+                /*! \fn void read_key_file();
+                    \brief If remote signing is disabled, reads the AWS credentials from an aws.key file
+                */
+                void read_key_file();
 
 
         };

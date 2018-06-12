@@ -1,6 +1,6 @@
 #include <vessel/compression/tarball.hpp>
 
-using namespace Backup::Compression;
+using namespace Vessel::Compression;
 
 Tarball::Tarball(const std::string& filename )
 {

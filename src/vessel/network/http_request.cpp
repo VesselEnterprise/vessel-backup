@@ -1,6 +1,6 @@
 #include <vessel/network/http_request.hpp>
 
-using namespace Backup::Networking;
+using namespace Vessel::Networking;
 
 void HttpRequest::set_uri ( const std::string& str ) {
     m_uri = str;

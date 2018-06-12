@@ -7,9 +7,9 @@
 #include <sstream>
 #include <boost/timer/timer.hpp>
 
-using namespace Backup::Networking;
-using namespace Backup::Database;
-using namespace Backup::File;
+using namespace Vessel::Networking;
+using namespace Vessel::Database;
+using namespace Vessel::File;
 
 int main()
 {
@@ -83,7 +83,7 @@ int main()
     std::cout << "Total Hashing Time Elapsed: " << total << "s" << std::endl;
 
     //Test File Scanner
-    Backup::File::FileIterator* fi = new Backup::File::FileIterator( ldb->get_setting_str("home_folder") );
+    Vessel::File::FileIterator* fi = new Vessel::File::FileIterator( ldb->get_setting_str("home_folder") );
 
     //Clean files
     std::cout << "Cleaning database..." << std::endl;

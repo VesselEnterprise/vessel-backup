@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace Backup {
+namespace Vessel {
     namespace Networking {
 
         class HttpRequestStream

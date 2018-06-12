@@ -1,6 +1,6 @@
 #include <vessel/network/http_client.hpp>
 
-using namespace Backup::Networking;
+using namespace Vessel::Networking;
 
 HttpClient::HttpClient(const std::string& uri) :
     m_use_ssl(false),
@@ -10,10 +10,10 @@ HttpClient::HttpClient(const std::string& uri) :
 {
 
      //Set local database object
-    m_ldb = &Backup::Database::LocalDatabase::get_database();
+    m_ldb = &Vessel::Database::LocalDatabase::get_database();
 
         //Create new log obj
-    m_log = new Backup::Logging::Log("asio");
+    m_log = new Vessel::Logging::Log("asio");
 
     //Set SSL Opts
     m_ssl_ctx.set_default_verify_paths();
@@ -383,6 +383,11 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
 
         //There may be some data in the buffer to consume
         if (m_response_buffer->size() > 0) {
+            /*
+            std::ostringstream oss;
+            oss << m_response_buffer.get();
+            m_response_data.append(oss.str());
+            */
             m_response_data.append( (std::istreambuf_iterator<char>( m_response_buffer.get() )), std::istreambuf_iterator<char>() );
         }
 
@@ -409,6 +414,11 @@ void HttpClient::handle_read_content( const boost::system::error_code& e )
     if (!e)
     {
         //Add to response data
+        /*
+        std::ostringstream oss;
+        oss << m_response_buffer.get();
+        m_response_data.append(oss.str());
+        */
         m_response_data.append( (std::istreambuf_iterator<char>(m_response_buffer.get()) ), std::istreambuf_iterator<char>() );
 
         // Continue reading remaining data until EOF.

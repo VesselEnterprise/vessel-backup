@@ -1,7 +1,7 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-namespace Backup::Version {
+namespace Vessel::Version {
 
 	//Date Version Types
 	static const char DATE[] = "03";

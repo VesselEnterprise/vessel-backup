@@ -30,7 +30,7 @@
 #define VACUUM_ON_LOAD 1
 #define DB_FILENAME "local.db"
 
-namespace Backup{
+namespace Vessel{
     namespace Database {
 
         class LocalDatabase
@@ -86,7 +86,7 @@ namespace Backup{
 
                 sqlite3* m_db;
                 int m_err_code;
-                Backup::Logging::Log* m_log;
+                Vessel::Logging::Log* m_log;
 
             protected:
                 ~LocalDatabase();

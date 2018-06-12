@@ -1,6 +1,6 @@
 #include <vessel/filesystem/directory.hpp>
 
-using namespace Backup::File;
+using namespace Vessel::File;
 
 BackupDirectory::BackupDirectory(const boost::filesystem::path& p) :  m_dir_path(p)
 {
@@ -120,7 +120,7 @@ std::string BackupDirectory::get_unique_id() const
 
 std::unique_ptr<unsigned char*> BackupDirectory::get_unique_id_raw() const
 {
-    using namespace Backup::Utilities;
+    using namespace Vessel::Utilities;
     return Hash::get_sha1_hash_raw(get_canonical_path());
 }
 

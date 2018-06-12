@@ -1,7 +1,7 @@
 #include <iostream>
 #include "local_db.hpp"
 
-using namespace Backup::Database;
+using namespace Vessel::Database;
 
 int main(int c, char** argv)
 {

@@ -23,7 +23,7 @@
 #define Z_CHUNK 32768
 #define GZIP_ENCODING 16
 
-namespace Backup {
+namespace Vessel {
     namespace Compression {
 
         class Compressor {

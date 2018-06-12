@@ -5,7 +5,7 @@
 #include "compress.hpp"
 
 using namespace std;
-using namespace Backup::Compression;
+using namespace Vessel::Compression;
 
 int main()
 {

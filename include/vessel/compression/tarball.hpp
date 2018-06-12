@@ -9,7 +9,7 @@
 #include <boost/filesystem.hpp>
 #include <vessel/compression/compress.hpp>
 
-namespace Backup {
+namespace Vessel {
     namespace Compression {
 
         class Tarball

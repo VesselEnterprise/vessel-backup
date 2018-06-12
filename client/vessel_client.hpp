@@ -37,13 +37,13 @@
 
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
-using Backup::File::BackupFile;
-using Backup::Database::LocalDatabase;
-using Backup::Logging::Log;
+using Vessel::File::BackupFile;
+using Vessel::Database::LocalDatabase;
+using Vessel::Logging::Log;
 using namespace rapidjson;
 namespace ssl = boost::asio::ssl;
 
-namespace Backup {
+namespace Vessel {
     namespace Networking {
 
         class VesselClient : public HttpClient
@@ -56,19 +56,19 @@ namespace Backup {
                 VesselClient( const std::string& hostname );
                 ~VesselClient();
 
-                /*! \fn int init_upload( Backup::File::BackupFile * bf );
+                /*! \fn int init_upload( Vessel::File::BackupFile * bf );
                     \brief Initialize a new file upload with the server REST API
                     \return Returns 0 if successful, 1 if there were errors
                 */
-                int init_upload( Backup::File::BackupFile * bf );
+                int init_upload( Vessel::File::BackupFile * bf );
 
-                /*! \fn upload_file_part( Backup::File::BackupFile * bf, int part_number );
+                /*! \fn upload_file_part( Vessel::File::BackupFile * bf, int part_number );
                     \brief Sends part of a file (or the entire file) to the server with metadata
                     \param bf BackupFile object
                     \param part_number The part or chunk number of the file content being uploaded
                     \return Returns true if successful, false if there were errors
                 */
-                bool upload_file_part( Backup::File::BackupFile * bf, int part_number );
+                bool upload_file_part( Vessel::File::BackupFile * bf, int part_number );
 
                 /*! \fn bool heartbeat();
                     \brief Sends a check-in payload to the server. Server will return with a JSON payload to the client
@@ -101,12 +101,12 @@ namespace Backup {
 
             private:
                 LocalDatabase* m_ldb;
-                Backup::Logging::Log* m_log;
+                Vessel::Logging::Log* m_log;
 
-                /*! \fn void send_request( Backup::Networking::HttpRequest* r );
+                /*! \fn void send_request( Vessel::Networking::HttpRequest* r );
                     \brief Send the HTTP request to the server
                 */
-                void send_request( Backup::Networking::HttpRequest* r );
+                void send_request( Vessel::Networking::HttpRequest* r );
 
                 /** Authorization **/
                 void handle_auth_error();

@@ -3,9 +3,9 @@
 #include "log.hpp"
 
 using std::cout;
-using namespace Backup::File;
-using namespace Backup::Logging;
-using namespace Backup::Database;
+using namespace Vessel::File;
+using namespace Vessel::Logging;
+using namespace Vessel::Database;
 
 int main()
 {
@@ -22,7 +22,7 @@ int main()
     fi->scan();
     ldb->clean();
 
-    log->set_level( Backup::Logging::info );
+    log->set_level( Vessel::Logging::info );
     log->add_message("This is some test text", "File Backup");
 
     delete fi;

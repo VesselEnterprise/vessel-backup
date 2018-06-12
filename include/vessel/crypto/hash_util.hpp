@@ -18,7 +18,7 @@
 
 using namespace CryptoPP;
 
-namespace Backup {
+namespace Vessel {
     namespace Utilities {
         class Hash
         {

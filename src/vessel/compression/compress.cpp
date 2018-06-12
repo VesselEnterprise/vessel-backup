@@ -1,6 +1,6 @@
 #include <vessel/compression/compress.hpp>
 
-using namespace Backup::Compression;
+using namespace Vessel::Compression;
 
 Compressor::Compressor() : m_z_level(Z_COMP_LEVEL)
 {

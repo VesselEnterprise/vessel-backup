@@ -5,15 +5,15 @@
 #include <vessel/aws/aws_s3_client.hpp>
 #include <vessel/filesystem/file.hpp>
 
-using namespace Backup::Networking;
-using namespace Backup::File;
-using namespace Backup::Database;
+using namespace Vessel::Networking;
+using namespace Vessel::File;
+using namespace Vessel::Database;
 
 
 int main( int argc, char** argv )
 {
 
-    using Backup::Networking::AwsS3Client;
+    using Vessel::Networking::AwsS3Client;
 
     std::string upload_type;
     std::string file_path;
@@ -33,6 +33,7 @@ int main( int argc, char** argv )
     std::cout << "Testing " << upload_type << " File Upload..." << '\n';
 
     AwsS3Client* aws = new AwsS3Client("https://vessel-backup.s3-us-east-2.amazonaws.com");
+    aws->set_auth_profile(AwsS3Client::AuthProfile::Local);
     AwsS3Client::AwsFlags flags = AwsS3Client::AwsFlags::ReducedRedundancy;
 
     std::cin.get();
@@ -42,6 +43,13 @@ int main( int argc, char** argv )
     }
 
     aws->init_upload(&bf, flags );
+
+    std::ofstream outfile("output.txt", std::ofstream::out );
+    if ( outfile.is_open() )
+    {
+        outfile << aws->get_response();
+        outfile.close();
+    }
 
     std::cin.get();
 

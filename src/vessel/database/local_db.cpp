@@ -1,13 +1,13 @@
 #include <vessel/database/local_db.hpp>
 
-using namespace Backup::Database;
-using namespace Backup::File;
+using namespace Vessel::Database;
+using namespace Vessel::File;
 
 LocalDatabase::LocalDatabase()
 {
 
     //Database logging
-    m_log = new Backup::Logging::Log("db");
+    m_log = new Vessel::Logging::Log("db");
 
     m_err_code = this->open_db(DB_FILENAME);
 
@@ -389,7 +389,7 @@ void LocalDatabase::update_global_settings()
     this->update_setting("host_domain", domain);
 
     //Update client application version
-    this->update_setting("client_version", Backup::Version::FULLVERSION_STRING);
+    this->update_setting("client_version", Vessel::Version::FULLVERSION_STRING);
 
 }
 
