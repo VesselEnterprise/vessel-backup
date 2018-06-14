@@ -1,5 +1,5 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef VESSELCLIENT_H
+#define VESSELCLIENT_H
 
 #include <iostream>
 #include <string>
@@ -144,4 +144,4 @@ namespace Vessel {
 
 
 
-#endif // CLIENT_H
+#endif // VESSELCLIENT_H

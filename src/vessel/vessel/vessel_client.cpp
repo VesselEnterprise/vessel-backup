@@ -1,4 +1,4 @@
-#include "vessel_client.hpp"
+#include <vessel/vessel/vessel_client.hpp>
 
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
@@ -50,7 +50,7 @@ void VesselClient::send_request( Vessel::Networking::HttpRequest* r )
 
     //Build the HTTP Request
     std::stringstream request_stream(std::stringstream::out | std::stringstream::binary);
-    request_stream << r->get_method() << " " << r->get_uri() << " HTTP/1.1\r\n";
+    request_stream << r->get_method() << " " << r->get_uri() << " HTTP/1.0\r\n";
     request_stream << "Host: " << get_hostname() << "\r\n";
     request_stream << "Accept: */*\r\n";
 
