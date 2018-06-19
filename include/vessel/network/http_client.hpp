@@ -17,6 +17,8 @@
 #include <vessel/network/http_stream.hpp>
 #include <vessel/network/http_exception.hpp>
 
+using namespace Vessel::Exception;
+
 namespace Vessel {
 
     namespace Networking {

@@ -13,6 +13,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
+#include <vessel/database/db_exception.hpp>
 #include <vessel/types.hpp>
 #include <vessel/log/log.hpp>
 #include <vessel/version.hpp>
@@ -29,6 +30,8 @@
 
 #define VACUUM_ON_LOAD 1
 #define DB_FILENAME "local.db"
+
+using namespace Vessel::Exception;
 
 namespace Vessel{
     namespace Database {
