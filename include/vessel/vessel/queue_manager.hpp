@@ -23,6 +23,8 @@ class QueueManager
 
         int get_total_pending();
 
+        void rebuild_queue();
+
     private:
         LocalDatabase* m_database;
 
@@ -31,8 +33,6 @@ class QueueManager
         void apply_weights();
 
     protected:
-
-        void rebuild_queue();
         void clear_queue();
 
 };

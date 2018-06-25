@@ -21,16 +21,20 @@ FileIterator::FileIterator(const BackupDirectory& dir) : m_base_dir(dir), m_curr
     if ( dir.get_path().empty() )
     {
 
+        std::string tmp_path;
+
         #ifdef _WIN32
             /* This sometimes returns incorrect results in Windows systems
             std::string home_drive = std::getenv("HOMEDRIVE");
             std::string home_path = std::getenv("HOMEPATH");
             */
-            m_base_path = std::getenv("USERPROFILE");
+           tmp_path = std::getenv("USERPROFILE");
         #elif __unix
-            std::string home_path = std::getenv("HOME");
-            m_base_dir = BackupDirectory(home_path);
+            tmp_path = std::getenv("HOME");
         #endif
+
+        m_base_dir = BackupDirectory(tmp_path);
+        m_current_dir = m_base_dir;
 
     }
 

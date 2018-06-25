@@ -16,9 +16,12 @@
 #include <vessel/database/local_db.hpp>
 #include <vessel/compression/compress.hpp>
 #include <vessel/crypto/hash_util.hpp>
+#include <vessel/filesystem/file_exception.hpp>
 
 #define BACKUP_LARGE_SZ 52428800 //Default size in bytes of what should be considered a larger file (50MB)
 #define BACKUP_CHUNK_SZ 52428800 //Default chunk size if not defined in DB (50MB)
+
+using namespace Vessel::Exception;
 
 namespace fs = boost::filesystem;
 

@@ -25,14 +25,17 @@ HttpClient::HttpClient(const std::string& uri) :
 
 HttpClient::~HttpClient()
 {
-    if ( m_socket->is_open() )
-        m_socket->close();
+    if ( m_socket != nullptr )
+    {
+        if ( m_socket->is_open() )
+            m_socket->close();
 
-    if ( m_ssl_socket->lowest_layer().is_open() )
-        m_ssl_socket->lowest_layer().close();
+        if ( m_ssl_socket->lowest_layer().is_open() )
+            m_ssl_socket->lowest_layer().close();
 
-    m_socket.reset();
-    m_ssl_socket.reset();
+        m_socket.reset();
+        m_ssl_socket.reset();
+    }
 }
 
 void HttpClient::parse_url( const std::string& host )

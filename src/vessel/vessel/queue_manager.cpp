@@ -13,8 +13,11 @@ QueueManager::~QueueManager()
 void QueueManager::rebuild_queue()
 {
 
+    //Clear the current queue
+    clear_queue();
+
     sqlite3_stmt* stmt;
-    std::string query = "SELECT a.file_id FROM backup_file AS a INNER JOIN backup_weight_ext AS b ON a.file_ext=b.file_ext WHERE a.uploaded=0 ORDER BY a.last_modified DESC LIMIT ?1";
+    std::string query = "SELECT a.file_id FROM backup_file AS a INNER JOIN backup_weight_ext AS b ON a.file_ext=b.file_ext WHERE a.last_modified >= a.last_backup_time ORDER BY a.last_modified DESC LIMIT ?1";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
         throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
@@ -103,7 +106,7 @@ void QueueManager::push_file(unsigned char* file_id)
     }
 
     //Bind file id
-    sqlite3_bind_blob(stmt, 0, file_id, sizeof(file_id), 0 );
+    sqlite3_bind_blob(stmt, 1, file_id, sizeof(file_id), 0 );
 
     //Execute query
     if ( sqlite3_step(stmt) != SQLITE_DONE ) {
@@ -183,5 +186,36 @@ int QueueManager::get_total_pending()
     }
 
     return total_pending;
+
+}
+
+BackupFile QueueManager::get_next_file()
+{
+
+    //If there are no pending uploads, rebuild the queue
+    if ( get_total_pending() == 0 )
+    {
+        rebuild_queue();
+    }
+
+    sqlite3_stmt* stmt;
+
+    std::string query = "SELECT a.filename,c.path FROM backup_file AS a INNER JOIN backup_upload AS b ON a.file_id = b.file_id INNER JOIN backup_directory AS c ON a.directory_id = c.directory_id ORDER BY a.last_modified,b.weight DESC LIMIT 1";
+
+    if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+    }
+
+    if ( sqlite3_step(stmt) != SQLITE_ROW )
+    {
+        throw FileException(FileException::FileNotFound, "No files were found in the upload queue");
+    }
+
+    std::string base_path = (char*)sqlite3_column_text(stmt, 1);
+    std::string file_name = (char*)sqlite3_column_text(stmt, 0);
+
+    BackupFile bf((base_path + "/" + file_name));
+
+    return bf;
 
 }
