@@ -4,10 +4,29 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Passport\HasApiTokens;
+use Spatie\BinaryUuid\HasBinaryUuid;
 
 class User extends Authenticatable
 {
     use Notifiable;
+    use HasBinaryUuid;
+    use HasApiTokens;
+
+    public function getKeyName()
+    {
+        return 'user_id';
+    }
+
+    public function roles()
+    {
+      return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
+    }
+
+		public function files()
+		{
+			return $this->hasMany('App\File');
+		}
 
     /**
      * The attributes that are mass assignable.
@@ -15,7 +34,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'user_id', 'name', 'email', 'password',
     ];
 
     /**
@@ -26,4 +45,5 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
 }
