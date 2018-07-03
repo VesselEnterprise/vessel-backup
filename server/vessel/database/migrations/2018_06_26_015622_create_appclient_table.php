@@ -23,7 +23,8 @@ class CreateAppclientTable extends Migration
           $table->string('ip_address', 32);
           $table->string('domain', 100);
           $table->string('client_version', 32);
-          $table->timestamp('last_check_in');
+          $table->timestamp('last_check_in')->nullable();
+					$table->timestamp('last_backup')->nullable();
           $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
           $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });

@@ -25,7 +25,12 @@ class User extends Authenticatable
 
 		public function files()
 		{
-			return $this->hasMany('App\File');
+			return $this->hasMany('App\File', 'user_id', 'user_id');
+		}
+
+		public function storageProviders()
+		{
+			return $this->hasMany('App\StorageProvider');
 		}
 
     /**

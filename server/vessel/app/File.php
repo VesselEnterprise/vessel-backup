@@ -15,8 +15,18 @@ class File extends Model
 				return 'file_id';
 		}
 
-		public function user() {
-			return $this->belongsTo('App\User');
+		public function user()
+		{
+			return $this->belongsTo('App\User', 'user_id', 'user_id');
+		}
+
+		public function uploads()
+    {
+        return $this->hasMany('App\FileUpload', 'file_id', 'file_id');
+    }
+
+		public function storageProvider() {
+			return $this->hasMany('App\StorageProviderFile', 'file_id', 'file_id');
 		}
 
 		/**
