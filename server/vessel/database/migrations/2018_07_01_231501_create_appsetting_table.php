@@ -17,6 +17,7 @@ class CreateAppSettingTable extends Migration
             $table->increments('setting_id');
 						$table->string('name', 32)->unique();
 						$table->string('value', 512);
+						$table->text('description');
 						$table->string('data_type', 32);
 						$table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));

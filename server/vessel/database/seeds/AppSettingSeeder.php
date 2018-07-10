@@ -44,7 +44,7 @@ class AppSettingSeeder extends Seeder
 				],
 				[
 					'name' => 'master_server',
-					'value' => 'https://' . $_SERVER[HTTP_HOST],
+					'value' => 'https://' . Request::server('HTTP_HOST'),
 					'description' => 'The master server which the backup client connects to',
 					'data_type' => 'string'
 				]

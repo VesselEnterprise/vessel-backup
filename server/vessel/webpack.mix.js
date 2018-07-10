@@ -11,5 +11,17 @@ let mix = require('laravel-mix');
  |
  */
 
+mix.autoload({
+ jquery: ['$', 'window.jQuery', 'jQuery']
+});
+
 mix.js('resources/assets/js/app.js', 'public/js')
-   .sass('resources/assets/sass/app.scss', 'public/css');
+	.js('resources/assets/js/vue.js', 'public/js')
+	.sass('resources/assets/sass/app.scss', 'public/css')
+	.copy('resources/assets/semantic/dist/semantic.min.js','public/js/semantic.min.js')
+	.copy('resources/assets/semantic/dist/themes/', 'public/css/themes/', false)
+	.copyDirectory('resources/assets/images', 'public/images');
+
+mix.styles([
+	'resources/assets/semantic/dist/semantic.min.css'
+], 'public/css/semantic.min.css');
