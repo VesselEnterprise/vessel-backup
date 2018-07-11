@@ -23,3 +23,4 @@ Auth::routes();
 /** User Routes **/
 Route::get('/user/profile/{id}', 'UserProfileController@show')->name('user.profile');
 Route::post('/user/profile/{id}/update', 'UserProfileController@update')->name('user.profile.update');
+Route::resource('user', 'UserController');

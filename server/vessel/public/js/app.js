@@ -64,7 +64,8 @@
 /******/ })
 /************************************************************************/
 /******/ ([
-/* 0 */
+/* 0 */,
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10435,7 +10436,6 @@ return jQuery;
 
 
 /***/ }),
-/* 1 */,
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10447,7 +10447,7 @@ module.exports = __webpack_require__(5);
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(__webpack_provided_window_dot_jQuery) {
+
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -10456,10 +10456,9 @@ module.exports = __webpack_require__(5);
 
 //require('./bootstrap');
 
-window.$ = __webpack_provided_window_dot_jQuery = __webpack_require__(0);
+window.$ = window.jQuery = __webpack_require__(1);
 
 __webpack_require__(4);
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
 /* 4 */
@@ -11177,7 +11176,7 @@ onLoad:function onLoad(){},onAllLoaded:function onAllLoaded(){},// special callb
 onFixed:function onFixed(){},onUnfixed:function onUnfixed(){},// utility callbacks
 onUpdate:false,// disabled by default for performance
 onRefresh:function onRefresh(){},metadata:{src:'src'},className:{fixed:'fixed',placeholder:'placeholder',visible:'visible'},error:{method:'The method you called is not defined.',visible:'Element is hidden, you must call refresh after element becomes visible'}};})(jQuery,window,document);
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
 /* 5 */

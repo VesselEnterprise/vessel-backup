@@ -42,12 +42,12 @@
 			<div class="ui inverted segment" style="background-color: #2a0038;">
 				<div class="ui stackable inverted secondary menu">
 					<a href="{{ url('/home') }}" class="item">
-						Home
+						Vessel
 					</a>
 					<a href="{{ url('/home') }}" class="active item">
 						Home
 					</a>
-					<a class="item">
+					<a class="item" href="{{ route('user.index') }}">
 						Users
 					</a>
 					<a class="item">
@@ -61,6 +61,9 @@
 					</a>
 					<a class="item">
 						Configuration
+					</a>
+					<a class="item">
+						Deployment
 					</a>
 					<div class="right menu">
 						@guest
