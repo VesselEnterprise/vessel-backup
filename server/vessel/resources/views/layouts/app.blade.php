@@ -34,85 +34,101 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
+		<style>
+		  .right.item .ui.input {
+		    width:auto;
+		  }
+		</style>
+
 		@yield('scripts')
 
 </head>
 <body>
     <div id="app">
-			<div class="ui inverted segment" style="background-color: #2a0038;">
-				<div class="ui stackable inverted secondary menu">
-					<a href="{{ url('/home') }}" class="item">
+			<div class="ui top fluid segment" style="background-color: #2a0038;">
+				<div class="ui top attached inverted secondary icon menu">
+					<a href="https://www.vesselenterprise.com/" target="_blank" class="item">
 						Vessel
 					</a>
 					<a href="{{ url('/home') }}" class="active item">
-						Home
+						<i class="home icon"></i>
+						&nbsp;Home
 					</a>
 					<a class="item" href="{{ route('user.index') }}">
-						Users
+						<i class="user icon"></i>
+						&nbsp;Users
+					</a>
+					<a class="item" href="{{ route('file.index') }}">
+						<i class="file icon"></i>
+						&nbsp;Files
+					</a>
+					<a class="item" href="{{ route('storage.index') }}">
+						<i class="hdd icon"></i>
+						&nbsp;Storage
 					</a>
 					<a class="item">
-						Files
+						<i class="computer icon"></i>
+						&nbsp;Clients
 					</a>
 					<a class="item">
-						Storage
+						<i class="setting icon"></i>
+						&nbsp;Configuration
 					</a>
 					<a class="item">
-						Clients
+						<i class="power icon"></i>
+						&nbsp;Deployment
 					</a>
-					<a class="item">
-						Configuration
-					</a>
-					<a class="item">
-						Deployment
-					</a>
+
 					<div class="right menu">
+
 						@guest
-		          <a class="item" href="{{ route('login') }}">{{ __('Login') }}</a>
-		          <a class="item" href="{{ route('register') }}">{{ __('Register') }}</a>
+		          <a class="right item" href="{{ route('login') }}">{{ __('Login') }}</a>
+		          <a class="right item" href="{{ route('register') }}">{{ __('Register') }}</a>
 
 						@else
 
 							<!-- User dropdown -->
-							<div class="ui container" style="width: 220px;">
-								<div class="ui very padded fluid menu" style="background-color: #fbffdd; width: 220px;">
-									<div class="ui fluid pointing dropdown link item" style="color: #2a0038 !important;">
-										<span class="right text">{{ Auth::user()->first_name }}</span>
-									  <i class="dropdown icon"></i>
-									  <div class="menu">
-											<div class="header">Menu</div>
-											<a class="item" href="{{ route('user.profile', ['id' => Auth::user()->uuid_text]) }}">
-												<i class="address card icon"></i>
-												My Profile
-											</a>
-											<a class="item" href="{{ route('logout') }}">
-												<i class="file icon"></i>
-												My Files
-											</a>
-											<a class="item" href="{{ route('logout') }}">
-												<i class="question circle icon"></i>
-												Help
-											</a>
-											<a class="item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color: #aaa !important;">
-												<i class="sign out icon"></i>
-												{{ __('Logout') }}
-											</a>
-									  </div>
-									</div>
+							<div class="right item">
+								<div class="ui inverted labeled icon pointing dropdown link item" style="width: 150px; background-color: #fff; color: #2a0038 !important;">
+									<span class="text">{{ Auth::user()->first_name }}</span>
+								  <i class="dropdown icon"></i>
+								  <div class="menu">
+										<div class="header">Menu</div>
+										<a class="item" href="{{ route('user.profile', ['id' => Auth::user()->uuid_text]) }}">
+											<i class="address card icon"></i>
+											My Profile
+										</a>
+										<a class="item" href="{{ route('logout') }}">
+											<i class="file icon"></i>
+											My Files
+										</a>
+										<a class="item" href="{{ route('logout') }}">
+											<i class="question circle icon"></i>
+											Help
+										</a>
+										<a class="item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color: #686868 !important;">
+											<i class="sign out icon"></i>
+											{{ __('Logout') }}
+										</a>
+								  </div>
 								</div>
-								<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-										@csrf
-								</form>
 							</div>
+							<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+									@csrf
+							</form>
 
 							<!-- Search -->
-							<div class="ui action input">
-								<input type="text" placeholder="Search...">
-								<button class="ui icon button">
-									<i class="search icon"></i>
-								</button>
+							<div class="right item">
+								<div class="ui icon input" >
+									<input type="text" placeholder="Search...">
+									<i class="search link icon"></i>
+								</div>
+								<div class="results"></div>
 							</div>
 						@endguest
+
 					</div>
+
 				</div>
 			</div>
       <main class="py-4">

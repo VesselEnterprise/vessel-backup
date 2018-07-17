@@ -1,5 +1,3 @@
-import sass from "gulp-sass";
-
 /*******************************
             Set-up
 *******************************/
@@ -72,9 +70,3 @@ if(config.rtl) {
   gulp.task('watch-rtl', 'Watch files as RTL', watchRTL);
   gulp.task('build-rtl', 'Build all files as RTL', buildRTL);
 }
-
-gulp.task('sass', function () {
-  return gulp.src('./resources/assets/sass/app.scss')
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('./public/css'));
-});

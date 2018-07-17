@@ -27,11 +27,11 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Passport::routes();
+				Passport::pruneRevokedTokens(); //basic garbage collector
 
-        /*
-        Passport::tokensExpireIn(now()->addDays(15));
-        Passport::refreshTokensExpireIn(now()->addDays(30));
-        */
+				//We don't want personal access tokens to ever expire
+        Passport::tokensExpireIn(now()->addYears(10));
+        Passport::refreshTokensExpireIn(now()->addYears(10));
 
         //
     }

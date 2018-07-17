@@ -1,5 +1,24 @@
 @extends('layouts.app')
 
+@section('scripts')
+
+<script type="text/javascript">
+
+	$(document).ready(function() {
+
+		$('.message .close')
+			.on('click', function() {
+				$(this)
+					.closest('.message')
+					.transition('fade');
+			});
+
+	});
+
+</script>
+
+@endsection
+
 @section('content')
 
 <div class="ui very padded container">
@@ -12,7 +31,15 @@
 	<form method="POST" action="{{ route('login') }}" class="ui form segment">
 	  @csrf
 
-			<div class="ui stackable centered grid">
+			<div class="ui padded stackable centered grid">
+				@if(isset($error))
+					<div class="ui small negative message">
+						<i class="close icon"></i>
+						<div class="header">
+							{{ $error }}
+						</div>
+					</div>
+				@endif
 			  <div class="row">
 					<div class="two wide column">
 				    <label>{{ __('E-Mail Address') }}</label>

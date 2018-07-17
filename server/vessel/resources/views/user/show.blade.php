@@ -112,17 +112,19 @@
 	<form method="POST" action="{{ route('user.profile.update', ['id' => $user->uuid_text]) }}" class="ui form segment">
 		@csrf
 
-		<div class="ui top attached tabular menu">
+		<div class="ui stackable top attached tabular menu">
 			<a class="item active" data-tab="first">Basic Information</a>
-			<a class="item" data-tab="second">Settings</a>
-			<a class="item" data-tab="third">Stats</a>
+			<a class="item" data-tab="second">Security</a>
+			<a class="item" data-tab="third">App Settings</a>
+			<a class="item" data-tab="fourth">Stats</a>
 		</div>
-		<div class="ui bottom attached tab segment active" data-tab="first">
+
+		<div class="ui padded bottom attached tab segment active" data-tab="first">
 
 			<!-- Basic Details -->
 			<div class="ui centered stackable grid container">
 				<div class="left floated row">
-					<div class="lfour wide column field">
+					<div class="four wide column field">
 						<label>First Name</label>
 						<input type="text" id="first_name" name="first_name" placeholder="First Name" value="{{ $user->first_name }}" required autofocus>
 					</div>
@@ -185,22 +187,124 @@
 						<div class="ui error message"></div>
 					</div>
 				</div>
-				<div class="row">
-					<div class="two wide centered column">
-						<div class="ui primary submit button">{{ __('Save') }}</div>
-					</div>
+			</div>
+
+		</div>
+
+		<div class="ui padded bottom attached tab segment" data-tab="second">
+
+			<div class="ui stackable grid container">
+
+				<div class="sixteen wide column field">
+					<label>API Token</label>
+					<input type="text" name="api_token" id="api_token" placeholder="" value="{{ $user->api_token }}">
+				</div>
+
+			</div>
+
+		</div>
+
+		<div class="ui padded bottom attached tab segment" data-tab="third">
+
+			<div class="ui stackable grid container">
+				<div class="ui three stackable cards">
+					@foreach($appSettings as $userSetting)
+
+						<div class="card">
+					    <div class="content">
+					      <div class="header">
+					        {{ $userSetting->setting->name }}
+									<i class="circular right floated edit icon"></i>
+					      </div>
+					      <div class="meta">
+					        {{ $userSetting->setting->data_type }}
+					      </div>
+					      <div class="description">
+					        {{ $userSetting->setting->description }}
+					      </div>
+					    </div>
+					    <div class="extra content">
+								<div class="ui input">
+								  <input name="setting[{{ $userSetting->setting->name }}]" type="text" value="{{ $userSetting->value }}" placeholder="">
+								</div>
+					    </div>
+					  </div>
+
+					@endforeach
 				</div>
 			</div>
 
 		</div>
-		<div class="ui bottom attached tab segment" data-tab="second">
-		Second
-		</div>
-		<div class="ui bottom attached tab segment" data-tab="third">
-		Third
-		</div>
+		<div class="ui padded bottom attached tab segment" data-tab="fourth">
+			<div class="ui stackable grid">
+				<div class="four wide column">
+						<!-- Last Backup -->
+					  <div class="ui list">
+					    <div class="item">
+					      <div class="header">Last Backup</div>
+					      <div class="meta">
+									<p>Date and Time of the most recent file backup for this user</p>
+									<p></p>
+					      </div>
+					      <div class="description">
+					        <span><b>{{ $user->last_backup != '' ? $user->last_backup : 'N/A' }}</b></span>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+					<div class="four wide column">
+						<!-- Last Login -->
+					  <div class="ui list">
+					    <div class="item">
+					      <div class="header">Last Login</div>
+					      <div class="meta">
+									<p>Date and Time when the user last logged in to the management portal</p>
+									<p></p>
+					      </div>
+					      <div class="description">
+					        <p><b>{{ $user->last_login != '' ? $user->last_login : 'N/A' }}</b></p>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+					<div class="four wide column">
+						<!-- Last Checkin -->
+					  <div class="ui list">
+							<div class="item">
+					      <div class="header">Last Check In</div>
+					      <div class="meta">
+									<p>Date and Time of the last heartbeat (check in) for the user</p>
+									<p></p>
+					      </div>
+					      <div class="description">
+					        <span><b>{{ $user->last_check_in != '' ? $user->last_check_in : 'N/A' }}</b></span>
+					      </div>
+							</div>
+					  </div>
+					</div>
+					<div class="four wide column">
+						<!-- File Count -->
+					  <div class="ui list">
+					    <div class="item">
+					      <div class="header">Total Files</div>
+					      <div class="meta">
+									<p>Total uploaded files for the user</p>
+									<p></p>
+					      </div>
+					      <div class="description">
+					        <span><b>5000</b></span>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+				</div>
+			</div>
 
+			<div class="ui very padded centered grid">
+				<div class="ui centered">
+					<div class="ui primary submit button">{{ __('Save') }}</div>
+				</div>
+			</div>
 	</form>
-
 </div>
 @endsection

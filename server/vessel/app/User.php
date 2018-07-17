@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\BinaryUuid\HasBinaryUuid;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -17,6 +18,26 @@ class User extends Authenticatable
     {
         return 'user_id';
     }
+
+		public function getKey()
+		{
+			return $this->id;
+		}
+
+		public static function getLastInsertId()
+		{
+			return DB::getPdo()->lastInsertId();
+		}
+
+		public function getAuthIdentifierName()
+		{
+			return 'id';
+		}
+
+		public function getAuthIdentifier()
+		{
+			return $this->id;
+		}
 
     public function roles()
     {
@@ -64,13 +85,21 @@ class User extends Authenticatable
 			return $this->hasMany('App\StorageProvider');
 		}
 
+		public function appSettings()
+    {
+        return $this->hasMany('App\AppSettingUser', 'user_id', 'user_id');
+    }
+
+		protected $primaryKey = 'id';
+		public $incrementing = true;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'user_id', 'first_name', 'last_name', 'email', 'password'
+        'id', 'user_id', 'first_name', 'last_name', 'email', 'password'
     ];
 
     /**
@@ -79,7 +108,15 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token'
+    ];
+
+		protected $dates = [
+        'created_at',
+        'updated_at',
+        'last_login',
+				'last_backup',
+				'last_check_in'
     ];
 
 }

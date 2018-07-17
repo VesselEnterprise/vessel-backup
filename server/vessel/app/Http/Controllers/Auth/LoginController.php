@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -36,4 +38,23 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+		public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+
+						//Update the user last login
+						$user = Auth::user();
+						$user->last_login = now();
+						$user->save();
+
+            return redirect()->intended('dashboard');
+        }
+				else {
+					return view('auth.login', ['error' => 'There was an issue with your username or password']);
+				}
+    }
+
 }

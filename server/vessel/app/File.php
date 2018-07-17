@@ -58,4 +58,10 @@ class File extends Model
 		];
 
 		protected $table = 'file';
+
+		protected $dates = [
+			'created_at',
+			'updated_at',
+			'last_backup'
+		];
 }

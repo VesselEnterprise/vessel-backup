@@ -24,3 +24,10 @@ Auth::routes();
 Route::get('/user/profile/{id}', 'UserProfileController@show')->name('user.profile');
 Route::post('/user/profile/{id}/update', 'UserProfileController@update')->name('user.profile.update');
 Route::resource('user', 'UserController');
+
+/** File Routes **/
+Route::resource('file', 'FileController');
+
+/** Storage Provider Routes **/
+Route::resource('storage', 'StorageController');
+Route::post('/storage/deletes', 'StorageController@destroyMany')->name('storage.provider.destroyMany');

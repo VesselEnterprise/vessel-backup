@@ -19,11 +19,13 @@ class CreateStorageProviderTable extends Migration
 						$table->string('provider_name', 36)->unique();
 						$table->text('description');
 						$table->string('server');
+						$table->string('region');
 						$table->string('bucket_name');
 						$table->string('access_id');
 						$table->string('access_key', 255);
 						$table->string('storage_path', 255);
 						$table->string('provider_type', 32);
+						$table->integer('priority');
 						$table->timestamp('created_at')->useCurrent();
 						$table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
 						$table->index('provider_name');

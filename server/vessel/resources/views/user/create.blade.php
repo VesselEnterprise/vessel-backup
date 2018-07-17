@@ -95,37 +95,37 @@
 <div class="ui very padded container">
 
 	<h2 class="ui header">
-		Profile
-		<div class="sub header">View or Update your profile</div>
+		Create New User
+		<div class="sub header"></div>
 	</h2>
 
-	@if( isset($status) )
-		<div class="ui positive message">
+	@if( isset($error) )
+		<div class="ui negative message">
 			<i class="close icon"></i>
 			<div class="header">
-				Profile has been updated
+				{{ $error }}
 			</div>
 		</div>
 	@endif
 
-	<form method="POST" action="{{ route('user.profile.update', ['id' => $user->uuid_text]) }}" class="ui form segment">
+	<form method="POST" action="{{ route('user.store') }}" class="ui form segment">
 		@csrf
 		<div class="ui centered stackable grid container">
 			<div class="left floated row">
 			  <div class="four wide column field">
 			    <label>First Name</label>
-			    <input type="text" id="first_name" name="first_name" placeholder="First Name" value="{{ $user->first_name }}" required autofocus>
+			    <input type="text" id="first_name" name="first_name" placeholder="First Name" value="{{ old('first_name') }}" required autofocus>
 			  </div>
 			  <div class="four wide column field">
 			    <label>Last Name</label>
-			    <input type="text" id="last_name" name="last_name" placeholder="Last Name" value="{{ $user->last_name }}" required>
+			    <input type="text" id="last_name" name="last_name" placeholder="Last Name" value="{{ old('last_name') }}" required>
 			  </div>
 				<div class="four wide column"></div>
 			</div>
 			<div class="row">
 				<div class="four wide column field">
 			    <label>E-Mail</label>
-			    <input type="text" id="email" name="email" placeholder="john.doe@email.com" value="{{ $user->email }}" required>
+			    <input type="text" id="email" name="email" placeholder="john.doe@email.com" value="{{ old('email') }}" required>
 			  </div>
 				<div class="four wide column field">
 			    <label>New Password</label>
@@ -139,35 +139,35 @@
 			<div class="row">
 				<div class="four wide column field">
 					<label>Job Title</label>
-					<input type="text" name="title" id="title" placeholder="Job Title" value="{{ $user->title }}">
+					<input type="text" name="title" id="title" placeholder="Job Title" value="{{ old('title') }}">
 				</div>
 				<div class="four wide column field">
 					<label>Office</label>
-					<input type="text" name="office" id="office" placeholder="Office" value="{{ $user->office }}">
+					<input type="text" name="office" id="office" placeholder="Office" value="{{ old('office') }}">
 				</div>
 				<div class="four wide column field">
 					<label>Mobile Phone</label>
-					<input type="text" name="mobile" id="mobile" placeholder="Mobile Phone" value="{{ $user->mobile}}">
+					<input type="text" name="mobile" id="mobile" placeholder="Mobile Phone" value="{{ old('mobile') }}">
 				</div>
 			</div>
 			<div class="row">
 				<div class="twelve wide column field">
 			    <label>Address</label>
-					<input type="text" name="address" id="address" placeholder="Street Address" value="{{ $user->address }}">
+					<input type="text" name="address" id="address" placeholder="Street Address" value="{{ old('address') }}">
 				</div>
 			</div>
 			<div class="row">
 				<div class="four wide column field">
 					<label>City</label>
-					<input type="text" name="city" id="city" placeholder="City" value="{{ $user->city }}">
+					<input type="text" name="city" id="city" placeholder="City" value="{{ old('city') }}">
 				</div>
 				<div class="four wide column field">
 					<label>State</label>
-					<input type="text" name="state" id="state" placeholder="State" value="{{ $user->state }}">
+					<input type="text" name="state" id="state" placeholder="State" value="{{ old('state') }}">
 				</div>
 				<div class="four wide column field">
 					<label>Zip</label>
-					<input type="text" name="zip" id="zip" placeholder="Zip Code" value="{{ $user->zip }}">
+					<input type="text" name="zip" id="zip" placeholder="Zip Code" value="{{ old('zip') }}">
 				</div>
 			</div>
 			<div class="row">
@@ -177,7 +177,7 @@
 			</div>
 			<div class="row">
 				<div class="two wide centered column">
-				  <div class="ui primary submit button">{{ __('Save') }}</div>
+				  <div class="ui primary submit button">{{ __('Create') }}</div>
 				</div>
 			</div>
 		</div>

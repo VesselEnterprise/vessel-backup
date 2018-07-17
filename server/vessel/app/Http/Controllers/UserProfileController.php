@@ -57,21 +57,21 @@ class UserProfileController extends Controller
 			$this->authorizeAction($id);
 
 			$user = User::withUuid($id)->first();
-			$user->first_name = $request['first_name'];
-			$user->last_name = $request['last_name'];
-			$user->email = $request['email'];
-			$user->title = $request['title'];
-			$user->office = $request['office'];
-			$user->mobile = $request['mobile'];
-			$user->address = $request['address'];
-			$user->city = $request['city'];
-			$user->state = $request['state'];
-			$user->zip = $request['zip'];
+			$user->first_name = $request->input('first_name');
+			$user->last_name = $request->input('last_name');
+			$user->email = $request->input('email');
+			$user->title = $request->input('title');
+			$user->office = $request->input('office');
+			$user->mobile = $request->input('mobile');
+			$user->address = $request->input('address');
+			$user->city = $request->input('city');
+			$user->state = $request->input('state');
+			$user->zip = $request->input('zip');
 
 			//Only update the password if provided
-			if ( $request['password'] != '' )
+			if ( $request->input('password') != '' )
 			{
-				$user->password = Hash::make($request['password']);
+				$user->password = Hash::make($request->input('password'));
 			}
 
 			$user->save();

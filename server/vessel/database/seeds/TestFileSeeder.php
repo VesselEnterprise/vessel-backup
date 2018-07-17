@@ -13,7 +13,7 @@ class TestFileSeeder extends Seeder
     public function run()
     {
         //Create 50,000 files
-        for ( $i=0; $i < 5; $i++) {
+        for ( $i=0; $i < 1; $i++) {
           $files = factory(File::class,10000)->create();
         }
     }

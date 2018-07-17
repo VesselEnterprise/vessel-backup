@@ -71,7 +71,17 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+
+				//Assign default roles
 				$user->roles()->attach( Role::where('name', 'user')->first() );
+
+				//Set incrementing id
+				$user->id = $user->getLastInsertId();
+
+				//Create a personal access token for API access
+				$token = $user->createToken('Vessel API')->accessToken;
+				$user->api_token = $token;
+				$user->save();
 
 				return $user;
     }
