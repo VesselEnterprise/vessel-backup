@@ -31,3 +31,10 @@ Route::resource('file', 'FileController');
 /** Storage Provider Routes **/
 Route::resource('storage', 'StorageController');
 Route::post('/storage/deletes', 'StorageController@destroyMany')->name('storage.provider.destroyMany');
+
+/** AppClient Routes **/
+Route::resource('client', 'AppClientController');
+
+/** Settings Routes **/
+Route::resource('setting', 'SettingController');
+Route::post('/setting/all', 'SettingController@updateAll')->name('setting.updateAll');

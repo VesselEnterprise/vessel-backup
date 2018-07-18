@@ -66,11 +66,11 @@
 						<i class="hdd icon"></i>
 						&nbsp;Storage
 					</a>
-					<a class="item">
+					<a class="item" href="{{ route('client.index') }}">
 						<i class="computer icon"></i>
 						&nbsp;Clients
 					</a>
-					<a class="item">
+					<a class="item" href="{{ route('setting.index') }}">
 						<i class="setting icon"></i>
 						&nbsp;Configuration
 					</a>

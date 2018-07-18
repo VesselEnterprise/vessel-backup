@@ -87,6 +87,8 @@
 
 			$('.menu .item').tab();
 
+			$('#upload_progress').progress();
+
 		});
 	</script>
 @endsection
@@ -236,7 +238,17 @@
 
 		</div>
 		<div class="ui padded bottom attached tab segment" data-tab="fourth">
-			<div class="ui stackable grid">
+			<div class="ui center aligned stackable grid container">
+
+				<div class="sixteen wide column">
+					<div class="ui segment">
+						<div class="ui olive progress" data-percent="75" id="upload_progress">
+							<div class="bar"></div>
+						</div>
+						<div class="label">75% Backup Ratio</div>
+					</div>
+				</div>
+
 				<div class="four wide column">
 						<!-- Last Backup -->
 					  <div class="ui list">

@@ -1,22 +1,12 @@
 <?php
 
-namespace App;
 namespace App\Http\Controllers;
 
-use App\File;
-use Illuminate\Support\Facades\DB;
+use App\Setting;
 use Illuminate\Http\Request;
-use Laravel\Scout\Searchable;
 
-class FileController extends Controller
+class SettingController extends Controller
 {
-
-		public function __construct()
-		{
-				$this->middleware('auth');
-				$this->middleware('authorizeRole:admin');
-		}
-
     /**
      * Display a listing of the resource.
      *
@@ -24,9 +14,8 @@ class FileController extends Controller
      */
     public function index()
     {
-			$files = File::paginate(25);  //DB::table('users')->paginate(1);
-
-			return view('file.list', ['files' => $files]);
+        $settings = Setting::all();
+				return view('setting.list', ['settings' => $settings]);
     }
 
     /**
@@ -58,10 +47,7 @@ class FileController extends Controller
      */
     public function show($id)
     {
-				$file = File::withUuid($id)->first();
-
-				return view('file.show', ['file' => $file]);
-
+        //
     }
 
     /**
@@ -86,6 +72,11 @@ class FileController extends Controller
     {
         //
     }
+
+		public function updateAll(Request $request)
+		{
+				//
+		}
 
     /**
      * Remove the specified resource from storage.

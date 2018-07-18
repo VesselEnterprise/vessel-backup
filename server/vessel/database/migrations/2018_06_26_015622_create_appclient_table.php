@@ -14,15 +14,15 @@ class CreateAppclientTable extends Migration
     public function up()
     {
         Schema::create('app_client', function (Blueprint $table) {
-          $table->uuid('id');
-          $table->primary('id');
-          $table->string('name', 64);
-          $table->index('name');
-          $table->string('os', 255);
-          $table->string('dns_name', 100);
-          $table->string('ip_address', 32);
-          $table->string('domain', 100);
-          $table->string('client_version', 32);
+          $table->uuid('client_id');
+          $table->primary('client_id');
+          $table->string('client_name', 64)->unique();
+          $table->string('os', 255)->nullable();
+          $table->string('dns_name', 100)->nullable();
+          $table->string('ip_address', 32)->nullable();
+          $table->string('domain', 100)->nullable();
+          $table->string('client_version', 32)->nullable();
+					$table->string('token', 32)->unique();
           $table->timestamp('last_check_in')->nullable();
 					$table->timestamp('last_backup')->nullable();
           $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

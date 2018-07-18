@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\BinaryUuid\HasBinaryUuid;
 use Illuminate\Support\Facades\DB;
+use Laravel\Scout\Searchable;
 
 class User extends Authenticatable
 {
@@ -49,6 +50,11 @@ class User extends Authenticatable
 			return $this->hasMany('App\File', 'user_id', 'user_id');
 		}
 
+		public function clients()
+		{
+			return $this->belongsToMany('App\AppClient', 'app_client_user', 'user_id', 'client_id');
+		}
+
 		//Credit for role authorization funcs: https://medium.com/@ezp127/laravel-5-4-native-user-authentication-role-authorization-3dbae4049c8a
 
 		/**
@@ -82,7 +88,7 @@ class User extends Authenticatable
 
 		public function storageProviders()
 		{
-			return $this->hasMany('App\StorageProvider');
+			return $this->hasMany('App\StorageProviderUser', 'user_id', 'user_id');
 		}
 
 		public function appSettings()

@@ -12,8 +12,19 @@ class AppClient extends Model
 
   public function getKeyName()
   {
-      return 'id';
+      return 'client_id';
   }
+
+	//32 chars
+	public static function generateToken()
+	{
+			return bin2hex(random_bytes(16));
+	}
+
+	public function users()
+	{
+		return $this->belongsToMany('App\User', 'app_client_user', 'client_id', 'user_id');
+	}
 
   /**
    * The attributes that are mass assignable.
@@ -21,11 +32,11 @@ class AppClient extends Model
    * @var array
    */
   protected $fillable = [
-      'uuid', 'name', 'os', 'dns_name', 'ip_address', 'domain', 'client_version', 'last_check_in'
+      'client_id', 'name', 'os', 'dns_name', 'ip_address', 'domain', 'client_version', 'last_check_in', 'last_backup'
   ];
 
   protected $table = 'app_client';
 
-  protected $dates = ['created_at', 'updated_at', 'last_check_in'];
+  protected $dates = ['created_at', 'updated_at', 'last_check_in', 'last_backup'];
 
 }

@@ -1,14 +1,12 @@
 <?php
 
-namespace App;
 namespace App\Http\Controllers;
 
-use App\File;
+use App\AppClient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Laravel\Scout\Searchable;
 
-class FileController extends Controller
+class AppClientController extends Controller
 {
 
 		public function __construct()
@@ -24,9 +22,8 @@ class FileController extends Controller
      */
     public function index()
     {
-			$files = File::paginate(25);  //DB::table('users')->paginate(1);
-
-			return view('file.list', ['files' => $files]);
+				$clients = AppClient::paginate(20);
+        return view('client.list', ['clients' => $clients]);
     }
 
     /**
@@ -58,10 +55,8 @@ class FileController extends Controller
      */
     public function show($id)
     {
-				$file = File::withUuid($id)->first();
-
-				return view('file.show', ['file' => $file]);
-
+        $client = AppClient::withUuid($id)->with('users')->first();
+				return view('client.show', ['client' => $client]);
     }
 
     /**

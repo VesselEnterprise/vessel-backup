@@ -15,12 +15,13 @@ class CreateSettingTable extends Migration
     {
         Schema::create('setting', function (Blueprint $table) {
             $table->increments('setting_id');
-            $table->string('name', 32)->unique();
+            $table->string('setting_name', 32)->unique();
             $table->string('display_name', 100);
             $table->string('value', 255);
             $table->text('description');
             $table->boolean('active')->default(1);
-            $table->string('type', 32);
+						$table->string('category', 32);
+            $table->string('data_type', 16);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             //$table->timestamps();
