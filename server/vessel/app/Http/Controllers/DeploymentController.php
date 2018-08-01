@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Setting;
+use App\Deployment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
-class SettingController extends Controller
+class DeploymentController extends Controller
 {
 
 		public function __construct()
@@ -21,8 +22,8 @@ class SettingController extends Controller
      */
     public function index()
     {
-        $settings = Setting::all();
-				return view('setting.list', ['settings' => $settings]);
+				$deployments = Deployment::paginate();
+        return view('deployment.list', ['deployments' => $deployments]);
     }
 
     /**
@@ -32,7 +33,7 @@ class SettingController extends Controller
      */
     public function create()
     {
-        //
+        return view('deployment.create', ['deploymentKey' => Deployment::generateToken()]);
     }
 
     /**
@@ -43,7 +44,13 @@ class SettingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $deployment = new Deployment();
+				$deployment->deployment_name = $request->input('deployment_name');
+				$deployment->expires_at = Carbon::parse( $request->input('expires_at') );
+				$deployment->deployment_key = $request->input('deployment_key');
+				$deployment->save();
+
+				return $this->index();
     }
 
     /**
@@ -54,7 +61,8 @@ class SettingController extends Controller
      */
     public function show($id)
     {
-        //
+        $deployment = Deployment::find($id);
+				return view('deployment.show', ['deployment' => $deployment]);
     }
 
     /**
@@ -65,7 +73,8 @@ class SettingController extends Controller
      */
     public function edit($id)
     {
-        //
+				$deployment = Deployment::find($id);
+				return view('deployment.show', ['deployment' => $deployment]);
     }
 
     /**
@@ -77,13 +86,13 @@ class SettingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-    }
+        $deployment = Deployment::find($id);
+				$deployment->deployment_name = $request->input('deployment_name');
+				$deployment->expires_at = Carbon::parse( $request->input('expires_at') );
+				$deployment->save();
 
-		public function updateAll(Request $request)
-		{
-				//
-		}
+				return $this->index();
+    }
 
     /**
      * Remove the specified resource from storage.

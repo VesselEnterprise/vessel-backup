@@ -35,6 +35,9 @@ Route::post('/storage/deletes', 'StorageController@destroyMany')->name('storage.
 /** AppClient Routes **/
 Route::resource('client', 'AppClientController');
 
-/** Settings Routes **/
+/** Setting Routes **/
 Route::resource('setting', 'SettingController');
 Route::post('/setting/all', 'SettingController@updateAll')->name('setting.updateAll');
+
+/** Deployment Routes **/
+Route::resource('deployment', 'DeploymentController');

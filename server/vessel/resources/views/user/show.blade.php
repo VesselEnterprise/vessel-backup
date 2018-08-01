@@ -200,6 +200,9 @@
 				<div class="sixteen wide column field">
 					<label>API Token</label>
 					<input type="text" name="api_token" id="api_token" placeholder="" value="{{ $user->api_token }}">
+					<button class="ui button">
+					  Generate New Token
+					</button>
 				</div>
 
 			</div>

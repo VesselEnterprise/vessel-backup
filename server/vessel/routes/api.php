@@ -17,4 +17,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+//Heartbeat
 Route::post('/heartbeat', 'api\HeartbeatController@store')->middleware('auth:api');
+
+//AppClient Install
+Route::post('/client/install', 'api\AppClientController@install')->middleware('auth:api');

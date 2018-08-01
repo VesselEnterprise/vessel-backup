@@ -74,7 +74,7 @@
 						<i class="setting icon"></i>
 						&nbsp;Configuration
 					</a>
-					<a class="item">
+					<a class="item" href="{{ route('deployment.index') }}">
 						<i class="power icon"></i>
 						&nbsp;Deployment
 					</a>

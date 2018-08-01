@@ -4,5 +4,6 @@
     "/css/app.css": "/css/app.css",
     "/js/tablesort.min.js": "/js/tablesort.min.js",
     "/js/semantic.min.js": "/js/semantic.min.js",
+    "/js/calendar.min.js": "/js/calendar.min.js",
     "/css/semantic.min.css": "/css/semantic.min.css"
 }

@@ -91,6 +91,14 @@ class SettingSeeder extends Seeder
 					'description' => 'Maximum file size for an upload. Default = 2GB',
 					'category' => 'File Upload',
 					'data_type' => 'integer'
+				),
+				array(
+					'setting_name' => 'enable_download_portal',
+					'display_name' => 'Enable Download Portal',
+					'value' => 'true',
+					'description' => 'Enable or disable the user download portal',
+					'category' => 'File Management',
+					'data_type' => 'boolean'
 				)
 			);
 
