@@ -1,5 +1,5 @@
-#ifndef HTTPEXCEPTION_H
-#define HTTPEXCEPTION_H
+#ifndef VESSELEXCEPTION_H
+#define VESSELEXCEPTION_H
 
 #include <iostream>
 #include <string>
@@ -8,19 +8,18 @@
 namespace Vessel {
 namespace Exception {
 
-        class HttpException : public std::exception
+        class VesselException : public std::exception
         {
             public:
 
                 enum ErrorCode
                 {
                     NoError = 0,
-                    InvalidUrl,
-                    ConnectFailed,
-                    HandshakeFailed
+                    NotInstalled,
+                    ProviderError
                 };
 
-                HttpException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
+                VesselException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
 
                 ErrorCode get_code() { return _code; }
 

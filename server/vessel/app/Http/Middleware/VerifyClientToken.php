@@ -2,10 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use App\Deployment;
 use Closure;
 
-class VerifyDeploymentKey
+class VerifyClientToken
 {
     /**
      * Handle an incoming request.
@@ -21,7 +20,7 @@ class VerifyDeploymentKey
 					return response()->json(['error' => 'Not authorized'], 403);
 				}
 
-				$result = Deployment::where('deployment_key', $request->bearerToken() )->whereDate('expires_at', '>=', now() );
+				$result = App\AppClient::where('token', $request->bearerToken() )->whereDate('expires_at', '>=', now() );
 
 				if ( $result->count() <= 0 ) {
 					return response()->json(['error' => 'Not authorized'], 403);

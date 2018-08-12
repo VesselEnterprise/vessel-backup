@@ -17,12 +17,12 @@ class CreateStorageProviderTable extends Migration
             $table->uuid('provider_id');
 						$table->primary('provider_id');
 						$table->string('provider_name', 36)->unique();
-						$table->text('description');
+						$table->text('description')->nullable();
 						$table->string('server');
 						$table->string('region');
 						$table->string('bucket_name');
 						$table->string('access_id');
-						$table->string('access_key', 255);
+						$table->string('access_key', 512);
 						$table->string('storage_path', 255);
 						$table->string('provider_type', 32);
 						$table->integer('priority');

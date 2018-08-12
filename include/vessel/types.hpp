@@ -15,6 +15,7 @@ namespace Vessel {
             unsigned long last_modified;
             size_t filesize;
         };
+        typedef struct file_directory file_directory;
 
         enum http { HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_DELETE };
 
@@ -26,6 +27,21 @@ namespace Vessel {
             std::string data;
             std::string auth_token;
         };
+        typedef struct request_type request_type;
+
+        struct StorageProvider
+        {
+            std::string provider_id;
+            std::string provider_name;
+            std::string description;
+            std::string server;
+            std::string region;
+            std::string bucket_name;
+            std::string storage_path;
+            std::string provider_type;
+            int priority;
+        };
+        typedef struct StorageProvider StorageProvider;
 
     }
 }

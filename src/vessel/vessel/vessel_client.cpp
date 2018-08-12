@@ -50,7 +50,7 @@ void VesselClient::send_request( Vessel::Networking::HttpRequest* r )
 
     //Build the HTTP Request
     std::stringstream request_stream(std::stringstream::out | std::stringstream::binary);
-    request_stream << r->get_method() << " " << r->get_uri() << " HTTP/1.0\r\n";
+    request_stream << r->get_method() << " " << r->get_uri() << " HTTP/1.1\r\n";
     request_stream << "Host: " << get_hostname() << "\r\n";
     request_stream << "Accept: */*\r\n";
 
@@ -642,4 +642,252 @@ void VesselClient::handle_json_error(const ParseResult& res)
     ss << "JSON parser error: ";
     ss << GetParseError_En(res.Code());
     m_log->add_message(ss.str(), "JSON");
+}
+
+bool VesselClient::has_deployment_key()
+{
+    return (m_ldb->get_setting_str("deployment_key") != "") ? true : false;
+}
+
+bool VesselClient::has_client_token()
+{
+    return (m_ldb->get_setting_str("client_token") != "") ? true : false;
+}
+
+void VesselClient::install_client()
+{
+
+    std::string deployment_key = m_ldb->get_setting_str("deployment_key");
+    std::string auth_token = m_ldb->get_setting_str("auth_token");
+
+    //Write some JSON
+    StringBuffer strbuf;
+    Writer<StringBuffer> writer(strbuf);
+
+    writer.StartObject();
+
+    writer.Key("deployment_key");
+    writer.String(deployment_key.c_str());
+
+    writer.Key("client_name");
+    writer.String(m_ldb->get_setting_str("hostname").c_str());
+
+    writer.Key("os");
+    writer.String(m_ldb->get_setting_str("host_os").c_str());
+
+    writer.Key("ip_address");
+    writer.String("");
+
+    writer.Key("mac_address");
+    writer.String("");
+
+    writer.Key("domain");
+    writer.String(m_ldb->get_setting_str("host_domain").c_str());
+
+    writer.Key("client_version");
+    writer.String(m_ldb->get_setting_str("client_version").c_str());
+
+    //
+    writer.EndObject();
+
+    std::string payload = strbuf.GetString();
+
+    std::cout << payload << '\n';
+
+    HttpRequestStream http_request;
+    http_request << "POST " << m_api_path << "/client/install HTTP/1.1" << "\r\n";
+    http_request << "Host: " << get_hostname() << ":8000\r\n";
+    http_request << "Content-Type: application/json" << "\r\n";
+    http_request << "Authorization: Bearer " << deployment_key << "\r\n";
+    http_request << "Accept: application/json" << "\r\n";
+    http_request << "Content-Length: " << payload.size() << "\r\n";
+    http_request << "\r\n";
+    http_request << payload;
+
+    std::cout << http_request.str() << '\n';
+
+    //Connect to socket
+    connect();
+
+    //Write to socket
+    write_socket(http_request.str());
+
+    do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
+
+    disconnect();
+
+    if ( get_http_status() != 200 ) //http code should always be 200
+    {
+        throw VesselException(VesselException::NotInstalled, "Failed to install the client application. Please check the auth token and/or deployment key");
+    }
+
+    std::string response = get_response();
+
+    //Parse the response, Save Storage Providers, Update settings, etc
+
+    Document document;
+    document.Parse(response.c_str());
+
+    if ( !document.HasMember("app_client" ) )
+    {
+        throw VesselException(VesselException::NotInstalled, "Invalid JSON response for client install");
+    }
+
+    const Value& appClientObj = document["app_client"];
+
+    //Update client settings
+    m_ldb->update_setting("client_id", appClientObj["client_id"].GetString() );
+    m_ldb->update_setting("client_token", appClientObj["token"].GetString() );
+
+    //Create vector to store current providers, and remove ones that no longer exist
+    std::vector<std::string> provider_ids;
+
+    //Parse Storage Providers
+    if ( document.HasMember("storage_providers") )
+    {
+        const Value& storageObj = document["storage_providers"];
+
+        if ( storageObj.IsArray() )
+        {
+            for ( auto& providerObj : storageObj.GetArray() )
+            {
+                std::string provider_id = providerObj["provider_id"].GetString();
+                if ( !sync_storage_provider(providerObj) )
+                {
+                    throw VesselException(VesselException::ProviderError, "Storage provider " + provider_id + " failed to sync" );
+                }
+                provider_ids.push_back( provider_id );
+            }
+
+            //Remove any obsolete providers
+            sync_storage_provider_all(provider_ids);
+
+        }
+
+    }
+
+}
+
+bool VesselClient::sync_storage_provider(const Value& obj)
+{
+
+    StorageProvider providerObj;
+    providerObj.provider_id = obj["provider_id"].GetString();
+    providerObj.provider_name = obj["provider_name"].GetString();
+    providerObj.provider_type = obj["provider_type"].GetString();
+    providerObj.bucket_name = obj["bucket_name"].GetString();
+    providerObj.description = obj["description"].GetString();
+    providerObj.server = obj["server"].GetString();
+    providerObj.storage_path = obj["storage_path"].GetString();
+    providerObj.region = obj["region"].GetString();
+    providerObj.priority = obj["priority"].GetInt();
+
+    sqlite3_stmt* stmt;
+    std::string query = "REPLACE INTO backup_provider (provider_id,name,server,type,storage_path,priority,bucket_name,region) VALUES(?1,?2,?3,?4,?5,?6,?7,?8)";
+
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return false;
+
+    sqlite3_bind_text(stmt, 1, providerObj.provider_id.c_str(), providerObj.provider_id.size(), 0 );
+    sqlite3_bind_text(stmt, 2, providerObj.provider_name.c_str(), providerObj.provider_name.size(), 0 );
+    sqlite3_bind_text(stmt, 3, providerObj.server.c_str(), providerObj.server.size(), 0 );
+    sqlite3_bind_text(stmt, 4, providerObj.provider_type.c_str(), providerObj.provider_type.size(), 0 );
+    sqlite3_bind_text(stmt, 5, providerObj.storage_path.c_str(), providerObj.storage_path.size(), 0 );
+    sqlite3_bind_int(stmt, 6, providerObj.priority );
+    sqlite3_bind_text(stmt, 7, providerObj.bucket_name.c_str(), providerObj.bucket_name.size(), 0 );
+    sqlite3_bind_text(stmt, 8, providerObj.region.c_str(), providerObj.region.size(), 0 );
+
+    int rc = sqlite3_step(stmt);
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    if ( rc != SQLITE_DONE )
+        return false;
+
+    return true;
+
+}
+
+void VesselClient::sync_storage_provider_all(const std::vector<std::string>& provider_ids)
+{
+
+    //Get current storage providers
+    sqlite3_stmt* stmt;
+    std::string query = "SELECT provider_id FROM backup_provider";
+
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return;
+
+    while ( sqlite3_step(stmt) == SQLITE_ROW )
+    {
+        std::string id = (char*)sqlite3_column_text(stmt, 0);
+
+        //If not in the provider_ids vector, delete from db
+        if ( std::find(provider_ids.begin(), provider_ids.end(), id) == provider_ids.end() )
+        {
+            delete_storage_provider(id);
+        }
+    }
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+}
+
+bool VesselClient::delete_storage_provider(const std::string& id)
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "DELETE FROM backup_provider WHERE provider_id=?1";
+
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+        return false;
+
+    sqlite3_bind_text(stmt, 1, id.c_str(), id.size(), 0 );
+
+    int rc = sqlite3_step(stmt);
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    if ( rc != SQLITE_DONE )
+        return false;
+
+    return true;
+
+}
+
+StorageProvider VesselClient::get_storage_provider()
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "SELECT provider_id,name,description,server,type,bucket_name,region,storage_path,priority FROM backup_provider ORDER BY priority ASC LIMIT 1";
+
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    {
+        throw DatabaseException(DatabaseException::InvalidStatement, "Bad statement. Failed to get storage provider");
+    }
+
+    if ( sqlite3_step(stmt) != SQLITE_ROW )
+    {
+        throw VesselException(VesselException::ProviderError, "Unable to find a storage provider");
+    }
+
+    StorageProvider provider;
+    provider.provider_id = (char*)sqlite3_column_text(stmt, 0);
+    provider.provider_name = (char*)sqlite3_column_text(stmt, 1);
+    //provider.description = (char*)sqlite3_column_text(stmt, 2);
+    provider.server = (char*)sqlite3_column_text(stmt, 3);
+    provider.provider_type = (char*)sqlite3_column_text(stmt, 4);
+    provider.bucket_name = (char*)sqlite3_column_text(stmt, 5);
+    provider.region = (char*)sqlite3_column_text(stmt, 6);
+    provider.storage_path = (char*)sqlite3_column_text(stmt, 7);
+    provider.priority = (int)sqlite3_column_int(stmt, 8);
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    return provider;
+
 }

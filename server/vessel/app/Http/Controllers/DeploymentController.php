@@ -46,7 +46,7 @@ class DeploymentController extends Controller
     {
         $deployment = new Deployment();
 				$deployment->deployment_name = $request->input('deployment_name');
-				$deployment->expires_at = Carbon::parse( $request->input('expires_at') );
+				$deployment->expires_at = Carbon::parse( $request->input('expires_at') )->setTimezone('UTC');
 				$deployment->deployment_key = $request->input('deployment_key');
 				$deployment->save();
 
@@ -88,7 +88,7 @@ class DeploymentController extends Controller
     {
         $deployment = Deployment::find($id);
 				$deployment->deployment_name = $request->input('deployment_name');
-				$deployment->expires_at = Carbon::parse( $request->input('expires_at') );
+				$deployment->expires_at = Carbon::parse( $request->input('expires_at') )->setTimezone('UTC');
 				$deployment->save();
 
 				return $this->index();

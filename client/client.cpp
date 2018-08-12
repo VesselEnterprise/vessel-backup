@@ -19,7 +19,10 @@ int main(int argc, char** argv)
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
         ("help", "Display supported options")
-        ("compression", boost::program_options::value<int>(), "set compression level")
+        ("with-auth-token", boost::program_options::value<std::string>(), "Sets the user auth token")
+        ("with-client-token", boost::program_options::value<std::string>(), "Sets the client token")
+        ("with-deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
+        ("scan-directory", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
     ;
 
     boost::program_options::variables_map vm;
@@ -49,10 +52,16 @@ int main(int argc, char** argv)
     std::string vessel_host = db->get_setting_str("master_server");
 
     //Create new instance of Vessel client
-    boost::shared_ptr<VesselClient> vessel = boost::make_shared<VesselClient>(vessel_host);
+    std::shared_ptr<VesselClient> vessel = std::make_shared<VesselClient>(vessel_host);
+
+    //Verify/install client
+    if ( !vessel->has_client_token() )
+    {
+        vessel->install_client();
+    }
 
     //Create new upload QueueManager
-    boost::shared_ptr<QueueManager> queue_manager = boost::make_shared<QueueManager>();
+    std::shared_ptr<QueueManager> queue_manager = std::make_shared<QueueManager>();
 
     //Create worker threads and pool them
     boost::asio::io_service io_service;
@@ -66,7 +75,7 @@ int main(int argc, char** argv)
     std::cout << "Starting " << thread_count << " threads!" << '\n';
 
     //Start hardware_concurrency() threads for processing
-    for ( auto i=0; i < thread_count; i++ )
+    for ( unsigned int i=0; i < thread_count; i++ )
     {
         tpool.create_thread( [&]() { io_service.run(); });
     }
@@ -76,7 +85,7 @@ int main(int argc, char** argv)
     BackupDirectory scan_dir ("");
 
     //Create a file iterator object to scan the filesystem
-    boost::shared_ptr<FileIterator> file_iterator = boost::make_shared<FileIterator>(scan_dir);
+    std::shared_ptr<FileIterator> file_iterator = std::make_shared<FileIterator>(scan_dir);
 
     //Add a new thread to the pool which scans the filesystem on intervals
     io_service.post([&](){
@@ -88,6 +97,7 @@ int main(int argc, char** argv)
         }
     });
 
+    //Manage the upload queue
     io_service.post([&](){
         for(;;)
         {
@@ -95,6 +105,22 @@ int main(int argc, char** argv)
             boost::this_thread::sleep( boost::posix_time::seconds(10) );
             std::cout << "Restarting queue rebuild after 10 seconds..." << '\n';
         }
+    });
+
+    //Manage uploads
+    io_service.post([&](){
+
+        //Get Storage Provider
+        const StorageProvider& provider = vessel->get_storage_provider();
+
+        //Create a new UploadManager
+        std::shared_ptr<UploadManager> upload_manager = std::make_shared<UploadManager>(provider);
+
+        for(;;)
+        {
+
+        }
+
     });
 
     //Allow threads to do their work

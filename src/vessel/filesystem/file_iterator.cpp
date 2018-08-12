@@ -162,7 +162,7 @@ void FileIterator::scan()
                     bf.set_directory_id( m_current_dir.get_directory_id() );
                     add_file(bf);
 
-                    std::cout << "Added file " << p.filename().string() << "..." << std::endl;
+                    std::cout << "Added file " << p.filename().string() << '\n';
 
                 }
                 else

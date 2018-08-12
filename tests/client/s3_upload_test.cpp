@@ -28,15 +28,11 @@ int main( int argc, char** argv )
 
     BackupFile bf( boost::filesystem::path(file_path.c_str()) );
 
-    std::cin.get();
-
     std::cout << "Testing " << upload_type << " File Upload..." << '\n';
 
     AwsS3Client* aws = new AwsS3Client("https://vessel-backup.s3-us-east-2.amazonaws.com");
     aws->set_auth_profile(AwsS3Client::AuthProfile::Local);
     AwsS3Client::AwsFlags flags = AwsS3Client::AwsFlags::ReducedRedundancy;
-
-    std::cin.get();
 
     if ( upload_type == "multi" ) {
         flags = flags | AwsS3Client::AwsFlags::Multipart; // | AwsS3Client::AwsFlags::SkipMultiInit;

@@ -13,4 +13,5 @@ class AppSetting extends Model
     }
 
     protected $table = 'app_setting';
+		protected $hidden = ['created_at','updated_at','setting_id'];
 }

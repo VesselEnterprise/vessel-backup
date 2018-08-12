@@ -5,11 +5,12 @@
 #include <cctype>
 #include <iomanip>
 #include <string>
+#include <regex>
+#include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/iostreams/stream.hpp>
 
 #include <vessel/database/local_db.hpp>
@@ -113,12 +114,12 @@ namespace Vessel {
                 boost::posix_time::time_duration m_timeout;
                 bool m_verify_cert;
                 boost::asio::io_service m_io_service;
-                boost::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
-                boost::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> m_ssl_socket;
-                boost::shared_ptr<boost::asio::deadline_timer> m_deadline_timer;
+                std::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
+                std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> m_ssl_socket;
+                std::shared_ptr<boost::asio::deadline_timer> m_deadline_timer;
 
                 //Member Vars for Data Transfer
-                boost::shared_ptr<boost::asio::streambuf> m_response_buffer;
+                std::shared_ptr<boost::asio::streambuf> m_response_buffer;
                 std::string m_request_data; //Response Data
 
                 unsigned int m_http_status;
@@ -127,7 +128,7 @@ namespace Vessel {
                 boost::system::error_code m_conn_status;
                 bool m_ssl_good;
                 boost::system::error_code m_response_ec;
-
+                bool m_chunked_encoding;
 
                 void parse_url(const std::string& host );
 
@@ -138,8 +139,10 @@ namespace Vessel {
                 void handle_handshake(const boost::system::error_code& e );
                 void handle_response( const boost::system::error_code& e );
                 void handle_write( const boost::system::error_code& e, size_t bytes_transferred );
-                void handle_read_content( const boost::system::error_code& e );
+                void handle_read_content( const boost::system::error_code& e, size_t bytes_transferred );
                 void handle_read_headers( const boost::system::error_code& e );
+                void read_chunked_content( const boost::system::error_code& e, size_t bytes_transferred );
+                void read_buffer_data();
 
                 void cleanup();
 

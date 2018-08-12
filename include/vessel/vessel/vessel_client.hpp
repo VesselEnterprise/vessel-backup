@@ -32,15 +32,20 @@
 #include <vessel/filesystem/directory.hpp>
 #include <vessel/log/log.hpp>
 #include <vessel/network/http_client.hpp>
+#include <vessel/vessel/vessel_exception.hpp>
 
 //#define BOOST_NETWORK_ENABLE_HTTPS 1
 
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
-using Vessel::File::BackupFile;
-using Vessel::Database::LocalDatabase;
-using Vessel::Logging::Log;
+
+using namespace Vessel;
+using namespace Vessel::Types;
+using namespace Vessel::File;
+using namespace Vessel::Database;
+using namespace Vessel::Logging;
 using namespace rapidjson;
+
 namespace ssl = boost::asio::ssl;
 
 namespace Vessel {
@@ -99,7 +104,31 @@ namespace Vessel {
                 */
                 void use_compression(bool flag);
 
+                /*! \fn bool has_deployment_key();
+                    \brief Returns true if the deployment_key setting has been set
+                    \return Returns true if the deployment_key setting has been set
+                */
+                bool has_deployment_key();
+
+                /*! \fn bool has_client_token();
+                    \brief Returns true if the client_token setting has been set
+                    \return Returns true if the client_token setting has been set
+                */
+                bool has_client_token();
+
+                /*! \fn void install_client();
+                    \brief Installs and initializes the client application with the Vessel API using the deployment key
+                */
+                void install_client();
+
+                /*! \fn StorageProvider get_storage_provider();
+                    \brief Returns the highest priority storage provider
+                    \return Returns the highest priority storage provider
+                */
+                StorageProvider get_storage_provider();
+
             private:
+
                 LocalDatabase* m_ldb;
                 Vessel::Logging::Log* m_log;
 
@@ -135,6 +164,21 @@ namespace Vessel {
                     \brief Handles a JSON parsing error and saves it to the log
                 */
                 void handle_json_error(const ParseResult& res);
+
+                /*! \fn bool sync_storage_provider(const Value& obj);
+                    \brief Syncs a single storage provider to the local database
+                */
+                bool sync_storage_provider(const Value& obj);
+
+                /*! \fn bool sync_storage_provider_all(const std::vector<std::string>& provider_ids);
+                    \brief Compares a vector of provider_ids to the local database and removes obsolete providers
+                */
+                void sync_storage_provider_all(const std::vector<std::string>& provider_ids);
+
+                /*! \fn void delete_storage_provider(const std::string& id );
+                    \brief Removes a storage provider from the local database
+                */
+                bool delete_storage_provider(const std::string& id );
 
         };
 

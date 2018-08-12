@@ -76,7 +76,9 @@ class AppClientController extends Controller
 				return response()->json(['error' => 'Invalid deployment key'], 400);
 			}
 
-			$deployment = App\Deployment::where('deployment_key', $deployment_key)->whereDate('expires_at', '>=', Carbon::now()->toDateTimeString() )->firstOrFail();
+			//return Carbon::now()->toDateTimeString();
+
+			$deployment = App\Deployment::where('deployment_key', $deployment_key)->whereDate('expires_at', '>=', now() )->firstOrFail();
 
 			//Validate Request
 			$validator = Validator::make($request->all(), [
@@ -104,7 +106,15 @@ class AppClientController extends Controller
 			}
 			$appClient->save();
 
-			return $appClient;
+			//Get storage providers
+			$providers = App\StorageProvider::all();
+			$appSettings = App\AppSetting::all();
+
+			return response()->json([
+				'app_client' => $appClient,
+				'storage_providers' => $providers,
+				'app_settings' => $appSettings
+			]);
 
 		}
 

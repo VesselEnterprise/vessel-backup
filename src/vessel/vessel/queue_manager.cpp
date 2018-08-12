@@ -20,7 +20,7 @@ void QueueManager::rebuild_queue()
     std::string query = "SELECT a.file_id FROM backup_file AS a INNER JOIN backup_weight_ext AS b ON a.file_ext=b.file_ext WHERE a.last_modified >= a.last_backup_time ORDER BY a.last_modified DESC LIMIT ?1";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")" );
         return;
     }
 
@@ -50,7 +50,7 @@ void QueueManager::rebuild_queue()
         query = "SELECT a.file_id FROM backup_file AS a LEFT JOIN backup_weight_ext AS b ON a.file_ext = b.file_ext WHERE b.file_ext IS NULL ORDER BY a.last_modified DESC LIMIT ?1";
 
         if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-            throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+            throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")" );
             return;
         }
 
@@ -82,7 +82,7 @@ void QueueManager::clear_queue()
     std::string query = "DELETE FROM backup_upload";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")" );
         return;
     }
 
@@ -101,7 +101,7 @@ void QueueManager::push_file(unsigned char* file_id)
     std::string query = "INSERT INTO backup_upload (file_id) VALUES(?1)";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")");
         return;
     }
 
@@ -110,7 +110,7 @@ void QueueManager::push_file(unsigned char* file_id)
 
     //Execute query
     if ( sqlite3_step(stmt) != SQLITE_DONE ) {
-        throw DatabaseException(DatabaseException::InvalidQuery, "Error executing query: " + query);
+        throw DatabaseException(DatabaseException::InvalidQuery, "Error executing query: " + query + "(" + m_database->get_last_err() + ")");
         return;
     }
 
@@ -126,7 +126,7 @@ void QueueManager::pop_file(unsigned char* file_id)
     std::string query = "DELETE FROM backup_upload WHERE file_id=?1";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")" );
         return;
     }
 
@@ -135,7 +135,7 @@ void QueueManager::pop_file(unsigned char* file_id)
 
     //Execute query
     if ( sqlite3_step(stmt) != SQLITE_DONE ) {
-        throw DatabaseException(DatabaseException::InvalidQuery, "Error executing query: " + query);
+        throw DatabaseException(DatabaseException::InvalidQuery, "Error executing query: " + query + "(" + m_database->get_last_err() + ")" );
         return;
     }
 
@@ -151,13 +151,13 @@ void QueueManager::apply_weights()
     std::string query = "UPDATE backup_upload SET weight = weight + (SELECT weight FROM backup_weight_ext AS b INNER JOIN backup_file AS c ON file_id = c.file_id WHERE b.file_ext = c.file_ext)";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")" );
         return;
     }
 
     //Execute query
     if ( sqlite3_step(stmt) != SQLITE_DONE ) {
-        throw DatabaseException(DatabaseException::InvalidQuery, "Error executing query: " + query);
+        throw DatabaseException(DatabaseException::InvalidQuery, "Error executing query: " + query + "(" + m_database->get_last_err() + ")");
         return;
     }
 
@@ -174,7 +174,7 @@ int QueueManager::get_total_pending()
     std::string query = "SELECT COUNT(*) FROM backup_upload";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")");
         return -1;
     }
 
@@ -203,7 +203,7 @@ BackupFile QueueManager::get_next_file()
     std::string query = "SELECT a.filename,c.path FROM backup_file AS a INNER JOIN backup_upload AS b ON a.file_id = b.file_id INNER JOIN backup_directory AS c ON a.directory_id = c.directory_id ORDER BY a.last_modified,b.weight DESC LIMIT 1";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query );
+        throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")" );
     }
 
     if ( sqlite3_step(stmt) != SQLITE_ROW )

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <iterator>
+#include <memory>
 #include <map>
 
 #include <boost/algorithm/string.hpp>
@@ -14,7 +15,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/hmac.h>
@@ -143,7 +143,7 @@ namespace Vessel {
                 std::string m_amzdate_short; //Shortened version of the AMZ date eg. 20130524
                 std::string m_amzdate_clean; //Example: Fri, 24 May 2013 00:00:00 GMT
                 std::string m_content_sha256; //SHA-256 hash of the file contents
-                boost::shared_ptr<std::string> m_file_content; //Content of the current file or part
+                std::shared_ptr<std::string> m_file_content; //Content of the current file or part
                 std::string m_content_md5; //MD5 hash of the current file or part
                 std::string m_previous_signature; //The previous signature used for streaming uploads
                 std::string m_request_payload;
@@ -238,11 +238,11 @@ namespace Vessel {
                 */
                 std::string parse_upload_id( const std::string& response );
 
-                /*! \fn std::string parse_etag( const std::string& response );
+                /*! \fn std::string parse_etag();
                     \brief Returns the etag for a file part upload returned from the S3 API
                     \return Returns the etag for a file part upload returned from the S3 API
                 */
-                std::string parse_etag( const std::string& response );
+                std::string parse_etag();
 
                 /*! \fn void read_key_file();
                     \brief If remote signing is disabled, reads the AWS credentials from an aws.key file

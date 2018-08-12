@@ -48,4 +48,5 @@ class StorageProvider extends Model
 
 		protected $fillable = ['provider_name'];
     protected $table = 'storage_provider';
+		protected $hidden = ['access_id', 'access_key','created_at','updated_at'];
 }
