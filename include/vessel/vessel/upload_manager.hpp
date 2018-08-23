@@ -6,11 +6,14 @@
 #include <memory>
 
 #include <vessel/vessel/vessel_exception.hpp>
+#include <vessel/filesystem/file.hpp>
+#include <vessel/vessel/queue_manager.hpp>
 #include <vessel/aws/aws_s3_client.hpp>
 #include <vessel/vessel/vessel_client.hpp>
 
 using namespace Vessel::Types;
 using namespace Vessel::Database;
+using namespace Vessel::File;
 using namespace Vessel::Networking;
 
 namespace Vessel
@@ -18,11 +21,16 @@ namespace Vessel
     class UploadInterface
     {
         public:
-            virtual void upload_file() = 0;
-            virtual void resume_uploads() = 0;
-            virtual void complete_upload() = 0;
+            UploadInterface();
+            virtual void upload_file(const BackupFile& file) {}
+            virtual void resume_uploads() {}
+            virtual void complete_upload() {}
+
+        protected:
+            std::shared_ptr<VesselClient> get_vessel_client();
 
         private:
+            std::shared_ptr<VesselClient> m_vessel;
 
     };
 
@@ -39,7 +47,6 @@ namespace Vessel
 
         private:
             std::shared_ptr<LocalDatabase> m_database;
-            std::shared_ptr<VesselClient> m_client;
 
     };
 
@@ -50,13 +57,15 @@ namespace Vessel
 
             AwsUpload();
 
-            virtual void upload_file();
-            virtual void resume_uploads();
-            virtual void complete_upload();
+            void upload_file(const BackupFile& file);
+            void resume_uploads();
+            void complete_upload();
 
         private:
             std::shared_ptr<LocalDatabase> m_database;
             std::shared_ptr<AwsS3Client> m_client;
+
+            void init_upload(const BackupFile& file);
 
     };
 

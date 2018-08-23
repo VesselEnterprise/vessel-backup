@@ -2,8 +2,8 @@
 
 using namespace Vessel::Networking;
 
-void HttpRequest::set_uri ( const std::string& str ) {
-    m_uri = str;
+void HttpRequest::set_url ( const std::string& str ) {
+    m_url = str;
 }
 
 void HttpRequest::set_method( const std::string& str) {
@@ -22,26 +22,53 @@ void HttpRequest::set_body( const std::string& str) {
     m_body = str;
 }
 
-std::string HttpRequest::get_uri() {
-    return m_uri;
+void HttpRequest::set_auth_header(const std::string& str)
+{
+    m_authorization = str;
 }
 
-std::string HttpRequest::get_method() {
+void HttpRequest::accept(const std::string& str)
+{
+    m_accept = str;
+}
+
+std::string HttpRequest::get_url() const
+{
+    return m_url;
+}
+
+std::string HttpRequest::get_method() const
+{
     return m_http_method;
 }
 
-std::vector<std::string> HttpRequest::get_headers() {
+std::vector<std::string> HttpRequest::get_headers() const
+{
     return m_headers;
 }
 
-std::string HttpRequest::get_content_type() {
+std::string HttpRequest::get_content_type() const
+{
     return m_content_type;
 };
 
-std::string HttpRequest::get_body() {
+std::string HttpRequest::get_body() const
+{
     return m_body;
 }
 
-size_t HttpRequest::get_body_length() {
+std::string HttpRequest::get_accept() const
+{
+    return m_accept;
+}
+
+std::string HttpRequest::get_auth() const
+{
+    return m_authorization;
+}
+
+
+size_t HttpRequest::get_body_length() const
+{
     return m_body.size();
 }

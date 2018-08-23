@@ -21,7 +21,10 @@
 #define BACKUP_LARGE_SZ 52428800 //Default size in bytes of what should be considered a larger file (50MB)
 #define BACKUP_CHUNK_SZ 52428800 //Default chunk size if not defined in DB (50MB)
 
+using namespace Vessel::Database;
 using namespace Vessel::Exception;
+using namespace Vessel::Utilities;
+using namespace CryptoPP;
 
 namespace fs = boost::filesystem;
 
@@ -50,7 +53,8 @@ namespace Vessel {
             };
 
             public:
-                BackupFile(const fs::path& file_path);
+                BackupFile(const fs::path& file_path); //Load file from filesystem
+                BackupFile(unsigned char* file_id); //Load file from database
                 ~BackupFile();
 
                 /*! \fn void set_path(const std::string& fp);
@@ -109,11 +113,12 @@ namespace Vessel {
                 */
                 std::unique_ptr<unsigned char*> get_unique_id_raw() const;
 
-                /*! \fn std::string get_hash_sha1();
+                /*! \fn std::string get_hash_sha1() const;
                     \brief
                     \return Returns a SHA-1 hash of the file contents
                 */
                 std::string get_hash_sha1();
+                std::string get_hash_sha1() const;
 
                 /*! \fn std::string get_hash_sha1(const std::string& content);
                     \brief
@@ -139,22 +144,16 @@ namespace Vessel {
                 */
                 unsigned int get_directory_id() const;
 
-
                 /*! \fn void set_directory_id(unsigned int id);
                     \brief Sets the associated database directory ID for the file (object only)
                 */
                 void set_directory_id(unsigned int id);
 
-                /*! \fn unsigned int get_file_id();
+                /*! \fn std::shared_ptr<unsigned char*> get_file_id() const;
                     \brief
-                    \return Returns the database ID of the file
+                    \return Returns the database unique ID of the file
                 */
-                unsigned int get_file_id() const;
-
-                /*! \fn void set_file_id(unsigned int id);
-                    \brief Sets the associated database file ID for the file (object only)
-                */
-                void set_file_id(unsigned int id);
+                std::shared_ptr<unsigned char*> get_file_id() const;
 
                 /*! \fn std::string get_file_path();
                     \brief
@@ -239,16 +238,23 @@ namespace Vessel {
 
                 static std::string find_mime_type(const std::string& ext);
 
+                /*! \fn bool is_readable();
+                    \brief Returns whether or not the file can be opened for reading
+                    \return Returns whether or not the file can be opened for reading
+                */
+                bool is_readable();
+
             private:
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file
+                std::shared_ptr<unsigned char*> m_file_id; //File ID / Unique ID
                 std::string m_hash; //!< SHA-1 hash of the file contents
                 std::string m_unique_id; //!< SHA-1 hash of the file path
                 std::string m_content; //!< Contents of the file (binary)
                 file_attrs m_file_attrs; //!< Struct containing common file attributes
-                unsigned int m_file_id; //!< Database ID of the file
                 unsigned int m_directory_id; //!< Database ID of the parent directory
                 unsigned int m_upload_id; //!< Server Upload ID of the file
                 static size_t m_chunk_size; //!< Size in bytes in a file part for multi part uploads
+                bool m_readable; //Can the file be opened for reading?
 
                 /*! \fn void update_attributes()
                     \brief Updates private member variables for file properties. Called in constructor and when assigning an object a new file path

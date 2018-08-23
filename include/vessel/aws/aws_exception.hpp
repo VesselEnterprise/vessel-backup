@@ -22,7 +22,10 @@ namespace Vessel {
                     InvalidCredentials
                 };
 
-                AwsException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
+                AwsException(ErrorCode e, const std::string& msg) : _code(e)
+                {
+                    _msg = "AwsException: " + msg + " (ErrorCode: " + std::to_string((int)e) + ")";
+                }
 
                 ErrorCode get_code() { return _code; }
 

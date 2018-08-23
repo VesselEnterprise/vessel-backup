@@ -28,6 +28,10 @@
 #include <vessel/aws/aws_exception.hpp>
 
 using namespace Vessel::Exception;
+using namespace Vessel::Database;
+using namespace Vessel::File;
+using namespace Vessel::Networking;
+using namespace Vessel::Utilities;
 
 namespace Vessel {
     namespace Networking {

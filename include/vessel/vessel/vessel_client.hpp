@@ -61,11 +61,11 @@ namespace Vessel {
                 VesselClient( const std::string& hostname );
                 ~VesselClient();
 
-                /*! \fn int init_upload( Vessel::File::BackupFile * bf );
-                    \brief Initialize a new file upload with the server REST API
-                    \return Returns 0 if successful, 1 if there were errors
+                /*! \fn std::string init_upload( const Vessel::File::BackupFile& bf );
+                    \brief Initialize a new file upload with the Vessel REST API
+                    \return Returns the Vessel file id from the API
                 */
-                int init_upload( Vessel::File::BackupFile * bf );
+                std::string init_upload( const Vessel::File::BackupFile& bf );
 
                 /*! \fn upload_file_part( Vessel::File::BackupFile * bf, int part_number );
                     \brief Sends part of a file (or the entire file) to the server with metadata
@@ -132,11 +132,6 @@ namespace Vessel {
                 LocalDatabase* m_ldb;
                 Vessel::Logging::Log* m_log;
 
-                /*! \fn void send_request( Vessel::Networking::HttpRequest* r );
-                    \brief Send the HTTP request to the server
-                */
-                void send_request( Vessel::Networking::HttpRequest* r );
-
                 /** Authorization **/
                 void handle_auth_error();
 
@@ -150,6 +145,7 @@ namespace Vessel {
 
                 std::string m_auth_header;
                 std::string m_auth_token;
+                std::string m_client_token;
                 std::string m_api_path;
                 std::string m_user_id;
                 bool m_activated;
@@ -179,6 +175,11 @@ namespace Vessel {
                     \brief Removes a storage provider from the local database
                 */
                 bool delete_storage_provider(const std::string& id );
+
+                /*! \fn std::string get_provider_endpoint(const std::string& provider_type);
+                    \brief Returns the provider API endpoint
+                */
+                std::string get_provider_endpoint(const std::string& provider_type);
 
         };
 

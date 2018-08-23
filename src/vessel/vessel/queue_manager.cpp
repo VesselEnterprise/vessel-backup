@@ -131,13 +131,15 @@ void QueueManager::pop_file(unsigned char* file_id)
     }
 
     //Bind file id
-    sqlite3_bind_blob(stmt, 0, file_id, sizeof(file_id), 0 );
+    sqlite3_bind_blob(stmt, 1, file_id, sizeof(file_id), 0 );
 
     //Execute query
     if ( sqlite3_step(stmt) != SQLITE_DONE ) {
         throw DatabaseException(DatabaseException::InvalidQuery, "Error executing query: " + query + "(" + m_database->get_last_err() + ")" );
         return;
     }
+
+    std::cout << "Rows affected: " << (int)sqlite3_changes(m_database->get_handle()) << '\n';
 
     //Cleanup
     sqlite3_finalize(stmt);
@@ -200,7 +202,7 @@ BackupFile QueueManager::get_next_file()
 
     sqlite3_stmt* stmt;
 
-    std::string query = "SELECT a.filename,c.path FROM backup_file AS a INNER JOIN backup_upload AS b ON a.file_id = b.file_id INNER JOIN backup_directory AS c ON a.directory_id = c.directory_id ORDER BY a.last_modified,b.weight DESC LIMIT 1";
+    std::string query = "SELECT file_id FROM backup_upload ORDER BY last_modified,weight DESC LIMIT 1";
 
     if ( sqlite3_prepare_v2(m_database->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
         throw DatabaseException(DatabaseException::InvalidStatement, "Error executing statement with query: " + query + "(" + m_database->get_last_err() + ")" );
@@ -211,10 +213,9 @@ BackupFile QueueManager::get_next_file()
         throw FileException(FileException::FileNotFound, "No files were found in the upload queue");
     }
 
-    std::string base_path = (char*)sqlite3_column_text(stmt, 1);
-    std::string file_name = (char*)sqlite3_column_text(stmt, 0);
+    unsigned char* file_id = (unsigned char*)sqlite3_column_blob(stmt, 0);
 
-    BackupFile bf((base_path + "/" + file_name));
+    BackupFile bf(file_id);
 
     return bf;
 

@@ -13,8 +13,9 @@ VesselClient::VesselClient( const std::string& host ) : HttpClient(host)
     //Get log
     m_log = new Vessel::Logging::Log("vessel_cli");
 
-    //Get user information
+    //Cache vars
     m_auth_token = m_ldb->get_setting_str("auth_token");
+    m_client_token = m_ldb->get_setting_str("client_token");
     m_user_id = m_ldb->get_setting_str("user_id");
     m_api_path = m_ldb->get_setting_str("vessel_api_path");
 
@@ -28,182 +29,71 @@ VesselClient::~VesselClient()
 
 }
 
-void VesselClient::send_request( Vessel::Networking::HttpRequest* r )
+std::string VesselClient::get_provider_endpoint(const std::string& provider_type )
 {
 
-    //If client is already connected, disconnect before a new attempt
-    if ( is_connected() )
-        disconnect();
+    if ( provider_type == "aws_s3") return "aws";
+    if ( provider_type == "azure") return "azure";
+    if ( provider_type == "vessel") return "vessel";
+    if ( provider_type == "local") return "local";
 
-    //Connect to server
-    connect();
-
-    if ( !is_connected() )
-        return;
-
-    //clear any existing data
-    clear_response();
-    clear_headers();
-
-    //15 seconds until timeout
-    set_deadline(15);
-
-    //Build the HTTP Request
-    std::stringstream request_stream(std::stringstream::out | std::stringstream::binary);
-    request_stream << r->get_method() << " " << r->get_uri() << " HTTP/1.1\r\n";
-    request_stream << "Host: " << get_hostname() << "\r\n";
-    request_stream << "Accept: */*\r\n";
-
-    //Send Authorization Header
-    if ( m_auth_token != "" ) {
-        request_stream << "Authorization: " << m_auth_header << "\r\n";
-    }
-
-    std::string http_method = r->get_method();
-    std::string content_type = r->get_content_type();
-
-    bool do_send_data=false; /* Flag which indicates we want to send raw data */
-
-    //If POST or PUT, send content length and type headers
-    if ( http_method == "POST" || http_method == "PUT" )
-    {
-        request_stream << "Content-Length: " << r->get_body_length() << "\r\n";
-
-        if ( !content_type.empty() )
-            request_stream << "Content-Type: " << content_type << "\r\n";
-
-        do_send_data=true;
-    }
-
-    //Add any custom headers
-    std::vector<std::string> headers = r->get_headers();
-    for ( std::vector<std::string>::iterator itr = headers.begin(); itr != headers.end(); ++itr )
-        request_stream << *itr << "\r\n";
-
-    //Close connection after response
-    request_stream << "Connection: close\r\n\r\n";
-
-    //request_stream << "\r\n";
-
-    if ( do_send_data )
-        request_stream.write( &r->get_body()[0], r->get_body_length() );
-
-    //Clear status code before sending new data
-    clear_error_code();
-
-    //Write HTTP request to socket
-    //write_socket(request_stream);
-
-    //Run the handlers until the response sets the status code or EOF
-    do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
-
-    disconnect();
-
-    unsigned int http_status = get_http_status();
-
-     std::cout << "HTTP Status: " << http_status << "\n";
-
-    /**
-     ** Handle HTTP Error codes
-     ** The 401 handler is designed to perform a user activation or token refresh on the fly in the event of authorization failures
-    **/
-    if (http_status == 401)
-        handle_auth_error();
-    else if ( http_status > 200 ) {
-        m_log->add_message("There was an error returned by the server. Status code: " + std::to_string(http_status), "ASIO" );
-        handle_api_error();
-    }
-
+    return "";
 }
 
-int VesselClient::init_upload ( Vessel::File::BackupFile * bf )
+std::string VesselClient::init_upload ( const BackupFile& bf )
 {
 
-    //Verify that file size is > 0
-    if ( bf->get_file_size() <= 0 )
-        return -1;
+    StorageProvider provider = get_storage_provider();
 
-    Document doc;
-    doc.SetObject();
-    Document::AllocatorType& alloc = doc.GetAllocator();
-
-    std::map<std::string,Value> jmap;
-
-    std::string parent_path = Vessel::File::BackupDirectory(bf->get_parent_path()).get_canonical_path();
-
-    //Get Activation Code from DB
-    jmap.insert( std::pair<std::string,Value>( "file_name", Value( bf->get_file_name().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "file_size", Value( bf->get_file_size() ) ) );
-    jmap.insert( std::pair<std::string,Value>( "file_type", Value( bf->get_file_type().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash_sha1().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "file_path", Value( parent_path.c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "last_modified", Value( (uint64_t)bf->get_last_modified() ) ) );
-    jmap.insert( std::pair<std::string,Value>( "parts", Value( bf->get_total_parts() ) ) );
-    jmap.insert( std::pair<std::string,Value>( "compressed", Value( m_use_compression ) ) );
-
-        //Add values to document object
-    for ( auto &kv : jmap )
-    {
-        doc.AddMember(Value().SetString(kv.first.c_str(),alloc), kv.second, alloc );
-    }
-
-    //Write object to buffer
+    //Write some JSON
     StringBuffer strbuf;
-    PrettyWriter<StringBuffer> writer(strbuf);
+    Writer<StringBuffer> writer(strbuf);
 
-    doc.Accept(writer);
+    writer.StartObject();
+
+    writer.Key("file_name");
+    writer.String( bf.get_file_name().c_str() );
+
+    writer.Key("file_path");
+    writer.String( bf.get_parent_path().c_str() );
+
+    writer.Key("file_type");
+    writer.String( bf.get_file_type().c_str() );
+
+    writer.Key("file_size");
+    writer.Uint( bf.get_file_size() );
+
+    writer.Key("hash");
+    writer.String( bf.get_hash_sha1().c_str() );
+
+    writer.Key("user_name");
+    writer.String( "admin" /*m_ldb->get_setting_str("username").c_str()*/ );
+
+    writer.Key("storage_provider_id");
+    writer.String( provider.provider_id.c_str() );
+
+    //
+    writer.EndObject();
+
+    std::string payload = strbuf.GetString();
 
     //Create a new HTTP request
+    std::string endpoint = "/upload/" + get_provider_endpoint( provider.provider_type );
+
     HttpRequest r;
-    r.add_header("Content-Type: application/json");
+    r.set_auth_header("Bearer " + m_client_token);
+    r.accept("application/json");
+    r.set_content_type("application/json");
     r.set_body(strbuf.GetString());
     r.set_method("POST");
-    r.set_uri(m_api_path + "/file?action=init");
+    r.set_url(m_api_path + endpoint);
 
-    //std::cout << "Example body:\n" << r.get_body() << std::endl;
+    //Send the init request
+    send_http_request(r);
 
-    send_request(&r);
+    //ParseResult json_ok = doc.Parse( get_response().c_str() );
 
-    //Parse response and get upload id
-
-    //Reset Document
-    doc.RemoveAllMembers();
-    strbuf.Clear();
-    writer.Reset(strbuf);
-
-    ParseResult json_ok = doc.Parse( get_response().c_str() );
-
-    if ( !json_ok )
-    {
-        handle_json_error(json_ok);
-        return -1;
-    }
-
-    doc.Accept(writer);
-
-    //Default to -1
-    int upload_id = -1;
-
-    std::cout << "Response: \n" << get_response() << std::endl;
-
-    if (get_http_status() == 200 ) {
-
-        if ( !doc.HasMember("response") ) {
-            set_error("There was an error parsing the JSON response");
-            return -1;
-        }
-
-        //Check if access token is present
-        const Value& response = doc["response"];
-
-        if ( response.HasMember("upload_id") )
-            upload_id = response["upload_id"].GetInt();
-        else
-            set_error("There was an error parsing the JSON response");
-
-    }
-
-    return upload_id;
+    return "";
 
 }
 
@@ -290,11 +180,11 @@ bool VesselClient::upload_file_part( Vessel::File::BackupFile * bf, int part_num
     r.add_header("Content-Type: multipart/form-data; boundary=BackupFile");
     r.set_body(body.str());
     r.set_method("POST");
-    r.set_uri(m_api_path + "/file");
+    r.set_url(m_api_path + "/file");
 
     //std::cout << "Example body:\n" << r.get_body() << std::endl;
 
-    send_request(&r);
+    send_http_request(r);
 
     std::cout << "File part response: " << get_response() << std::endl;
 
@@ -331,10 +221,10 @@ bool VesselClient::heartbeat()
     HttpRequest r;
     r.set_content_type("application/json");
     r.set_method("POST");
-    r.set_uri(m_api_path + "/heartbeat");
+    r.set_url(m_api_path + "/heartbeat");
     r.set_body( strbuf.GetString() );
 
-    send_request(&r);
+    send_http_request(r);
 
     return true;
 
@@ -349,9 +239,9 @@ std::string VesselClient::get_client_settings()
     HttpRequest r;
     r.set_content_type("application/json");
     r.set_method("GET");
-    r.set_uri(m_api_path + "/settings");
+    r.set_url(m_api_path + "/settings");
 
-    send_request(&r);
+    send_http_request(r);
 
     return get_response();
 
@@ -378,11 +268,11 @@ bool VesselClient::activate()
 
     HttpRequest r;
     r.set_method("POST");
-    r.set_uri(m_api_path + "/activate");
+    r.set_url(m_api_path + "/activate");
     r.set_content_type("application/json");
     r.set_body( strbuf.GetString() );
 
-    send_request( &r );
+    send_http_request( r );
 
     //Reset Document
     strbuf.Clear();
@@ -491,11 +381,11 @@ bool VesselClient::refresh_token()
     //Send Http Request
     HttpRequest r;
     r.set_method("POST");
-    r.set_uri(m_api_path + "/refresh_token");
+    r.set_url(m_api_path + "/refresh_token");
     r.set_content_type("application/json");
     r.set_body( strbuf.GetString() );
 
-    send_request( &r );
+    send_http_request( r );
 
     //Clear existing JSON document
     strbuf.Clear();
@@ -875,9 +765,9 @@ StorageProvider VesselClient::get_storage_provider()
     }
 
     StorageProvider provider;
-    provider.provider_id = (char*)sqlite3_column_text(stmt, 0);
+    provider.provider_id = LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 0) );
     provider.provider_name = (char*)sqlite3_column_text(stmt, 1);
-    //provider.description = (char*)sqlite3_column_text(stmt, 2);
+    provider.description = LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 2) );
     provider.server = (char*)sqlite3_column_text(stmt, 3);
     provider.provider_type = (char*)sqlite3_column_text(stmt, 4);
     provider.bucket_name = (char*)sqlite3_column_text(stmt, 5);

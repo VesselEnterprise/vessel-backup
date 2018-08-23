@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App;
 use Closure;
 
 class VerifyClientToken
@@ -20,7 +21,7 @@ class VerifyClientToken
 					return response()->json(['error' => 'Not authorized'], 403);
 				}
 
-				$result = App\AppClient::where('token', $request->bearerToken() )->whereDate('expires_at', '>=', now() );
+				$result = App\AppClient::where('token', $request->bearerToken() );
 
 				if ( $result->count() <= 0 ) {
 					return response()->json(['error' => 'Not authorized'], 403);

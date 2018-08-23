@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AppClientUser extends Model
 {
+
     public function client()
 		{
 				return $this->belongsTo('App\AppClient', 'client_id', 'client_id');

@@ -18,4 +18,5 @@ class StorageProviderFile extends StorageProvider
 		}
 
     protected $table = 'storage_provider_file';
+		protected $fillable = ['provider_id', 'file_id'];
 }

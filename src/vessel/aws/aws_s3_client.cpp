@@ -1,15 +1,12 @@
 #include <vessel/aws/aws_s3_client.hpp>
 
-using namespace Vessel::Networking;
-using namespace Vessel::Utilities;
-
 AwsS3Client::AwsS3Client(const std::string& uri) : HttpClient(uri), m_reduced_redundancy(true)
 {
 
-    m_ldb = &Vessel::Database::LocalDatabase::get_database();
+    m_ldb = &LocalDatabase::get_database();
     m_http_verb = "PUT"; //Default for uploading new files
     m_region = "us-east-2"; //Default
-    m_part_size = Vessel::File::BackupFile::get_chunk_size();
+    m_part_size = BackupFile::get_chunk_size();
     init_amz_date();
 
 }
@@ -34,8 +31,6 @@ std::string AwsS3Client::get_canonical_request()
 std::string AwsS3Client::get_string_to_sign()
 {
 
-    using namespace Vessel::Utilities;
-
     //Get SHA256 hash of canonical request
     std::string cr_hash = Hash::get_sha256_hash(get_canonical_request());
 
@@ -51,8 +46,6 @@ std::string AwsS3Client::get_string_to_sign()
 
 std::string AwsS3Client::get_signing_key()
 {
-    using namespace Vessel::Utilities;
-
     std::string secret = m_secret_key;
     std::string key_date = Hash::get_hmac_256("AWS4" + secret, m_amzdate_short, false);
     std::string key_region = Hash::get_hmac_256(key_date, m_region, false);
@@ -64,8 +57,6 @@ std::string AwsS3Client::get_signing_key()
 
 std::string AwsS3Client::get_signature_v4()
 {
-    using namespace Vessel::Utilities;
-
     //Signature calculation from signing key
     return Hash::get_hmac_256(get_signing_key(), get_string_to_sign());
 
@@ -73,8 +64,6 @@ std::string AwsS3Client::get_signature_v4()
 
 std::string AwsS3Client::get_stream_signature_v4(const std::string& prev_signature)
 {
-    using namespace Vessel::Utilities;
-
     //If it's the first part use the seed signature
     if ( m_current_part <= 1 ) {
         return get_signature_v4();
@@ -642,7 +631,6 @@ std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>&
     //Handle Empty Response
     if ( response.empty() ) {
         throw AwsException( AwsException::BadResponse, "Invalid Complete Multipart Upload Response");
-        return "";
     }
 
     std::stringstream iss; //Response stream

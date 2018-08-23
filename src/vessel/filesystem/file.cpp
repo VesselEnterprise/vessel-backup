@@ -9,7 +9,47 @@ BackupFile::BackupFile(const fs::path& fp ) : m_file_path(fp)
 {
     m_directory_id=-1;
     m_upload_id=-1;
+    m_readable=true;
     update_attributes();
+}
+
+BackupFile::BackupFile(unsigned char* file_id )
+{
+
+    m_file_id = std::make_shared<unsigned char*>(file_id); //Set internal file_id
+
+    sqlite3_stmt* stmt;
+
+    std::string query = "SELECT a.filename,a.file_ext,a.filesize,a.directory_id,a.last_modified,b.path FROM backup_file AS a INNER JOIN backup_directory AS b ON a.directory_id=b.directory_id WHERE a.file_id=?1";
+
+    if ( sqlite3_prepare_v2(LocalDatabase::get_database().get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
+        throw FileException(FileException::FileNotFound, "File does not exist in database");
+    }
+
+    sqlite3_bind_blob(stmt, 1, *m_file_id, sizeof(*m_file_id), 0);
+
+    if ( sqlite3_step(stmt) != SQLITE_ROW ) {
+        throw FileException(FileException::FileNotFound, "File does not exist in database");
+    }
+
+    std::string parent_path = (char*)sqlite3_column_text(stmt, 5);
+    m_file_attrs.file_name = (char*)sqlite3_column_text(stmt, 0);
+
+    m_file_path = boost::filesystem::path( parent_path + "/" + m_file_attrs.file_name );
+
+    m_file_attrs.file_path = m_file_path.string();
+    m_file_attrs.relative_path = m_file_path.relative_path().string();
+    m_file_attrs.parent_path = m_file_path.parent_path().string();
+    m_file_attrs.canonical_path = boost::filesystem::canonical(m_file_path).string();
+    m_file_attrs.file_type = m_file_path.extension().string();
+    m_file_attrs.mime_type = find_mime_type(m_file_attrs.file_type);
+    m_file_attrs.file_size = (unsigned long)sqlite3_column_int(stmt,2);
+    m_file_attrs.last_write_time = (unsigned long)sqlite3_column_int(stmt, 4);
+    m_unique_id = calculate_unique_id();
+    m_directory_id = (int)sqlite3_column_int(stmt, 3);
+
+    sqlite3_finalize(stmt);
+
 }
 
 BackupFile::~BackupFile() {}
@@ -46,6 +86,11 @@ void BackupFile::update_attributes()
             //Add error log here?
         }
 
+    }
+    else
+    {
+        m_readable=false;
+        //hrow FileException(FileException::FileNotFound, "File does not exist: " + m_file_path.string() );
     }
 }
 
@@ -119,8 +164,6 @@ std::string BackupFile::get_hash_sha1()
     if ( !m_file_attrs.content_sha1.empty() )
         return m_file_attrs.content_sha1;
 
-    using namespace CryptoPP;
-
     SHA1 hash;
     std::string digest;
 
@@ -130,7 +173,14 @@ std::string BackupFile::get_hash_sha1()
         /**
         * This peforms about 20% slower than reading the file manually and passing to StringSource
         */
-        FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+        try
+        {
+            FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+        }
+        catch(const std::exception& ex)
+        {
+            m_readable=false;
+        }
     }
     else
     {
@@ -140,8 +190,10 @@ std::string BackupFile::get_hash_sha1()
 
             //Read file contents
             std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
-            if ( !infile.is_open() )
+            if ( !infile.is_open() ) {
+                m_readable = false;
                 return ""; //No hash
+            }
 
             infile.seekg( 0, std::ios::end );
             auto file_size = infile.tellg();
@@ -160,14 +212,62 @@ std::string BackupFile::get_hash_sha1()
 
 }
 
+std::string BackupFile::get_hash_sha1() const
+{
+
+    //If SHA-1 has already been generated, return the hash
+    if ( !m_file_attrs.content_sha1.empty() )
+        return m_file_attrs.content_sha1;
+
+    SHA1 hash;
+    std::string digest;
+
+    //Use this method for larger files
+    if ( get_file_size() > BACKUP_LARGE_SZ )
+    {
+        /**
+        * This peforms about 20% slower than reading the file manually and passing to StringSource
+        */
+        try
+        {
+            FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+        }
+        catch ( const std::exception& ex )
+        {
+            //Log an error here?
+        }
+    }
+    else
+    {
+        //Read file contents
+        std::string content;
+        std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
+        if ( !infile.is_open() ) {
+            //Log an error?
+            return ""; //No hash
+        }
+
+        infile.seekg( 0, std::ios::end );
+        auto file_size = infile.tellg();
+        content.resize( file_size ); //Pre-allocate memory
+        infile.seekg( 0, std::ios::beg );
+        infile.read( &content[0], content.size() ); //Read contents
+        infile.close(); //Close file
+
+        StringSource s(content, true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+
+    }
+
+    return digest;
+
+}
+
 std::string BackupFile::get_hash_sha256()
 {
 
     //If SHA-256 has already been generated, return the hash
     if ( !m_file_attrs.content_sha256.empty() )
         return m_file_attrs.content_sha256;
-
-    using namespace CryptoPP;
 
     SHA256 hash;
     std::string digest;
@@ -178,7 +278,14 @@ std::string BackupFile::get_hash_sha256()
         /**
         * This peforms about 20% slower than reading the file manually and passing to StringSource
         */
-        FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+        try
+        {
+            FileSource s( get_file_path().c_str(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
+        }
+        catch( const std::exception& ex )
+        {
+            m_readable=false;
+        }
     }
     else
     {
@@ -188,8 +295,10 @@ std::string BackupFile::get_hash_sha256()
 
             //Read file contents
             std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
-            if ( !infile.is_open() )
+            if ( !infile.is_open() ) {
+                m_readable=false;
                 return ""; //No hash
+            }
 
             infile.seekg( 0, std::ios::end );
             auto file_size = infile.tellg();
@@ -211,8 +320,6 @@ std::string BackupFile::get_hash_sha256()
 std::string BackupFile::get_hash_sha1( const std::string& data ) const
 {
 
-    using namespace CryptoPP;
-
     SHA1 hash;
     std::string digest;
 
@@ -224,8 +331,6 @@ std::string BackupFile::get_hash_sha1( const std::string& data ) const
 
 std::string BackupFile::get_hash_sha256( const std::string& data ) const
 {
-
-    using namespace CryptoPP;
 
     SHA256 hash;
     std::string digest;
@@ -245,8 +350,10 @@ std::string BackupFile::get_file_contents()
 
     //Read file contents
     std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
-    if ( !infile.is_open() )
+    if ( !infile.is_open() ) {
+        m_readable=false;
         return "";
+    }
 
     //infile.ignore(  std::numeric_limits<std::streamsize>::max(), '\0' );
 
@@ -264,8 +371,6 @@ std::string BackupFile::get_file_contents()
 
 std::string BackupFile::calculate_unique_id() const
 {
-        using namespace CryptoPP;
-
         SHA1 hash;
         std::string digest;
 
@@ -281,8 +386,7 @@ std::string BackupFile::get_unique_id() const
 
 std::unique_ptr<unsigned char*> BackupFile::get_unique_id_raw() const
 {
-    using namespace Vessel::Utilities;
-    return Hash::get_sha1_hash_raw(get_canonical_path());
+    return Hash::get_sha1_hash_raw( get_canonical_path() );
 }
 
 unsigned int BackupFile::get_directory_id() const
@@ -295,14 +399,9 @@ void BackupFile::set_directory_id(unsigned int id)
     m_directory_id = id;
 }
 
-unsigned int BackupFile::get_file_id() const
+std::shared_ptr<unsigned char*> BackupFile::get_file_id() const
 {
     return m_file_id;
-}
-
-void BackupFile::set_file_id(unsigned int id)
-{
-    m_file_id = id;
 }
 
 void BackupFile::set_chunk_size(size_t chunk_sz)
@@ -350,8 +449,10 @@ std::string BackupFile::get_file_part(unsigned int num) {
 
         //Read file contents
         std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
-        if ( !infile.is_open() )
+        if ( !infile.is_open() ) {
+            m_readable = false;
             return "";
+        }
 
         infile.seekg( start_pos, std::ios::beg );
         infile.read( &file_part[0], bytes_to_read ); //Read contents
@@ -391,8 +492,6 @@ size_t BackupFile::get_chunk_size()
 std::string BackupFile::find_mime_type( const std::string& ext )
 {
 
-    using namespace Vessel::Database;
-
     LocalDatabase* ldb = &LocalDatabase::get_database();
 
     sqlite3_stmt* stmt;
@@ -414,4 +513,17 @@ std::string BackupFile::find_mime_type( const std::string& ext )
     sqlite3_finalize(stmt);
 
     return val;
+}
+
+bool BackupFile::is_readable()
+{
+    std::ifstream infile( get_canonical_path() );
+    if ( !infile.is_open() )
+    {
+        m_readable=false;
+        return false;
+    }
+    infile.close();
+    m_readable=true;
+    return true;
 }

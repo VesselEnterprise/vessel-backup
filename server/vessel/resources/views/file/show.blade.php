@@ -35,7 +35,7 @@
 		</div>
 	@endif
 
-	<form method="POST" action="{{ route('file.update', ['id' => $file->uuid_text]) }}" class="ui form segment">
+	<form method="POST" action="{{ route('file.update', ['id' => $file->file_id_text]) }}" class="ui form segment">
 		@csrf
 
 	<div class="ui stackable grid container">

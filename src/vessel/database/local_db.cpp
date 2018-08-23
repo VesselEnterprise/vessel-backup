@@ -1,7 +1,6 @@
 #include <vessel/database/local_db.hpp>
 
 using namespace Vessel::Database;
-using namespace Vessel::File;
 
 LocalDatabase::LocalDatabase()
 {
@@ -446,4 +445,43 @@ void LocalDatabase::start_transaction()
 void LocalDatabase::end_transaction()
 {
     sqlite3_exec(m_db, "END TRANSACTION", NULL, NULL, NULL);
+}
+
+std::string LocalDatabase::get_sqlite_str(const void* data)
+{
+    return (data != NULL) ? (const char*)data : "";
+}
+
+void LocalDatabase::purge_file(const unsigned char* file_id)
+{
+
+    std::vector<std::string> queries;
+    queries.push_back("DELETE FROM backup_file WHERE file_id=?1");
+    queries.push_back("DELETE FROM backup_upload WHERE file_id=?1");
+
+    size_t file_id_size = sizeof(file_id);
+
+    for ( const auto &query : queries )
+    {
+        sqlite3_stmt* st;
+        if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &st, NULL ) != SQLITE_OK ) {
+            return;
+        }
+
+        sqlite3_bind_blob(st, 1, file_id, file_id_size, 0);
+
+        std::string file_id_s = (char*)file_id;
+
+        if ( sqlite3_step(st) == SQLITE_DONE ) {
+            m_log->add_message("File has been purged: " + file_id_s, "Database Cleaner");
+        }
+        else {
+            m_log->add_message("File could not be purged: " + file_id_s, "Database Cleaner");
+        }
+
+        //Cleanup
+        sqlite3_finalize(st);
+
+    }
+
 }

@@ -17,7 +17,6 @@
 #include <vessel/types.hpp>
 #include <vessel/log/log.hpp>
 #include <vessel/version.hpp>
-#include <vessel/filesystem/file.hpp>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -56,6 +55,8 @@ namespace Vessel{
                 template <typename T>
                 bool update_setting(const std::string& key, const T& val );
 
+                static std::string get_sqlite_str(const void* data);
+
                 //Update file extension count
                 bool update_ext_count( const std::string& ext, int total );
 
@@ -72,6 +73,8 @@ namespace Vessel{
 
                 void start_transaction();
                 void end_transaction();
+
+                void purge_file(const unsigned char* file_id);
 
             //protected:
                 sqlite3* get_handle();

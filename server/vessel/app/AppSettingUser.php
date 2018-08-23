@@ -18,4 +18,5 @@ class AppSettingUser extends Model
     }
 
 		protected $table = 'app_setting_user';
+
 }

@@ -39,6 +39,7 @@ namespace Vessel {
             std::string bucket_name;
             std::string storage_path;
             std::string provider_type;
+            std::string endpoint;
             int priority;
         };
         typedef struct StorageProvider StorageProvider;

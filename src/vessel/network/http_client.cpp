@@ -2,12 +2,9 @@
 
 using namespace Vessel::Networking;
 
-HttpClient::HttpClient(const std::string& uri) :
-    m_use_ssl(false),
-    m_ssl_ctx(boost::asio::ssl::context::tlsv12),
-    m_timeout(boost::posix_time::seconds(60)),
-    m_verify_cert(true)
+HttpClient::HttpClient(const std::string& uri) : m_ssl_ctx(boost::asio::ssl::context::tlsv12)
 {
+    set_defaults();
 
      //Set local database object
     m_ldb = &Vessel::Database::LocalDatabase::get_database();
@@ -19,23 +16,37 @@ HttpClient::HttpClient(const std::string& uri) :
     m_ssl_ctx.set_default_verify_paths();
 
     //Determine protocol, hostname, etc
-    this->parse_url(uri);
+    parse_url(uri);
 
 }
 
 HttpClient::~HttpClient()
 {
-    if ( m_socket != nullptr )
-    {
-        if ( m_socket->is_open() )
+    if ( m_socket ) {
+        if ( m_socket->is_open() ) {
             m_socket->close();
-
-        if ( m_ssl_socket->lowest_layer().is_open() )
-            m_ssl_socket->lowest_layer().close();
-
-        m_socket.reset();
-        m_ssl_socket.reset();
+        }
     }
+
+    if ( m_ssl_socket ) {
+        if ( m_ssl_socket->lowest_layer().is_open() ) {
+            m_ssl_socket->lowest_layer().close();
+        }
+    }
+
+    m_socket.reset();
+    m_ssl_socket.reset();
+
+}
+
+void HttpClient::set_defaults()
+{
+    m_verify_cert = true;
+    m_connected = false;
+    m_use_ssl = false;
+    m_timeout = boost::posix_time::seconds(60);
+    m_verify_cert = true;
+    m_connected = false;
 }
 
 void HttpClient::parse_url( const std::string& host )
@@ -104,9 +115,9 @@ void HttpClient::set_timeout( boost::posix_time::time_duration t )
     m_timeout = t;
 }
 
-void HttpClient::set_ssl(bool f)
+void HttpClient::set_ssl(bool flag)
 {
-    m_use_ssl = f;
+    m_use_ssl = flag;
 }
 
 bool HttpClient::connect()
@@ -127,73 +138,45 @@ bool HttpClient::connect()
 
     check_deadline(); //Run indefinitely
 
-    try
-    {
+    boost::asio::ip::tcp::resolver resolver(m_io_service);
+    boost::asio::ip::tcp::resolver::query query( m_hostname.c_str(), std::to_string(m_port) );
+    boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
-        boost::asio::ip::tcp::resolver resolver(m_io_service);
-        boost::asio::ip::tcp::resolver::query query( m_hostname.c_str(), std::to_string(m_port) );
-        boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+    //Block the call to ASYNC connect until the error code changes
+    m_conn_status = boost::asio::error::would_block;
 
-        //Block the call to ASYNC connect until the error code changes
-        m_conn_status = boost::asio::error::would_block;
+    if ( !m_use_ssl ) {
 
-        if ( !m_use_ssl ) {
-
-            boost::asio::async_connect(*m_socket, endpoint_iterator, boost::bind(&HttpClient::handle_connect, this, boost::asio::placeholders::error) );
-
-        }
-        else {
-
-            m_ssl_socket->set_verify_callback(boost::asio::ssl::rfc2818_verification(m_hostname));
-
-            if ( m_verify_cert ) {
-                m_ssl_socket->set_verify_mode(boost::asio::ssl::verify_peer);
-            }
-            else {
-                m_ssl_socket->set_verify_mode(boost::asio::ssl::verify_none);
-            }
-
-            boost::asio::async_connect(m_ssl_socket->lowest_layer(), endpoint_iterator, boost::bind(&HttpClient::handle_connect, this, boost::asio::placeholders::error) );
-
-        }
-
-        //Run ASYNC connect until operation completed
-        do m_io_service.run_one(); while (m_conn_status == boost::asio::error::would_block);
-
-        if ( !m_conn_status )
-        {
-            m_connected=true;
-        }
-        else
-        {
-            throw boost::system::system_error( m_conn_status ? m_conn_status : boost::asio::error::operation_aborted );
-            m_connected=false;
-        }
-
-        /*
-        for (;;)
-        {
-            boost::array<char, 128> buf;
-            boost::system::error_code error;
-
-            size_t len = m_socket.read_some(boost::asio::buffer(buf), error);
-
-            if (error == boost::asio::error::eof)
-                break; // Connection closed cleanly by peer.
-            else if (error)
-                throw boost::system::system_error(error); // Some other error.
-
-            std::cout.write(buf.data(), len);
-
-            std::cout << "Reading data..." << std::endl;
-        }
-        */
+        boost::asio::async_connect(*m_socket, endpoint_iterator, boost::bind(&HttpClient::handle_connect, this, boost::asio::placeholders::error) );
 
     }
-    catch (std::exception& e)
+    else {
+
+        m_ssl_socket->set_verify_callback(boost::asio::ssl::rfc2818_verification(m_hostname));
+
+        if ( m_verify_cert ) {
+            m_ssl_socket->set_verify_mode(boost::asio::ssl::verify_peer);
+        }
+        else {
+            m_ssl_socket->set_verify_mode(boost::asio::ssl::verify_none);
+        }
+
+        boost::asio::async_connect(m_ssl_socket->lowest_layer(), endpoint_iterator, boost::bind(&HttpClient::handle_connect, this, boost::asio::placeholders::error) );
+
+    }
+
+    //Run ASYNC connect until operation completed
+    do m_io_service.run_one(); while (m_conn_status == boost::asio::error::would_block);
+
+    if ( !m_conn_status )
     {
-        std::cerr << e.what() << std::endl;
+        m_connected=true;
+    }
+    else
+    {
+        //throw boost::system::system_error( m_conn_status ? m_conn_status : boost::asio::error::operation_aborted );
         m_connected=false;
+        throw HttpException(HttpException::ConnectFailed, std::string("Failed to connect to " + m_hostname) );
     }
 
     return m_connected;
@@ -205,15 +188,19 @@ void HttpClient::disconnect()
     boost::system::error_code disconnect_ec;
     try
     {
-        if ( m_socket->is_open() ) {
-            m_socket->shutdown( boost::asio::ip::tcp::socket::shutdown_both, disconnect_ec );
-            m_socket->close();
+        if ( m_socket ) {
+            if ( m_socket->is_open() ) {
+                m_socket->shutdown( boost::asio::ip::tcp::socket::shutdown_both, disconnect_ec );
+                m_socket->close();
+            }
         }
 
-        if ( m_ssl_socket->lowest_layer().is_open() ) {
-            //m_ssl_socket->shutdown(); //Shutdown the SSL stream
-            m_ssl_socket->lowest_layer().shutdown( boost::asio::ip::tcp::socket::shutdown_both, disconnect_ec );
-            m_ssl_socket->lowest_layer().close(); //Close the TCP socket
+        if ( m_ssl_socket ) {
+            if ( m_ssl_socket->lowest_layer().is_open() ) {
+                //m_ssl_socket->shutdown(); //Shutdown the SSL stream
+                m_ssl_socket->lowest_layer().shutdown( boost::asio::ip::tcp::socket::shutdown_both, disconnect_ec );
+                m_ssl_socket->lowest_layer().close(); //Close the TCP socket
+            }
         }
         //Cancel the deadline
         m_deadline_timer->cancel();
@@ -236,7 +223,6 @@ void HttpClient::disconnect()
 
     //Clear error codes
     m_response_ec.clear();
-
     m_connected=false;
 
 }
@@ -262,10 +248,6 @@ void HttpClient::handle_connect(const boost::system::error_code& e)
         }
 
     }
-    else
-    {
-        std::cout << "Connect failed: " << e.message() << "\n";
-    }
 
     //Update connection status error code
     m_conn_status = e;
@@ -288,7 +270,6 @@ void HttpClient::handle_handshake(const boost::system::error_code& e )
         m_ssl_good=false;
         m_conn_status = e;
         throw HttpException(HttpException::HandshakeFailed, e.message() );
-        //std::cout << "Handshake failed: " << e.message() << "\n";
     }
 
 }
@@ -760,5 +741,87 @@ std::string HttpClient::encode_uri(const std::string& uri)
     }
 
     return escaped.str();
+
+}
+
+int HttpClient::send_http_request( const HttpRequest& request )
+{
+
+    HttpRequestStream http_stream;
+    std::string accept = request.get_accept();
+    std::string authorization = request.get_auth();
+    std::string http_method = request.get_method();
+    std::string content_type = request.get_content_type();
+
+    //Build the HTTP Request
+    http_stream << http_method << " " << request.get_url() << " HTTP/1.0\r\n";
+    http_stream << "Host: " << get_hostname() << ":" << std::to_string(m_port) << "\r\n";
+
+    if ( !accept.empty() )
+    {
+        http_stream << "Accept: " << accept << "\r\n";
+    }
+
+    //Send Authorization Header
+    if ( !authorization.empty() ) {
+        http_stream << "Authorization: " << authorization << "\r\n";
+    }
+
+    bool send_body = false;
+
+    //If POST or PUT, send content length and type headers
+    if ( http_method == "POST" || http_method == "PUT" )
+    {
+        http_stream << "Content-Length: " << request.get_body_length() << "\r\n";
+
+        if ( !content_type.empty() )
+        {
+            http_stream << "Content-Type: " << content_type << "\r\n";
+        }
+
+        if ( request.get_body_length() > 0 )
+        {
+            send_body=true;
+        }
+
+    }
+
+    //Add any custom headers
+    std::vector<std::string> headers = request.get_headers();
+    for ( auto itr : headers ) {
+        http_stream << itr << "\r\n";
+    }
+
+    //Close connection after response
+    http_stream << "Connection: close\r\n\r\n";
+
+    if ( send_body ) {
+        http_stream << request.get_body();
+    }
+
+    std::cout << "Sending request:" << '\n' << http_stream.str() << '\n';
+
+    //If client is already connected, disconnect before a new attempt
+    if ( is_connected() ) {
+        disconnect();
+    }
+
+    //Connect to server
+    connect();
+
+    //Write HTTP request to socket
+    write_socket(http_stream.str());
+
+    //Run the handlers until the response sets the status code or EOF
+    do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
+
+    disconnect();
+
+    unsigned int http_status = get_http_status();
+
+    std::cout << "HTTP Status: " << http_status << "\n";
+    std::cout << "HTTP Response: " << get_response() << '\n';
+
+    return http_status;
 
 }

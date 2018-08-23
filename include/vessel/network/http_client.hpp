@@ -17,6 +17,7 @@
 #include <vessel/log/log.hpp>
 #include <vessel/network/http_stream.hpp>
 #include <vessel/network/http_exception.hpp>
+#include <vessel/network/http_request.hpp>
 
 using namespace Vessel::Exception;
 
@@ -101,6 +102,12 @@ namespace Vessel {
                 //TBD
                 std::string decode_uri(const std::string& uri);
 
+                /*! \fn int send_http_request ( const HttpRequest& request );
+                    \brief Sends a new HTTP request and writes to the socket
+                    \return HTTP status code
+                */
+                int send_http_request ( const HttpRequest& request );
+
             private:
 
                 Vessel::Database::LocalDatabase* m_ldb;
@@ -145,6 +152,7 @@ namespace Vessel {
                 void read_buffer_data();
 
                 void cleanup();
+                void set_defaults();
 
                 /** Logging and errors **/
                 Vessel::Logging::Log* m_log;

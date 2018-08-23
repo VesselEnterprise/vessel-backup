@@ -15,10 +15,14 @@ namespace Vessel {
                 enum ErrorCode
                 {
                     NoError = 0,
-                    FileNotFound
+                    FileNotFound,
+                    ReadError
                 };
 
-                FileException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
+                FileException(ErrorCode e, const std::string& msg) : _code(e)
+                {
+                    _msg = "FileException: " + msg + " (ErrorCode: " + std::to_string((int)e) + ")";
+                }
 
                 ErrorCode get_code() { return _code; }
 

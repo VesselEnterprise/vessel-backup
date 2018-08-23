@@ -99,6 +99,14 @@ class SettingSeeder extends Seeder
 					'description' => 'Enable or disable the user download portal',
 					'category' => 'File Management',
 					'data_type' => 'boolean'
+				),
+				array(
+					'setting_name' => 'prevent_duplicate_hash',
+					'display_name' => 'Prevent Duplicate File Hashes',
+					'value' => 'true',
+					'description' => 'Prevent files with the same SHA-1 hashes from being uploaded again for the same user',
+					'category' => 'File Management',
+					'data_type' => 'boolean'
 				)
 			);
 

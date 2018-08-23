@@ -11,11 +11,6 @@ class StorageProvider extends Model
 
 		use HasBinaryUuid;
 
-		public function getKeyName()
-		{
-				return 'provider_id';
-		}
-
 		function getAccessKeyAttribute($value) {
 
 			$decrypted = null;
@@ -46,7 +41,13 @@ class StorageProvider extends Model
 			return $this->hasMany('App\StorageProviderFile', 'provider_id', 'provider_id');
 		}
 
-		protected $fillable = ['provider_name'];
+		public function getKeyName() {
+			return 'provider_id';
+		}
+
+		public $incrementing = false;
+		public $primaryKey = 'provider_id';
     protected $table = 'storage_provider';
 		protected $hidden = ['access_id', 'access_key','created_at','updated_at'];
+		
 }

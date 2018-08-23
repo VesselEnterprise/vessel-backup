@@ -34,15 +34,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    /*
-    if (vm.count("")) {
-        cout << "Compression level was set to " << vm[""].as<int>() << ".\n";
-    }
-    else {
-        cout << "Compression level was not set.\n";
-    }
-    */
-
     //Create new instance of local database
     LocalDatabase* db = &LocalDatabase::get_database();
 
@@ -91,7 +82,7 @@ int main(int argc, char** argv)
     io_service.post([&](){
         for(;;)
         {
-            file_iterator->scan();
+            //file_iterator->scan();
             boost::this_thread::sleep( boost::posix_time::seconds(10) );
             std::cout << "Restarting scan after 10 seconds..." << '\n';
         }
@@ -101,7 +92,7 @@ int main(int argc, char** argv)
     io_service.post([&](){
         for(;;)
         {
-            queue_manager->rebuild_queue();
+            //queue_manager->rebuild_queue();
             boost::this_thread::sleep( boost::posix_time::seconds(10) );
             std::cout << "Restarting queue rebuild after 10 seconds..." << '\n';
         }
@@ -116,9 +107,21 @@ int main(int argc, char** argv)
         //Create a new UploadManager
         std::shared_ptr<UploadManager> upload_manager = std::make_shared<UploadManager>(provider);
 
-        for(;;)
+        //Start backing up files
+        for ( ;; )
         {
+            try
+            {
+                upload_manager->run_uploader();
+            }
+            catch( const std::exception& ex )
+            {
+                std::cout << "Caught an exception: " << ex.what() << '\n';
+                continue;
 
+            }
+            boost::this_thread::sleep( boost::posix_time::seconds(10) );
+            std::cout << "Restarting file uploader after 10 seconds..." << '\n';
         }
 
     });

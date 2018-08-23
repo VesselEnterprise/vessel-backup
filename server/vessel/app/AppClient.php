@@ -10,11 +10,6 @@ class AppClient extends Model
 
   use HasBinaryUuid;
 
-  public function getKeyName()
-  {
-      return 'client_id';
-  }
-
 	//32 chars
 	public static function generateToken()
 	{
@@ -35,8 +30,14 @@ class AppClient extends Model
       'client_id', 'name', 'os', 'dns_name', 'ip_address', 'domain', 'client_version', 'last_check_in', 'last_backup'
   ];
 
-  protected $table = 'app_client';
+	public function getKeyName() {
+		return 'client_id';
+	}
 
-  protected $dates = ['created_at', 'updated_at', 'last_check_in', 'last_backup'];
+	protected $table = 'app_client';
+	public $incrementing = false;
+  public $primaryKey = 'client_id';
+	protected $uuids = ['client_id'];
+	protected $dates = ['created_at', 'updated_at', 'last_check_in', 'last_backup'];
 
 }

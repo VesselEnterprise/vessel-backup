@@ -45,7 +45,7 @@
 			          <input type="checkbox"><label></label>
 			        </div>
 						</td>
-						<td><a href="{{ route('file.show', $file->uuid_text) }}">{{ $file->file_name }}</a></td>
+						<td><a href="{{ route('file.show', $file->file_id_text) }}">{{ $file->file_name }}</a></td>
 						<td>{{ $file->user_id }}</td>
 						<td>{{ $file->file_type }}</td>
 						<td>{{ $file->file_size }}</td>

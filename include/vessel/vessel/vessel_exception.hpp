@@ -19,7 +19,10 @@ namespace Exception {
                     ProviderError
                 };
 
-                VesselException(ErrorCode e, const std::string& msg) : _msg(msg),_code(e) {}
+                VesselException(ErrorCode e, const std::string& msg) : _code(e)
+                {
+                    _msg = "VesselException: " + msg + " (ErrorCode: " + std::to_string((int)e) + ")";
+                }
 
                 ErrorCode get_code() { return _code; }
 

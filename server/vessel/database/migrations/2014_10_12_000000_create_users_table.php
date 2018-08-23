@@ -20,9 +20,9 @@ class CreateUsersTable extends Migration
 						$table->increments('id');
             $table->uuid('user_id')->unique();
             $table->string('email')->unique();
-            $table->string('user_name', 40);
-            $table->string('password', 255);
-						$table->string('api_token', 1200);
+            $table->string('user_name', 40)->unique();
+            $table->string('password', 255)->nullable();
+						$table->string('api_token', 1200)->nullable();
             $table->boolean('active')->default(true);
             $table->string('first_name', 100)->nullable();
             $table->string('last_name', 100)->nullable();
@@ -43,8 +43,6 @@ class CreateUsersTable extends Migration
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             //$table->timestamps();
-
-						$table->index('user_name');
 
         });
     }

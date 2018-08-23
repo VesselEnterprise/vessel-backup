@@ -3,10 +3,6 @@
 AwsUpload::AwsUpload()
 {
 
-    //m_database = std::make_shared<LocalDatabase>(LocalDatabase::get_database());
-    //m_client = std::make_shared<Vessel::Networking::AwsS3Client>();
-
-
 }
 
 void AwsUpload::resume_uploads()
@@ -14,12 +10,23 @@ void AwsUpload::resume_uploads()
 
 }
 
-void AwsUpload::upload_file()
+void AwsUpload::upload_file(const BackupFile& file)
 {
+
+    //Initialize the upload with the Vessel API
+    init_upload(file);
 
 }
 
 void AwsUpload::complete_upload()
 {
+
+}
+
+void AwsUpload::init_upload(const BackupFile& file)
+{
+
+    std::cout << "Uploading " << file.get_file_name() << "..." << '\n';
+    get_vessel_client()->init_upload(file);
 
 }

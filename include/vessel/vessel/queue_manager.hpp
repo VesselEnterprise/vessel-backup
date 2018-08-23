@@ -20,16 +20,14 @@ class QueueManager
         ~QueueManager();
 
         BackupFile get_next_file();
-
         int get_total_pending();
-
         void rebuild_queue();
+        void pop_file(unsigned char* file_id);
 
     private:
         LocalDatabase* m_database;
 
         void push_file(unsigned char* file_id);
-        void pop_file(unsigned char* file_id);
         void apply_weights();
 
     protected:
