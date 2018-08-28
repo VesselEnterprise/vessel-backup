@@ -20,6 +20,7 @@
 #include <vessel/network/http_request.hpp>
 
 using namespace Vessel::Exception;
+using namespace Vessel::Logging;
 
 namespace Vessel {
 

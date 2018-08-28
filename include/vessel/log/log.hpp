@@ -1,7 +1,8 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef VESSELLOG_H
+#define VESSELLOG_H
 
 #define BOOST_LOG_DYN_LINK 1
+#define LOG_FILENAME "vessel"
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -61,21 +62,41 @@ namespace Vessel {
         {
 
             public:
-                Log(const std::string& filename);
-                ~Log();
+                static Log& get_log()
+                {
+                    static Log instance;
+                    return instance;
+                }
+
+                Log(Log const&) = delete;
+                void operator=(Log const&) = delete;
 
                 void add_message( const std::string& msg, const std::string& category );
-
+                void add_sql_message(const std::string& msg, bool is_error=false);
                 void set_level ( unsigned int level );
+                void add_exception(const std::exception& ex);
+                void set_file_logging(bool flag);
+                void set_sql_logging(bool flag);
+                void set_filename(const std::string& filename);
+
+            protected:
+                ~Log();
 
             private:
+                Log();
                 std::string m_filename;
                 src::severity_channel_logger< Vessel::Logging::severity_level, std::string > m_logger;
                 unsigned int m_level;
+                bool m_file_logging;
+                bool m_sql_logging;
+                void add_file_exception(const std::exception& ex);
+                void add_sql_exception(const std::exception& ex);
         };
 
     }
 
 }
+
+#include <vessel/database/local_db.hpp>
 
 #endif // LOG_H

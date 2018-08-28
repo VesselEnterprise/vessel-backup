@@ -2,7 +2,6 @@
 
 UploadInterface::UploadInterface()
 {
-    std::cout << "Called the constructor!" << '\n';
     m_vessel = std::make_shared<VesselClient>(LocalDatabase::get_database().get_setting_str("master_server"));
 }
 

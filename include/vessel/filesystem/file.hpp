@@ -13,6 +13,7 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/hex.h>
 
+#include <vessel/global.hpp>
 #include <vessel/database/local_db.hpp>
 #include <vessel/compression/compress.hpp>
 #include <vessel/crypto/hash_util.hpp>

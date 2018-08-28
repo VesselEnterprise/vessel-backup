@@ -10,7 +10,7 @@ HttpClient::HttpClient(const std::string& uri) : m_ssl_ctx(boost::asio::ssl::con
     m_ldb = &Vessel::Database::LocalDatabase::get_database();
 
         //Create new log obj
-    m_log = new Vessel::Logging::Log("asio");
+    m_log = &Log::get_log();
 
     //Set SSL Opts
     m_ssl_ctx.set_default_verify_paths();

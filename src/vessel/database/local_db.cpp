@@ -6,7 +6,7 @@ LocalDatabase::LocalDatabase()
 {
 
     //Database logging
-    m_log = new Vessel::Logging::Log("db");
+    m_log = &Vessel::Logging::Log::get_log();
 
     m_err_code = this->open_db(DB_FILENAME);
 
@@ -168,7 +168,7 @@ void LocalDatabase::clean()
 
 void LocalDatabase::clean_dirs()
 {
-    //Cleanup Files from database
+    //Cleanup Directories from database
 
     sqlite3_stmt* stmt;
     std::string query = "SELECT directory_id,path FROM backup_directory";
@@ -188,23 +188,23 @@ void LocalDatabase::clean_dirs()
             sqlite3_stmt* st;
 
             //Mark file as deleted
-            std::string q = "UPDATE backup_directory SET deleted=1 WHERE directory_id=?1";
+            std::string q = "DELETE FROM backup_directory WHERE directory_id=?1";
 
-            if ( sqlite3_prepare_v2(m_db, q.c_str(), q.size(), &st, NULL ) != SQLITE_OK )
-                return;
+            if ( sqlite3_prepare_v2(m_db, q.c_str(), q.size(), &st, NULL ) != SQLITE_OK ) {
+                m_log->add_message("Failed to remove directory from database: " + dir, "Database Cleaner");
+                continue;
+            }
 
             sqlite3_bind_int(st, 1, directory_id );
 
-            if ( sqlite3_step(st) != SQLITE_DONE )
-                m_log->add_message("Failed to mark directory deleted: " + dir, "Database Cleaner");
-            else
-                m_log->add_message("File no longer exists: " + dir + " (Marked for deletion)", "Database Cleaner");
+            if ( sqlite3_step(st) != SQLITE_DONE ) {
+                m_log->add_message("Failed to remove directory from database: " + dir, "Database Cleaner");
+            }
 
             //Cleanup
             sqlite3_finalize(st);
 
         }
-
 
     }
 
@@ -218,54 +218,28 @@ void LocalDatabase::clean_files()
     //Cleanup Files from database
 
     sqlite3_stmt* stmt;
-    std::string query = "SELECT bd.path,bf.filename,bf.file_id FROM backup_file AS bf INNER JOIN backup_directory AS bd ON bf.directory_id = bd.directory_id WHERE bf.deleted=0";
+    std::string query = "SELECT bd.path,bf.filename,bf.file_id FROM backup_file AS bf INNER JOIN backup_directory AS bd ON bf.directory_id = bd.directory_id";
 
-    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
+        m_log->add_message("Failed to clean files", "Database Cleaner");
         return;
+    }
 
     while ( sqlite3_step(stmt) == SQLITE_ROW )
     {
 
         std::string dir = (char*)sqlite3_column_text(stmt, 0);
         std::string filename = (char*)sqlite3_column_text(stmt, 1);
-        //int file_id = sqlite3_column_int(stmt,2);
         unsigned char* file_id = (unsigned char*)sqlite3_column_blob(stmt,2);
 
-        #ifdef _WIN32
-            char cslash = '\\';
-        #else
-            char cslash = '/';
-        #endif
-
-        if ( !boost::filesystem::exists(dir + cslash + filename) )
+        if ( !boost::filesystem::exists(dir + PATH_SEPARATOR() + filename) )
         {
 
-            sqlite3_stmt* st;
-
-            //Mark file as deleted
-            std::string q = "UPDATE backup_file SET deleted=1 WHERE file_id=?1";
-
-            if ( sqlite3_prepare_v2(m_db, q.c_str(), q.size(), &st, NULL ) != SQLITE_OK )
-                return;
-
-            //sqlite3_bind_int(st, 1, file_id );
-            sqlite3_bind_blob(st, 1, reinterpret_cast<const char*>(file_id), sizeof(file_id), 0);
-
-            if ( sqlite3_step(st) != SQLITE_DONE )
-                m_log->add_message("Failed to mark file deleted: " + dir + cslash + filename, "Database Cleaner");
-            else
-                m_log->add_message("File no longer exists: " + dir + cslash + filename + " (Marked for deletion)", "Database Cleaner");
-
-            std::cout << get_last_err() << "\n";
-
-            //Cleanup
-            sqlite3_finalize(st);
+            purge_file(file_id);
 
         }
 
     }
-
-
 
     //Cleanup
     sqlite3_finalize(stmt);
@@ -460,17 +434,17 @@ void LocalDatabase::purge_file(const unsigned char* file_id)
     queries.push_back("DELETE FROM backup_upload WHERE file_id=?1");
 
     size_t file_id_size = sizeof(file_id);
+    std::string file_id_s = (char*)file_id;
 
     for ( const auto &query : queries )
     {
         sqlite3_stmt* st;
         if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &st, NULL ) != SQLITE_OK ) {
-            return;
+            m_log->add_message("Failed to remove file from database: " + file_id_s, "Database Cleaner");
+            continue;
         }
 
         sqlite3_bind_blob(st, 1, file_id, file_id_size, 0);
-
-        std::string file_id_s = (char*)file_id;
 
         if ( sqlite3_step(st) == SQLITE_DONE ) {
             m_log->add_message("File has been purged: " + file_id_s, "Database Cleaner");

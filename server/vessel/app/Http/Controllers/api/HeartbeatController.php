@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api;
 
+use App;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -26,7 +27,15 @@ class HeartbeatController extends Controller
      */
     public function store(Request $request)
     {
-        echo "Test";
+      //Get storage providers
+      $providers = App\StorageProvider::all();
+      $appSettings = App\AppSetting::all();
+
+      return response()->json([
+				//'app_client' => $appClient,
+				'storage_providers' => $providers,
+				'app_settings' => $appSettings
+			]);
     }
 
     /**

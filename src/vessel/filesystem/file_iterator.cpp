@@ -15,7 +15,7 @@ FileIterator::FileIterator(const BackupDirectory& dir) : m_base_dir(dir), m_curr
         m_skip_dir_periods=false;
 
     //Init log
-    m_log = new Vessel::Logging::Log("scan");
+    m_log = &Log::get_log();
 
     //If Path is blank, try to find home folder
     if ( dir.get_path().empty() )
@@ -52,7 +52,6 @@ FileIterator::FileIterator(const BackupDirectory& dir) : m_base_dir(dir), m_curr
 
 FileIterator::~FileIterator()
 {
-    delete m_log;
 }
 
 std::string FileIterator::get_base_path()

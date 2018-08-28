@@ -35,7 +35,7 @@ BackupFile::BackupFile(unsigned char* file_id )
     std::string parent_path = (char*)sqlite3_column_text(stmt, 5);
     m_file_attrs.file_name = (char*)sqlite3_column_text(stmt, 0);
 
-    m_file_path = boost::filesystem::path( parent_path + "/" + m_file_attrs.file_name );
+    m_file_path = boost::filesystem::path( parent_path + PATH_SEPARATOR() + m_file_attrs.file_name );
 
     m_file_attrs.file_path = m_file_path.string();
     m_file_attrs.relative_path = m_file_path.relative_path().string();

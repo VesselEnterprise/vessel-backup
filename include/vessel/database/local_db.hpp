@@ -1,5 +1,5 @@
-#ifndef LOCALDB_H
-#define LOCALDB_H
+#ifndef VESSELDB_H
+#define VESSELDB_H
 
 #include <iostream>
 #include <string>
@@ -13,6 +13,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
+#include <vessel/global.hpp>
 #include <vessel/database/db_exception.hpp>
 #include <vessel/types.hpp>
 #include <vessel/log/log.hpp>
@@ -101,4 +102,4 @@ namespace Vessel{
     }
 }
 
-#endif // LOCALDB_H
+#endif // VESSELDB_H

@@ -19,10 +19,12 @@ int main(int argc, char** argv)
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
         ("help", "Display supported options")
-        ("with-auth-token", boost::program_options::value<std::string>(), "Sets the user auth token")
-        ("with-client-token", boost::program_options::value<std::string>(), "Sets the client token")
-        ("with-deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
-        ("scan-directory", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
+        ("auth-token", boost::program_options::value<std::string>(), "Sets the user auth token")
+        ("client-token", boost::program_options::value<std::string>(), "Sets the client token")
+        ("file-logging", boost::program_options::value<std::string>(), "Enables or disables saving log output to flat files")
+        ("sql-logging", boost::program_options::value<std::string>(), "Enables or disables saving log output to SQLite database")
+        ("deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
+        ("scan-dir", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
     ;
 
     boost::program_options::variables_map vm;

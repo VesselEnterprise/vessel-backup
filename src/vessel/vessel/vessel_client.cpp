@@ -11,7 +11,7 @@ VesselClient::VesselClient( const std::string& host ) : HttpClient(host)
     m_ldb = &Vessel::Database::LocalDatabase::get_database();
 
     //Get log
-    m_log = new Vessel::Logging::Log("vessel_cli");
+    m_log = &Log::get_log();
 
     //Cache vars
     m_auth_token = m_ldb->get_setting_str("auth_token");
@@ -225,6 +225,15 @@ bool VesselClient::heartbeat()
     r.set_body( strbuf.GetString() );
 
     send_http_request(r);
+
+    if ( get_http_status != 200 ) {
+        return false;
+    }
+
+    const std::string& response = get_response();
+
+    //Parse Storage Providers from response
+    parse_s
 
     return true;
 

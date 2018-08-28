@@ -76,7 +76,7 @@ namespace Vessel {
                 bool upload_file_part( Vessel::File::BackupFile * bf, int part_number );
 
                 /*! \fn bool heartbeat();
-                    \brief Sends a check-in payload to the server. Server will return with a JSON payload to the client
+                    \brief Sends a heartbeat payload to the Vessel API. API returns client settings and other data back to the client
                     \return Returns true if successful, false if errors
                 */
                 bool heartbeat();
@@ -130,7 +130,7 @@ namespace Vessel {
             private:
 
                 LocalDatabase* m_ldb;
-                Vessel::Logging::Log* m_log;
+                Log* m_log;
 
                 /** Authorization **/
                 void handle_auth_error();
