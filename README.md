@@ -6,13 +6,27 @@ https://www.vesselenterprise.com/
 Development: IN PROGRESS  
 Release: TBD
 
+- [Vessel Enterprise Backup Platform](#vessel-enterprise-backup-platform)
+  * [What is Vessel?](#what-is-vessel-)
+  * [Features](#features)
+    + [Client](#client)
+    + [Server](#server)
+  * [Security](#security)
+  * [Management Portal](#management-portal)
+  * [Managed Services and Setup](#managed-services-and-setup)
+  * [Documentation](#documentation)
+  * [Technology stack](#technology-stack)
+    + [Client](#client-1)
+    + [Server](#server-1)
+  * [Contributing](#contributing)
+
 ## What is Vessel?
 
 Vessel is an open-source enterprise platform for file backup and storage management. Vessel supports all major cloud storage providers including Amazon, Azure, and Google. You can also use your own on-premise NFS storage provider with the platform.
 
 ## Features
 
-** Client **
+### Client
 * Builds: Cross-platform (Linux, Windows) (OSX TBD)
 * Storage: Support for AWS, Azure, Google, NFS; File Encryption
 * Network: Bandwidth throttling and uncap
@@ -22,7 +36,7 @@ Vessel is an open-source enterprise platform for file backup and storage managem
 * Encryption rules: Use Cloud Encryption by specifying a rule set to protect your CEO's files
 * Auto-updater: Clients can be configured to keep their application up-to-date with the most recent compatible platform version
 
-** Server **
+### Server
 * Management Portal
 * Files: Restore, Manage, Reports
 * Storage Providers: Add your preferred cloud storage provider to the platform. Clients will automatically use the provider for file backup
@@ -41,7 +55,7 @@ Vessel uses remote signing methods for cloud providers so that IAM user secrets 
 
 Manage organization configuration, storage providers, files, and more from the portal. Create deployments to deploy the client to your user base,
 
-[[https://github.com/VesselEnterprise/vessel-backup/blob/master/etc/vessel_ui_example.png|alt=Vessel Management Portal]]
+[[vessel-backup/etc/vessel_ui_example.png|alt=Vessel Management Portal]]
 
 ## Managed Services and Setup
 
@@ -53,10 +67,10 @@ Documentation is currently being built. More details will come soon.
 
 ## Technology stack
 
-** Client Application **
+### Client
 * C++, Boost, RapidJSON, SQLite, CryptoPP
 
-** Server **
+### Server
 * PHP, Laravel, MariaDB (recommended)
 * Semantic UI
 
