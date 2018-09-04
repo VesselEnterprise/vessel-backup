@@ -14,6 +14,7 @@
 #include <cryptopp/hex.h>
 
 #include <vessel/global.hpp>
+#include <vessel/log/log.hpp>
 #include <vessel/database/local_db.hpp>
 #include <vessel/compression/compress.hpp>
 #include <vessel/crypto/hash_util.hpp>
@@ -22,6 +23,7 @@
 #define BACKUP_LARGE_SZ 52428800 //Default size in bytes of what should be considered a larger file (50MB)
 #define BACKUP_CHUNK_SZ 52428800 //Default chunk size if not defined in DB (50MB)
 
+using namespace Vessel::Logging;
 using namespace Vessel::Database;
 using namespace Vessel::Exception;
 using namespace Vessel::Utilities;
@@ -54,8 +56,9 @@ namespace Vessel {
             };
 
             public:
+                BackupFile(){}
                 BackupFile(const fs::path& file_path); //Load file from filesystem
-                BackupFile(unsigned char* file_id); //Load file from database
+                BackupFile(const unsigned char* file_id); //Load file from database
                 ~BackupFile();
 
                 /*! \fn void set_path(const std::string& fp);
@@ -154,7 +157,7 @@ namespace Vessel {
                     \brief
                     \return Returns the database unique ID of the file
                 */
-                std::shared_ptr<unsigned char*> get_file_id() const;
+                const unsigned char* get_file_id() const;
 
                 /*! \fn std::string get_file_path();
                     \brief
@@ -220,16 +223,27 @@ namespace Vessel {
                 */
                 unsigned int get_total_parts() const;
 
-                /*! \fn void set_upload_id();
-                    \brief Sets the server upload id for the file
+                /*! \fn void set_upload_id(unsigned int upload_id);
+                    \brief Sets the database internal upload id for the file
                 */
-                void set_upload_id(unsigned int id);
+                void set_upload_id(unsigned int upload_id);
 
-                /*! \fn unsigned int get_upload_id();
+                /*! \fn void set_upload_key(const std::string& upload_key);
+                    \brief Sets the server upload id/key for the file
+                */
+                void set_upload_key(const std::string& upload_key);
+
+                /*! \fn unsigned int get_upload_id() const;
                     \brief
-                    \return Returns the server upload id from the initiated upload
+                    \return Returns the database upload id from the file
                 */
                 unsigned int get_upload_id() const;
+
+                /*! \fn std::string get_upload_key() const;
+                    \brief
+                    \return Returns the server upload id/key from the file
+                */
+                std::string get_upload_key() const;
 
                 /*! \fn std::shared_ptr<BackupFile> get_compressed_copy();
                     \brief Creates a compressed copy of the file stored in the tmp directory
@@ -245,15 +259,26 @@ namespace Vessel {
                 */
                 bool is_readable();
 
+                /*! \fn update_last_backup();
+                    \fn update_last_backup(const BackupFile& file);
+                    \fn update_last_backup(const unsigned char* file_id);
+                    \brief Sets the last backup time for the file to the current UNIX timestamp
+                */
+                void update_last_backup();
+                static void update_last_backup(const BackupFile& file);
+                static void update_last_backup(const unsigned char* file_id);
+
+
             private:
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file
-                std::shared_ptr<unsigned char*> m_file_id; //File ID / Unique ID
+                const unsigned char* m_file_id;
                 std::string m_hash; //!< SHA-1 hash of the file contents
                 std::string m_unique_id; //!< SHA-1 hash of the file path
                 std::string m_content; //!< Contents of the file (binary)
                 file_attrs m_file_attrs; //!< Struct containing common file attributes
                 unsigned int m_directory_id; //!< Database ID of the parent directory
-                unsigned int m_upload_id; //!< Server Upload ID of the file
+                unsigned int m_upload_id; //!< Internal upload id for the file
+                std::string m_upload_key; //!< Server Upload ID/Key of the file
                 static size_t m_chunk_size; //!< Size in bytes in a file part for multi part uploads
                 bool m_readable; //Can the file be opened for reading?
 

@@ -9,8 +9,33 @@ use App\Http\Controllers\Controller;
 class AwsUploadController extends UploadController
 {
 
-		function initUpload(Request $request) {
+		public function initUpload(Request $request) {
 			return parent::initUpload($request);
+		}
+
+		public function getSigningKey(Request $request) {
+
+			$providerId = $request->input('providerId');
+			$amzDate = $request->input('amzDate');
+
+			if ( empty($amzDate) ) {
+				return response()->json(['error' => 'Invalid AWS date string'], 400);
+			}
+
+			if ( empty($providerId) ) {
+				return response()->json(['error' => 'Invalid provider id'], 400);
+			}
+
+			$storageProvider = App\StorageProvider::withUuid($providerId)->firstOrFail();
+
+			$secret = $storageProvider->access_key; //Decrypted from DB automatically using application key
+	    $keyDate = hash_hmac("sha256", $amzDate, ("AWS4" . $secret), true);
+	    $keyRegion = hash_hmac("sha256", $storageProvider->region, $keyDate, true);
+	    $keyService = hash_hmac("sha256", "s3", $keyRegion, true);
+	    $keySigning = base64_encode(hash_hmac("sha256", "aws4_request", $keyService, true));
+
+			return response()->json(['key' => $keySigning]);
+
 		}
 
     /**
@@ -33,12 +58,6 @@ class AwsUploadController extends UploadController
     {
         //
     }
-
-		public function getSigningKey(Request $request, $id)
-		{
-
-
-		}
 
     /**
      * Display the specified resource.

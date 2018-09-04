@@ -31,6 +31,7 @@
 #define VACUUM_ON_LOAD 1
 #define DB_FILENAME "local.db"
 
+using namespace Vessel::Types;
 using namespace Vessel::Exception;
 
 namespace Vessel{
@@ -77,8 +78,9 @@ namespace Vessel{
 
                 void purge_file(const unsigned char* file_id);
 
-            //protected:
                 sqlite3* get_handle();
+
+                void purge_upload(unsigned int upload_id);
 
             private:
 

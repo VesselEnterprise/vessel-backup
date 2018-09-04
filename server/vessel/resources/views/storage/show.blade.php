@@ -15,7 +15,8 @@
 
 			$('.menu .item').tab();
 
-			$('#provider_type').val('{{ $provider->provider_type }}');
+			//$('#provider_type').val('{{ $provider->provider_type }}');
+			$('#provider_type').dropdown('set selected', '{{ $provider->provider_type }}');
 
 		});
 	</script>

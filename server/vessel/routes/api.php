@@ -23,9 +23,11 @@ Route::post('/heartbeat', 'api\HeartbeatController@store')->middleware('verifyCl
 //AppClient Install
 Route::post('/client/install', 'api\AppClientController@install')->middleware('verifyDeploymentKey');
 
+//File Uploads
+Route::get('/upload/{id}', 'api\UploadController@show')->middleware('verifyClientToken');
+Route::post('/upload/{id}/complete', 'api\UploadController@complete')->middleware('verifyClientToken');
+Route::delete('/upload/{id}', 'api\UploadController@destroy')->middleware('verifyClientToken');
+
 //AWS S3 Uploads
 Route::post('/upload/aws', 'api\AwsUploadController@initUpload')->middleware('verifyClientToken');
-Route::get('/upload/aws/{id}', 'api\AwsUploadController@show')->middleware('verifyClientToken');
-Route::post('/upload/aws/{id}', 'api\AwsUploadController@complete')->middleware('verifyClientToken');
-Route::delete('/upload/aws/{id}', 'api\AwsUploadController@destroy')->middleware('verifyClientToken');
-Route::post('/upload/aws/{id}/sign', 'api\AwsUploadController@getSigningKey')->middleware('verifyClientToken');
+Route::post('/upload/aws/sign', 'api\AwsUploadController@getSigningKey')->middleware('verifyClientToken');

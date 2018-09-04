@@ -52,25 +52,55 @@ void Log::set_sql_logging(bool flag)
     m_sql_logging = flag;
 }
 
-void Log::add_message(const std::string& msg, const std::string& cat )
+void Log::add_message(const std::string& msg, const std::string& type )
 {
-    BOOST_LOG_SEV( m_logger, static_cast<Vessel::Logging::severity_level>(m_level) ) << logging::add_value(category, cat) << msg;
-    if ( m_sql_logging ) add_sql_message(msg);
+    BOOST_LOG_SEV( m_logger, static_cast<Vessel::Logging::severity_level>(m_level) ) << logging::add_value(category, type) << msg;
+    if ( m_sql_logging ) add_sql_message(msg, type);
 }
 
-void Log::add_sql_message(const std::string& msg, bool is_error)
+void Log::add_error(const std::string& msg, const std::string& type )
+{
+    BOOST_LOG_SEV( m_logger, static_cast<Vessel::Logging::severity_level>(m_level) ) << logging::add_value(category, type) << msg;
+    if ( m_sql_logging ) add_sql_message(msg, type, true);
+}
+
+void Log::add_sql_message(const std::string& msg, const std::string& type, bool is_error)
 {
 
     sqlite3_stmt* stmt;
 
-    std::string query = "INSERT INTO backup_log (message,error) VALUES(?1,?2)";
+    std::string query = "INSERT INTO backup_log (message,type,error) VALUES(?1,?2,?3)";
 
     if ( sqlite3_prepare(LocalDatabase::get_database().get_handle(), query.c_str(), query.size(), &stmt, NULL) != SQLITE_OK ) {
         return;
     }
 
     sqlite3_bind_text(stmt, 1, msg.c_str(), msg.size(), 0);
-    sqlite3_bind_int(stmt, 2, (int)is_error );
+    sqlite3_bind_text(stmt, 2, type.c_str(), type.size(), 0);
+    sqlite3_bind_int(stmt, 3, (int)is_error );
+
+    sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+}
+
+void Log::add_http_message(const std::string& request, const std::string& response, int status)
+{
+
+    sqlite3_stmt* stmt;
+
+    bool is_error = (status == 200) ? false : true;
+
+    std::string query = "INSERT INTO backup_log (message,payload,code,error,type) VALUES(?1,?2,?3,?4,'http')";
+
+    if ( sqlite3_prepare(LocalDatabase::get_database().get_handle(), query.c_str(), query.size(), &stmt, NULL) != SQLITE_OK ) {
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, response.c_str(), response.size(), 0);
+    sqlite3_bind_text(stmt, 2, request.c_str(), request.size(), 0);
+    sqlite3_bind_int(stmt, 3, status );
+    sqlite3_bind_int(stmt, 4, (int)is_error );
 
     sqlite3_step(stmt);
 
@@ -100,13 +130,16 @@ void Log::add_sql_exception(const std::exception& ex)
 
     sqlite3_stmt* stmt;
 
-    std::string query = "INSERT INTO backup_log (message,exception,error) VALUES(?1, '', 1)";
+    std::string query = "INSERT INTO backup_log (message,exception,error) VALUES(?1, ?2, 1)";
 
     if ( sqlite3_prepare(LocalDatabase::get_database().get_handle(), query.c_str(), query.size(), &stmt, NULL) != SQLITE_OK ) {
         return;
     }
 
+    std::string type_name = typeid(ex).name();
+
     sqlite3_bind_text(stmt, 1, message.c_str(), message.size(), 0);
+    sqlite3_bind_text(stmt, 2, type_name.c_str(), type_name.size(), 0);
 
     sqlite3_step(stmt);
 

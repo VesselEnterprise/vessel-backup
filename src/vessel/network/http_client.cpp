@@ -2,6 +2,8 @@
 
 using namespace Vessel::Networking;
 
+bool HttpClient::m_http_logging = false;
+
 HttpClient::HttpClient(const std::string& uri) : m_ssl_ctx(boost::asio::ssl::context::tlsv12)
 {
     set_defaults();
@@ -64,7 +66,6 @@ void HttpClient::parse_url( const std::string& host )
         for (const auto& res : url_match_result)
         {
             url_parts.push_back(res);
-            //std::cout << res << '\n';
         }
     }
     else {
@@ -89,17 +90,18 @@ void HttpClient::parse_url( const std::string& host )
 
     if ( m_port <= 0 )
     {
-        if ( m_protocol == "http" )
-        {
+        if ( m_protocol == "http" ) {
             m_port = 80;
         }
-        else if ( m_protocol == "https" )
-        {
+        else if ( m_protocol == "https" ) {
             m_port = 443;
+        }
+        else {
+            m_port = 443; //Default
         }
     }
 
-    if ( m_protocol == "https" )
+    if ( m_protocol == "https" || m_port == 443 )
     {
         m_use_ssl = true;
     }
@@ -302,8 +304,6 @@ void HttpClient::read_chunked_content( const boost::system::error_code& e, size_
     //Remove carriage return
     boost::replace_all(chunk_sz_s, "\r", "");
 
-    std::cout << "String chunk size is: " << chunk_sz_s << '\n';
-
     int chunk_sz = std::stoul(chunk_sz_s, nullptr, 16);
 
     std::cout << "Read chunk size: " << chunk_sz << '\n';
@@ -460,7 +460,6 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         }
 
         std::cout << "Read headers: " << '\n' << m_header_data << '\n';
-        //std::cin.get();
 
         //There may be some data in the buffer to consume
         if (m_response_buffer->size() > 0) {
@@ -470,12 +469,10 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         }
 
         //Check for chunked transfer encoding
-        if ( m_header_data.find("Transfer-Encoding: chunked") != std::string::npos )
-        {
+        if ( m_header_data.find("Transfer-Encoding: chunked") != std::string::npos ) {
             m_chunked_encoding=true;
         }
-        else
-        {
+        else {
             m_chunked_encoding=false;
         }
 
@@ -692,11 +689,6 @@ bool HttpClient::is_connected()
     return m_connected;
 }
 
-std::string HttpClient::get_uri_path()
-{
-    return m_uri;
-}
-
 void HttpClient::cleanup()
 {
     //Refresh buffer(s)
@@ -729,7 +721,7 @@ std::string HttpClient::encode_uri(const std::string& uri)
         std::string::value_type c = (*i);
 
         // Keep alphanumeric and other accepted characters intact
-        if ( isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+        if ( isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '/') {
             escaped << c;
             continue;
         }
@@ -754,7 +746,7 @@ int HttpClient::send_http_request( const HttpRequest& request )
     std::string content_type = request.get_content_type();
 
     //Build the HTTP Request
-    http_stream << http_method << " " << request.get_url() << " HTTP/1.0\r\n";
+    http_stream << http_method << " " << request.get_url() << " HTTP/1.1\r\n";
     http_stream << "Host: " << get_hostname() << ":" << std::to_string(m_port) << "\r\n";
 
     if ( !accept.empty() )
@@ -819,9 +811,21 @@ int HttpClient::send_http_request( const HttpRequest& request )
 
     unsigned int http_status = get_http_status();
 
-    std::cout << "HTTP Status: " << http_status << "\n";
-    std::cout << "HTTP Response: " << get_response() << '\n';
+    if ( m_http_logging )
+    {
+        m_log->add_http_message(http_stream.str(), get_response(), http_status );
+    }
 
     return http_status;
 
+}
+
+bool HttpClient::http_logging()
+{
+    return m_http_logging;
+}
+
+void HttpClient::http_logging(bool flag)
+{
+    m_http_logging = flag;
 }

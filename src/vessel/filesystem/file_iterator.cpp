@@ -279,7 +279,7 @@ int FileIterator::add_file( const BackupFile& bf )
 {
 
     sqlite3_stmt* stmt;
-    std::string query = "REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified,deleted) VALUES(?1,?2,?3,?4,?5,?6,0)";
+    std::string query = "REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified) VALUES(?1,?2,?3,?4,?5,?6)";
 
     if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return false;

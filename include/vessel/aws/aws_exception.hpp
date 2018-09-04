@@ -19,7 +19,9 @@ namespace Vessel {
                     UploadFailed,
                     BadResponse,
                     XmlParseError,
-                    InvalidCredentials
+                    InvalidCredentials,
+                    BadSigningKey,
+                    BadUploadId
                 };
 
                 AwsException(ErrorCode e, const std::string& msg) : _code(e)

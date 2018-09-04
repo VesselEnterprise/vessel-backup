@@ -20,13 +20,16 @@
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
+#include <vessel/types.hpp>
 #include <vessel/network/http_client.hpp>
+#include <vessel/vessel/vessel_client.hpp>
 #include <vessel/network/http_request.hpp>
 #include <vessel/network/http_stream.hpp>
 #include <vessel/filesystem/file.hpp>
 #include <vessel/crypto/hash_util.hpp>
 #include <vessel/aws/aws_exception.hpp>
 
+using namespace Vessel::Types;
 using namespace Vessel::Exception;
 using namespace Vessel::Database;
 using namespace Vessel::File;
@@ -41,8 +44,8 @@ namespace Vessel {
 
             public:
 
-                AwsS3Client(const std::string & uri);
-                ~AwsS3Client();
+                AwsS3Client(const StorageProvider & provider);
+                ~AwsS3Client() {}
 
                 enum AwsFlags
                 {
@@ -54,31 +57,19 @@ namespace Vessel {
                     SkipMultiInit = 8 //Skips the initialization of a multipart upload if the upload id already exists
                 };
 
-                enum AuthProfile
-                {
-                    Local,
-                    Remote
-                };
-
-                struct etag_pair
-                {
-                    int part_number;
-                    std::string etag;
-                };
-                typedef struct etag_pair etag_pair;
-
                 friend AwsFlags operator|(AwsFlags a, AwsFlags b)
                 {return static_cast<AwsFlags>(static_cast<int>(a) | static_cast<int>(b));}
 
                 friend AwsFlags operator&(AwsFlags a, AwsFlags b)
                 {return static_cast<AwsFlags>(static_cast<int>(a) & static_cast<int>(b));}
 
-                void set_http_request( Vessel::Networking::HttpRequest* r );
+                void set_http_request( const HttpRequest& r );
 
-                /*! \fn void init_upload( Vessel::File::BackupFile* bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
+                /*! \fn bool init_upload( Vessel::File::BackupFile* bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
                     \brief Initializes the AWS S3 upload
+                    \return Returns true if the upload was initialized
                 */
-                void init_upload( Vessel::File::BackupFile* bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
+                bool init_upload( const BackupFile& bf, AwsFlags flags = AwsFlags::ReducedRedundancy );
 
                 /*! \fn void set_part_size(size_t part_size);
                     \brief Sets the part size in bytes for multipart uploads
@@ -97,11 +88,11 @@ namespace Vessel {
                 */
                 std::string upload_part(int part_number, const std::string& upload_id );
 
-                /*! \fn std::string complete_multipart_upload(const std::vector<etag_pair>& etags, const std::string& upload_id)
+                /*! \fn std::string complete_multipart_upload(const std::vector<UploadTagSet>& etags, const std::string& upload_id);
                     \brief Completes a multipart upload and returns the ETag for the file upload
                     \return Completes a multipart upload and returns the ETag for the file upload
                 */
-                std::string complete_multipart_upload(const std::vector<etag_pair>& etags, const std::string& upload_id);
+                std::string complete_multipart_upload(const std::vector<UploadTagSet>& etags, const std::string& upload_id);
 
                 /*! \fn bool upload_stream_chunk(int part_number, const std::string& prev_signature );
                     \brief Streaming file upload to the AWS S3 REST API
@@ -129,16 +120,34 @@ namespace Vessel {
                 /*! \fn void set_file(Vessel::File::BackupFile* bf);
                     \brief Sets a pointer to the BackupFile
                 */
-                void set_file(Vessel::File::BackupFile* bf);
+                void set_file(const BackupFile& bf);
 
-                /*! \fn void set_auth_profile(AuthProfile profile);
-                    \brief Sets the authentication profile for AWS requests. Local for aws.key method and remote signing
+                /*! \fn void remote_signing(bool flag);
+                    \brief If enabled, the request will be signed remotely via the Vessel API. Otherwise, a local key file will be used
                 */
-                void set_auth_profile(AuthProfile profile);
+                void remote_signing(bool flag);
+
+                /*! \fn void set_storage_provider( const StorageProvider& provider );
+                    \brief Sets the internal storage provider for the AWS client. Used for key signing
+                */
+                void set_storage_provider( const StorageProvider& provider );
+
+                /*! \fn std::string get_file_uri_path();
+                    \brief Returns the relative path to the file on the cloud server
+                    \return Returns the relative path to the file on the cloud server
+                */
+                std::string get_file_uri_path();
+
+                /*! \fn  size_t get_current_part_size();
+                    \brief Returns the total size in bytes of the current part to be uploaded
+                    \return Returns the total size in bytes of the current part to be uploaded
+                */
+                size_t get_current_part_size();
 
             private:
-                Vessel::Database::LocalDatabase* m_ldb;
-                Vessel::File::BackupFile* m_file;
+                LocalDatabase* m_ldb;
+                BackupFile m_file;
+                std::shared_ptr<VesselClient> m_vessel;
                 std::map<std::string,std::string> m_headers;
                 std::string m_http_verb;
                 std::string m_query_str;
@@ -152,18 +161,19 @@ namespace Vessel {
                 std::string m_previous_signature; //The previous signature used for streaming uploads
                 std::string m_request_payload;
                 std::string m_upload_id; //Upload ID returned for Multipart uploads
+                std::string m_uri_file_path; //Relative path to the file on the cloud server
                 int m_current_part; //For multipart uploads, the current part index
                 bool m_multipart; //Indicates whether or not a multipart upload
                 bool m_streaming; //Indicates whether or not a streaming upload (for unknown filesizes)
                 bool m_reduced_redundancy; //Default = False
                 bool m_remote_signing; //Remote sign S3 requests via Vessel REST API
                 size_t m_part_size; //part size bytes for multipart uploads
-                Vessel::Networking::HttpRequest* m_http_request;
+                HttpRequest* m_http_request;
+                StorageProvider m_storage_provider;
 
                 /**
                  ** Used only if remote signing is disabled (will be read from aws.key file)
                 **/
-                std::string m_access_id;
                 std::string m_secret_key;
 
                 /*! \fn std::string get_canonical_request();
@@ -209,6 +219,12 @@ namespace Vessel {
                 */
                 std::string get_signing_key();
 
+                /*! \fn std::string api_get_signing_key();
+                    \brief Returns the base64 encoded signing key using the Vessel REST API
+                    \return Returns the base64 encoded signing key using the Vessel REST API
+                */
+                std::string api_get_signing_key();
+
                 /*! \fn void build_request_headers();
                     \brief Internal call to store request headers in a std::map
                 */
@@ -218,12 +234,6 @@ namespace Vessel {
                     \brief Internal call to build the dates used by the AWS S3 API. Includes ISO8601 date and nice version
                 */
                 void init_amz_date();
-
-                /*! \fn  size_t get_current_part_size();
-                    \brief Returns the total size in bytes of the current part to be uploaded
-                    \return Returns the total size in bytes of the current part to be uploaded
-                */
-                size_t get_current_part_size();
 
                 /*! \fn void init_multipart_upload();
                     \brief Initializes a multipart upload and sets the upload id. Called internally when the Multipart flag is set
@@ -252,6 +262,11 @@ namespace Vessel {
                     \brief If remote signing is disabled, reads the AWS credentials from an aws.key file
                 */
                 void read_key_file();
+
+                /*! \fn void build_file_uri_path();
+                    \brief Assembles the relative path to the file on the cloud server
+                */
+                void build_file_uri_path();
 
 
         };

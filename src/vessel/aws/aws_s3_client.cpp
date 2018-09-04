@@ -1,14 +1,12 @@
 #include <vessel/aws/aws_s3_client.hpp>
 
-AwsS3Client::AwsS3Client(const std::string& uri) : HttpClient(uri), m_reduced_redundancy(true)
+AwsS3Client::AwsS3Client(const StorageProvider& provider) : HttpClient(provider.server), m_storage_provider(provider), m_reduced_redundancy(true)
 {
-
     m_ldb = &LocalDatabase::get_database();
     m_http_verb = "PUT"; //Default for uploading new files
-    m_region = "us-east-2"; //Default
     m_part_size = BackupFile::get_chunk_size();
+    m_remote_signing=true;
     init_amz_date();
-
 }
 
 std::string AwsS3Client::get_canonical_request()
@@ -17,7 +15,7 @@ std::string AwsS3Client::get_canonical_request()
     std::stringstream ss;
 
     ss << m_http_verb << "\n";
-    ss << "/" << encode_uri(get_uri_path() + m_file->get_file_name()) << "\n";
+    ss << "/" << encode_uri( get_file_uri_path() ) << "\n";
     ss << m_query_str << "\n";
     ss << get_amz_headers() << "\n";
     ss << get_signed_headers() << "\n";
@@ -37,7 +35,7 @@ std::string AwsS3Client::get_string_to_sign()
     std::ostringstream oss;
     oss << "AWS4-HMAC-SHA256\n";
     oss << m_amzdate << "\n";
-    oss << m_amzdate_short << "/" << m_region << "/s3/aws4_request\n";
+    oss << m_amzdate_short << "/" << m_storage_provider.region << "/s3/aws4_request\n";
     oss << cr_hash;
 
     return oss.str();
@@ -46,13 +44,52 @@ std::string AwsS3Client::get_string_to_sign()
 
 std::string AwsS3Client::get_signing_key()
 {
+
+    if ( m_remote_signing )
+    {
+        return api_get_signing_key();
+    }
+
     std::string secret = m_secret_key;
     std::string key_date = Hash::get_hmac_256("AWS4" + secret, m_amzdate_short, false);
-    std::string key_region = Hash::get_hmac_256(key_date, m_region, false);
+    std::string key_region = Hash::get_hmac_256(key_date, m_storage_provider.region, false);
     std::string key_service = Hash::get_hmac_256(key_region, "s3", false);
     std::string key_signing = Hash::get_hmac_256(key_service, "aws4_request", false);
 
     return key_signing;
+}
+
+std::string AwsS3Client::api_get_signing_key()
+{
+
+    std::unique_ptr<HttpClient> vessel = std::make_unique<HttpClient>( m_ldb->get_setting_str("master_server") );
+
+    HttpRequest request;
+    request.set_method("POST");
+    request.set_auth_header( "Bearer " + m_ldb->get_setting_str("client_token") );
+    request.set_content_type("application/json");
+    request.accept("application/json");
+    request.set_url( m_ldb->get_setting_str("vessel_api_path") + "/upload/aws/sign");
+    request.set_body("{\"providerId\" : \"" + m_storage_provider.provider_id + "\", \"amzDate\" : \"" + m_amzdate_short + "\"}");
+
+    //Send the API Request
+    vessel->send_http_request(request);
+
+    //Parse the signing key
+    Document document;
+    document.Parse( vessel->get_response().c_str() );
+
+    Log::get_log().add_message( vessel->get_response(), "AWS");
+
+    if ( !document.HasMember("key") ) {
+        throw AwsException( AwsException::BadSigningKey, "Unable to parse signing key from API");
+    }
+
+    std::string signing_key = document["key"].GetString();
+
+    //Log::get_log().add_message("Obtained signing key: " + signing_key + " from API", "File Upload");
+
+    return Hash::base64_decode(signing_key);
 }
 
 std::string AwsS3Client::get_signature_v4()
@@ -73,17 +110,17 @@ std::string AwsS3Client::get_stream_signature_v4(const std::string& prev_signatu
     std::ostringstream oss;
     oss << "AWS4-HMAC-SHA256-PAYLOAD\n";
     oss << m_amzdate << "\n";
-    oss << m_amzdate_short << "/" << m_region << "/s3/aws4_request\n";
+    oss << m_amzdate_short << "/" << m_storage_provider.region << "/s3/aws4_request\n";
     oss << prev_signature << "\n";
     oss << Hash::get_sha256_hash("") << "\n";
-    oss << Hash::get_sha256_hash(&m_file->get_file_part(m_current_part)[0]);
+    oss << Hash::get_sha256_hash(&m_file.get_file_part(m_current_part)[0]);
 
     //Return the signature using the parted version of the string to sign
     return Hash::get_hmac_256(get_signing_key(), oss.str());
 
 }
 
-void AwsS3Client::init_upload(Vessel::File::BackupFile* bf, AwsFlags flags )
+bool AwsS3Client::init_upload(const BackupFile& bf, AwsFlags flags )
 {
 
     //Reset Part #
@@ -96,6 +133,9 @@ void AwsS3Client::init_upload(Vessel::File::BackupFile* bf, AwsFlags flags )
     init_amz_date();
 
     m_file = bf;
+
+    //Build the relative path on the cloud server
+    build_file_uri_path();
 
     m_multipart = (flags & AwsFlags::Multipart);
     m_reduced_redundancy = (flags & AwsFlags::ReducedRedundancy);
@@ -130,14 +170,16 @@ void AwsS3Client::init_upload(Vessel::File::BackupFile* bf, AwsFlags flags )
         m_query_str = "";
 
         //Set the file content
-        m_file_content = std::make_shared<std::string>( m_file->get_file_contents() );
+        m_file_content = std::make_shared<std::string>( m_file.get_file_contents() );
 
         //Get the SHA256 hash of the current payload, in this case - the entire file contents
-        m_content_sha256 = m_file->get_hash_sha256();
+        m_content_sha256 = m_file.get_hash_sha256();
 
         //Rebuild the request headers
         build_request_headers();
     }
+
+    return true;
 
 }
 
@@ -158,9 +200,9 @@ void AwsS3Client::build_request_headers()
 
         //m_headers.insert ( std::pair<std::string,std::string>("Cache-Control", "no-cache") );
 
-        if ( !m_file->get_mime_type().empty() ) {
-            m_headers.insert ( std::pair<std::string,std::string>("Content-Encoding", m_file->get_mime_type()) );
-            m_headers.insert ( std::pair<std::string,std::string>("Content-Type", m_file->get_mime_type()) );
+        if ( !m_file.get_mime_type().empty() ) {
+            m_headers.insert ( std::pair<std::string,std::string>("Content-Encoding", m_file.get_mime_type()) );
+            m_headers.insert ( std::pair<std::string,std::string>("Content-Type", m_file.get_mime_type()) );
 
         }
 
@@ -182,9 +224,9 @@ void AwsS3Client::build_request_headers()
     //Build these headers for streaming uploads
     if ( m_streaming )
     {
-        m_headers.insert ( std::pair<std::string,std::string>("Content-Encoding", (m_file->get_mime_type().empty() ? "aws-chunked" : ("aws-chunked," + m_file->get_mime_type()) ) ) );
+        m_headers.insert ( std::pair<std::string,std::string>("Content-Encoding", (m_file.get_mime_type().empty() ? "aws-chunked" : ("aws-chunked," + m_file.get_mime_type()) ) ) );
         m_headers.insert ( std::pair<std::string,std::string>("Expect", "100-continue") );
-        m_headers.insert ( std::pair<std::string,std::string>("x-amz-decoded-content-length", std::to_string( m_file->get_file_size() ) ) );
+        m_headers.insert ( std::pair<std::string,std::string>("x-amz-decoded-content-length", std::to_string( m_file_content->size() ) ) );
 
         if ( m_reduced_redundancy ) {
                 m_headers.insert ( std::pair<std::string,std::string>("x-amz-storage-class", "REDUCED_REDUNDANCY" ) );
@@ -258,18 +300,20 @@ void AwsS3Client::init_amz_date()
 bool AwsS3Client::upload()
 {
 
+    //TODO: Migrate to using HttpRequest
+
     //Build the raw request
     HttpRequestStream http_request;
 
-    http_request << m_http_verb << " /" << encode_uri(m_file->get_file_name()) << " HTTP/1.1\r\n";
+    http_request << m_http_verb << " /" << encode_uri( get_file_uri_path() ) << " HTTP/1.1\r\n";
     http_request << "Host: " << get_hostname() << "\r\n";
     http_request << "Date: " << m_amzdate_clean << "\r\n";
-    http_request << "Authorization: AWS4-HMAC-SHA256 Credential=" << m_access_id << "/" << m_amzdate_short << "/" << m_region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << get_signature_v4() << "\r\n";
-    http_request << "Content-Length: " << m_file->get_file_size() << "\r\n";
+    http_request << "Authorization: AWS4-HMAC-SHA256 Credential=" << m_storage_provider.access_id << "/" << m_amzdate_short << "/" << m_storage_provider.region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << get_signature_v4() << "\r\n";
+    http_request << "Content-Length: " << m_file_content->size() << "\r\n";
 
-    if ( !m_file->get_mime_type().empty() ) {
-        http_request << "Content-Encoding: " << m_file->get_mime_type() << "\r\n";
-        http_request << "Content-Type: " << m_file->get_mime_type() << "\r\n";
+    if ( !m_file.get_mime_type().empty() ) {
+        http_request << "Content-Encoding: " << m_file.get_mime_type() << "\r\n";
+        http_request << "Content-Type: " << m_file.get_mime_type() << "\r\n";
     }
 
     http_request << "x-amz-content-sha256: " << m_content_sha256 << "\r\n";
@@ -281,6 +325,7 @@ bool AwsS3Client::upload()
     http_request << "x-amz-date: " << m_amzdate << "\r\n";
     http_request << "Cache-Control: " << "no-cache" << "\r\n";
     http_request << "Connection: close\r\n\r\n";
+
     http_request << *m_file_content;
 
     //Connect to socket
@@ -292,6 +337,11 @@ bool AwsS3Client::upload()
     do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
 
     disconnect();
+
+    if ( http_logging() )
+    {
+        Log::get_log().add_http_message(http_request.str().substr(0, (http_request.str().size() - m_file_content->size()) ), get_response(), get_http_status() );
+    }
 
     //Empty file content from memory
     m_file_content.reset();
@@ -310,14 +360,14 @@ void AwsS3Client::init_multipart_upload()
     //Build the raw request
     HttpRequestStream http_request;
 
-    http_request << "POST /" << encode_uri(m_file->get_file_name()) << "?uploads" << " HTTP/1.1\r\n";
+    http_request << "POST /" << encode_uri( get_file_uri_path() ) << "?uploads" << " HTTP/1.1\r\n";
     http_request << "Host: " << get_hostname() << "\r\n";
     http_request << "Date: " << m_amzdate_clean << "\r\n";
-    http_request << "Authorization: AWS4-HMAC-SHA256 Credential=" << m_access_id << "/" << m_amzdate_short << "/" << m_region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << signature << "\r\n";
+    http_request << "Authorization: AWS4-HMAC-SHA256 Credential=" << m_storage_provider.access_id << "/" << m_amzdate_short << "/" << m_storage_provider.region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << signature << "\r\n";
 
-    if ( !m_file->get_mime_type().empty() ) {
-        http_request << "Content-Type: " << m_file->get_mime_type() << "\r\n";
-        http_request << "Content-Encoding: " << m_file->get_mime_type() << "\r\n";
+    if ( !m_file.get_mime_type().empty() ) {
+        http_request << "Content-Type: " << m_file.get_mime_type() << "\r\n";
+        http_request << "Content-Encoding: " << m_file.get_mime_type() << "\r\n";
     }
 
     http_request << "x-amz-content-sha256: " << m_content_sha256 << "\r\n";
@@ -340,8 +390,10 @@ void AwsS3Client::init_multipart_upload()
 
     disconnect();
 
-    std::cout << "Init Multipart Upload Response:\n" << get_response() << '\n';
-    std::cin.get();
+    if ( http_logging() )
+    {
+        Log::get_log().add_http_message(http_request.str(), get_response(), get_http_status() );
+    }
 
     //Parse the response and get the upload ID here
     m_upload_id = parse_upload_id( get_response() );
@@ -358,7 +410,7 @@ std::string AwsS3Client::upload_part(int part, const std::string& upload_id )
     m_http_verb = "PUT";
 
     //Set the MD5 of the current part
-    m_file_content = std::make_shared<std::string>( m_file->get_file_part(m_current_part) );
+    m_file_content = std::make_shared<std::string>( m_file.get_file_part(m_current_part) );
 
     m_content_sha256 =  Hash::get_sha256_hash(*m_file_content);
     m_content_md5 = Hash::get_md5_hash(*m_file_content, true);
@@ -373,16 +425,14 @@ std::string AwsS3Client::upload_part(int part, const std::string& upload_id )
     //Build the HTTP request
     HttpRequestStream http_request;
 
-    http_request.append(m_http_verb + " /" + encode_uri(m_file->get_file_name()) + "?partNumber=" + std::to_string(part) + "&uploadId=" + encode_uri(upload_id) + " HTTP/1.1\r\n");
+    http_request.append(m_http_verb + " /" + encode_uri( get_file_uri_path() ) + "?partNumber=" + std::to_string(part) + "&uploadId=" + encode_uri(upload_id) + " HTTP/1.1\r\n");
     http_request.append("Host: " + get_hostname() + "\r\n");
     http_request.append("Date: " + m_amzdate_clean + "\r\n");
-    http_request.append("Authorization: AWS4-HMAC-SHA256 Credential=" + m_access_id + "/" + m_amzdate_short + "/" + m_region + "/s3/aws4_request,SignedHeaders=" + get_signed_headers() + ",Signature=" + get_signature_v4() + "\r\n");
+    http_request.append("Authorization: AWS4-HMAC-SHA256 Credential=" + m_storage_provider.access_id + "/" + m_amzdate_short + "/" + m_storage_provider.region + "/s3/aws4_request,SignedHeaders=" + get_signed_headers() + ",Signature=" + get_signature_v4() + "\r\n");
     http_request.append("Content-Length: " + std::to_string(m_file_content->size()) + "\r\n");
     http_request.append("Content-MD5: " + m_content_md5 + "\r\n");
     http_request.append("x-amz-content-sha256: " + m_content_sha256 + "\r\n");
     http_request.append("x-amz-date: " + m_amzdate + "\r\n");
-    //http_request.append("Cache-Control: no-cache" + "\r\n");
-    //http_request.append("Expect: 100-continue\r\n");
     http_request.append("Connection: close\r\n");
 
     //TODO: Optional Encryption
@@ -403,12 +453,17 @@ std::string AwsS3Client::upload_part(int part, const std::string& upload_id )
 
     disconnect();
 
+    if ( http_logging() )
+    {
+        Log::get_log().add_http_message(http_request.str().substr(0, (http_request.str().size() - m_file_content->size()) ), get_response(), get_http_status() );
+    }
+
     //Parse the ETag from the response
     return parse_etag();
 
 }
 
-void AwsS3Client::set_file(Vessel::File::BackupFile* bf)
+void AwsS3Client::set_file(const BackupFile& bf)
 {
     m_file = bf;
 }
@@ -418,13 +473,13 @@ size_t AwsS3Client::get_current_part_size()
 
     if ( m_multipart )
     {
-        size_t part_size = (m_part_size > 0) ? m_part_size : m_file->get_chunk_size();
+        size_t part_size = (m_part_size > 0) ? m_part_size : m_file.get_file_size();
         size_t byte_index = part_size * m_current_part;
-        size_t overflow = (byte_index > m_file->get_file_size()) ? byte_index-m_file->get_file_size() : 0;
+        size_t overflow = ( byte_index > m_file.get_file_size() ) ? ( byte_index - m_file.get_file_size() ) : 0;
         return (part_size - overflow);
     }
 
-    return m_file->get_file_size(); //Default
+    return m_file.get_file_size(); //Default
 
 }
 
@@ -485,10 +540,7 @@ std::string AwsS3Client::parse_upload_id(const std::string& response)
     }
     catch ( const boost::property_tree::ptree_error& e )
     {
-        //Log error here
         throw AwsException(AwsException::XmlParseError, e.what());
-        //std::cout << "XML Parser error: " << e.what() << '\n';
-        return "";
     }
 
     //Example payload
@@ -531,7 +583,7 @@ std::string AwsS3Client::parse_etag()
 
 }
 
-std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>& etags, const std::string& upload_id)
+std::string AwsS3Client::complete_multipart_upload(const std::vector<UploadTagSet>& etags, const std::string& upload_key)
 {
 
     using namespace boost::property_tree;
@@ -569,7 +621,7 @@ std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>&
     {
         auto& node = root_node.add_child("Part", ptree{});
         node.put("PartNumber", etags[i].part_number );
-        node.put("ETag", etags[i].etag );
+        node.put("ETag", etags[i].tag );
     }
 
     write_xml(oss, pt, xml_parser::xml_writer_make_settings<std::string>(' ',4) );
@@ -589,7 +641,7 @@ std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>&
     //Set the MD5 of the current part
     m_file_content = std::make_shared<std::string>( payload );
     m_content_sha256 =  Hash::get_sha256_hash(*m_file_content);
-    m_query_str = "uploadId=" + encode_uri(upload_id);
+    m_query_str = "uploadId=" + encode_uri(upload_key);
 
     //Refresh the date/time vars
     init_amz_date();
@@ -600,10 +652,10 @@ std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>&
     //Build the raw request
     HttpRequestStream http_request;
 
-    http_request << m_http_verb << " /" << encode_uri(m_file->get_file_name()) << "?uploadId=" << encode_uri(upload_id) << " HTTP/1.1\r\n";
+    http_request << m_http_verb << " /" << encode_uri( get_file_uri_path() ) << "?uploadId=" << encode_uri(upload_key) << " HTTP/1.1\r\n";
     http_request << "Host: " << get_hostname() << "\r\n";
     http_request << "Date: " << m_amzdate_clean << "\r\n";
-    http_request << "Authorization: AWS4-HMAC-SHA256 Credential=" << m_access_id << "/" << m_amzdate_short << "/" << m_region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << get_signature_v4() << "\r\n";
+    http_request << "Authorization: AWS4-HMAC-SHA256 Credential=" << m_storage_provider.access_id << "/" << m_amzdate_short << "/" << m_storage_provider.region << "/s3/aws4_request,SignedHeaders=" << get_signed_headers() << ",Signature=" << get_signature_v4() << "\r\n";
     http_request << "Content-Length: " << m_file_content->size() << "\r\n";
     http_request << "x-amz-content-sha256: " << m_content_sha256 << "\r\n";
     http_request << "x-amz-date: " << m_amzdate << "\r\n";
@@ -623,10 +675,13 @@ std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>&
     //Clear content
     m_file_content.reset();
 
+    if ( http_logging() )
+    {
+        Log::get_log().add_http_message(http_request.str(), get_response(), get_http_status() );
+    }
+
     //Parse the response and return the ETag
     std::string response = get_response();
-
-    std::cout << "Complete Multipart Upload Response:\n" << response << '\n';
 
     //Handle Empty Response
     if ( response.empty() ) {
@@ -645,9 +700,9 @@ std::string AwsS3Client::complete_multipart_upload(const std::vector<etag_pair>&
 
 }
 
-void AwsS3Client::set_auth_profile(AuthProfile profile)
+void AwsS3Client::remote_signing(bool flag)
 {
-    if ( profile == AuthProfile::Local ) {
+    if ( !flag ) {
         read_key_file();
         m_remote_signing=false;
     }
@@ -661,7 +716,6 @@ void AwsS3Client::read_key_file()
     std::ifstream infile("keys/aws.key", std::ios::in );
     if ( !infile.is_open() ) {
         throw AwsException(AwsException::InvalidCredentials, "Unable to open aws.key file");
-        return;
     }
 
     /**
@@ -673,17 +727,40 @@ void AwsS3Client::read_key_file()
     std::string tmp;
 
     if ( std::getline(infile, tmp) ) {
-        m_access_id = tmp;
+        m_storage_provider.access_id = tmp;
     }
 
     if ( std::getline(infile, tmp) ) {
         m_secret_key = tmp;
     }
 
+    /*
     if ( std::getline(infile, tmp) ) {
         m_region = tmp;
     }
+    */
 
     infile.close();
 
+}
+
+void AwsS3Client::set_storage_provider( const StorageProvider& provider )
+{
+    m_storage_provider = provider;
+}
+
+void AwsS3Client::build_file_uri_path()
+{
+
+    m_uri_file_path = m_ldb->get_setting_str("user_id") + m_file.get_parent_path() + "/" + m_file.get_file_name();
+
+    #ifdef _WIN32
+        boost::replace_all(m_uri_file_path, "\\", "/");
+    #endif
+
+}
+
+std::string AwsS3Client::get_file_uri_path()
+{
+    return m_uri_file_path;
 }

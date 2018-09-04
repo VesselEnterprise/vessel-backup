@@ -80,12 +80,6 @@ namespace Vessel {
                 */
                 std::string get_hostname();
 
-                /*! \fn std::string get_uri_path();
-                    \brief Returns the URI path of the URL
-                    \return Returns the URI path of the URL
-                */
-                std::string get_uri_path();
-
                 /*! \fn bool is_https();
                     \brief Returns whether or not the connection uses HTTPS (secure)
                     \return Returns whether or not the connection uses HTTP (secure)
@@ -109,11 +103,21 @@ namespace Vessel {
                 */
                 int send_http_request ( const HttpRequest& request );
 
+                /*! \fn bool http_logging();
+                    \brief Returns true if http logging is enabled
+                    \return True if http logging is enabled
+                */
+                bool http_logging();
+
+                /*! \fn static void http_logging(bool flag);
+                    \brief Enables or disables HTTP logging
+                */
+                static void http_logging(bool flag);
+
             private:
 
                 Vessel::Database::LocalDatabase* m_ldb;
                 std::string m_hostname;
-                std::string m_uri;
                 std::string m_protocol;
                 unsigned int m_port; //or service name
                 bool m_connected;
@@ -158,6 +162,8 @@ namespace Vessel {
                 /** Logging and errors **/
                 Vessel::Logging::Log* m_log;
                 std::string m_error_message;
+
+                static bool m_http_logging;
 
             protected:
 

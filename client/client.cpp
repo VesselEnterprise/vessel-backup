@@ -20,11 +20,12 @@ int main(int argc, char** argv)
     desc.add_options()
         ("help", "Display supported options")
         ("auth-token", boost::program_options::value<std::string>(), "Sets the user auth token")
-        ("client-token", boost::program_options::value<std::string>(), "Sets the client token")
-        ("file-logging", boost::program_options::value<std::string>(), "Enables or disables saving log output to flat files")
-        ("sql-logging", boost::program_options::value<std::string>(), "Enables or disables saving log output to SQLite database")
-        ("deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
-        ("scan-dir", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
+        ("with-client-token", boost::program_options::value<std::string>(), "Sets the client token")
+        ("with-file-logging", boost::program_options::value<std::string>(), "Enables saving log output to flat files")
+        ("with-sql-logging", boost::program_options::value<std::string>(), "Enables saving log output to SQLite database")
+        ("with-http-logging", boost::program_options::value<std::string>(), "Enables the logging of HTTP requests and responses")
+        ("with-deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
+        ("with-scan-dir", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
     ;
 
     boost::program_options::variables_map vm;
@@ -36,8 +37,19 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    //Enable HTTP Logging
+    if ( vm.count("with-http-logging") ) {
+        HttpClient::http_logging(true);
+    }
+
+    //Override for development
+    HttpClient::http_logging(true);
+
     //Create new instance of local database
     LocalDatabase* db = &LocalDatabase::get_database();
+
+    //Get Log Instance
+    Log* log = &Log::get_log();
 
     //Update global settings
     db->update_global_settings();
@@ -51,10 +63,8 @@ int main(int argc, char** argv)
     if ( !vessel->has_client_token() )
     {
         vessel->install_client();
+        log->add_message("Successfully installed client", "Installation");
     }
-
-    //Create new upload QueueManager
-    std::shared_ptr<QueueManager> queue_manager = std::make_shared<QueueManager>();
 
     //Create worker threads and pool them
     boost::asio::io_service io_service;
@@ -77,16 +87,26 @@ int main(int argc, char** argv)
     //TODO: This can be overridden by boost::program_options
     BackupDirectory scan_dir ("");
 
-    //Create a file iterator object to scan the filesystem
-    std::shared_ptr<FileIterator> file_iterator = std::make_shared<FileIterator>(scan_dir);
-
     //Add a new thread to the pool which scans the filesystem on intervals
     io_service.post([&](){
         for(;;)
         {
-            //file_iterator->scan();
-            boost::this_thread::sleep( boost::posix_time::seconds(10) );
-            std::cout << "Restarting scan after 10 seconds..." << '\n';
+            //Create a file iterator object to scan the filesystem
+            std::unique_ptr<FileIterator> file_iterator = std::make_unique<FileIterator>(scan_dir);
+
+            try
+            {
+                file_iterator->scan();
+            }
+            catch( const std::exception& ex )
+            {
+                log->add_exception(ex);
+            }
+
+            boost::this_thread::sleep( boost::posix_time::seconds(900) );
+            std::cout << "Restarting scan after 15 minutes..." << '\n';
+
+            file_iterator.reset();
         }
     });
 
@@ -94,9 +114,26 @@ int main(int argc, char** argv)
     io_service.post([&](){
         for(;;)
         {
-            //queue_manager->rebuild_queue();
+
+            //Create new upload QueueManager
+            std::unique_ptr<QueueManager> queue_manager = std::make_unique<QueueManager>();
+
+            try
+            {
+                //Rebuild the queue if no uploads are remaining
+                if ( queue_manager->get_total_pending() == 0 ) {
+                    queue_manager->rebuild_queue();
+                }
+            }
+            catch( const std::exception& ex )
+            {
+                log->add_exception(ex);
+            }
+
             boost::this_thread::sleep( boost::posix_time::seconds(10) );
             std::cout << "Restarting queue rebuild after 10 seconds..." << '\n';
+
+            queue_manager.reset();
         }
     });
 
@@ -106,24 +143,30 @@ int main(int argc, char** argv)
         //Get Storage Provider
         const StorageProvider& provider = vessel->get_storage_provider();
 
-        //Create a new UploadManager
-        std::shared_ptr<UploadManager> upload_manager = std::make_shared<UploadManager>(provider);
-
         //Start backing up files
         for ( ;; )
         {
+
+            //Create a new UploadManager
+            std::unique_ptr<UploadManager> upload_manager = std::make_unique<UploadManager>(provider);
+
             try
             {
                 upload_manager->run_uploader();
             }
             catch( const std::exception& ex )
             {
-                std::cout << "Caught an exception: " << ex.what() << '\n';
+                log->add_exception(ex);
                 continue;
 
             }
-            boost::this_thread::sleep( boost::posix_time::seconds(10) );
-            std::cout << "Restarting file uploader after 10 seconds..." << '\n';
+
+            upload_manager.reset();
+
+            boost::this_thread::sleep( boost::posix_time::seconds(5) );
+            std::cout << "Restarting file uploader after 5 seconds..." << '\n';
+
+
         }
 
     });

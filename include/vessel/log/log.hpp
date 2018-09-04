@@ -4,6 +4,8 @@
 #define BOOST_LOG_DYN_LINK 1
 #define LOG_FILENAME "vessel"
 
+#include <typeinfo>
+
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -71,8 +73,10 @@ namespace Vessel {
                 Log(Log const&) = delete;
                 void operator=(Log const&) = delete;
 
-                void add_message( const std::string& msg, const std::string& category );
-                void add_sql_message(const std::string& msg, bool is_error=false);
+                void add_message( const std::string& msg, const std::string& type );
+                void add_error( const std::string& msg, const std::string& type );
+                void add_http_message( const std::string& request, const std::string& response, int status );
+                void add_sql_message(const std::string& msg, const std::string& type, bool is_error=false);
                 void set_level ( unsigned int level );
                 void add_exception(const std::exception& ex);
                 void set_file_logging(bool flag);

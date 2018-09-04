@@ -20,7 +20,11 @@ class File extends Model
     }
 
 		public function storageProvider() {
-			return $this->hasMany('App\StorageProviderFile', 'file_id', 'file_id');
+			return $this->hasOne('App\StorageProvider', 'provider_id', 'provider_id');
+		}
+
+		public function filePath() {
+			return $this->hasOne('App\FilePath', 'path_id', 'file_path_id');
 		}
 
 		protected $fillable = [
@@ -38,7 +42,7 @@ class File extends Model
 		public $primaryKey = 'file_id';
 		public $incrementing = false;
 		protected $table = 'file';
-		protected $uuids = ['user_id','file_path_id'];
+		protected $uuids = ['user_id','file_path_id','provider_id'];
 		protected $dates = ['created_at','updated_at','last_backup'];
 
 }

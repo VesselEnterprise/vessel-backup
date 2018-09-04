@@ -38,7 +38,7 @@ class UploadController extends Controller
 				//Duplicate check should only occur if this is a new file_path
 				$preventDuplicate = App\Setting::where(['setting_name' => 'prevent_duplicate_hash', 'value' => 'true'])->first();
 				if ( $preventDuplicate ) {
-					$duplicate = App\File::where(['hash' => $fileHash, 'user_id' => $user->user_id])->first();
+					$duplicate = App\File::where(['hash' => $fileHash, 'user_id' => $user->user_id, 'provider_id' => $storageProvider->provider_id])->first();
 					if ( $duplicate ) {
 						return response()->json(['error' => 'Duplicate file: File has already been uploaded'], 400);
 					}
@@ -61,16 +61,23 @@ class UploadController extends Controller
 				$file->file_type = $request->input('file_type');
 				$file->file_size = $request->input('file_size');
 				$file->hash = $fileHash;
+				$file->provider_id = $storageProvider->provider_id;
 				$file->save();
 			}
 
-			//Add Storage Provider Relationship
-			$fileProvider = App\StorageProviderFile::updateOrCreate([
-				'provider_id' => $storageProvider->provider_id,
-				'file_id' => $file->file_id
-			]);
+			//Add a new file upload
+			$upload = new App\FileUpload;
+			$upload->file_id = $file->file_id;
+			$upload->user_id = $user->user_id;
+			$upload->parts = 0;
+			$upload->total_bytes = $file->file_size;
+			$upload->hash = $fileHash;
+			$upload->save();
 
-			return $file;
+			return response()->json([
+				'file' => $file,
+				'upload' => $upload
+			]);
 
 		}
 

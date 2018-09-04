@@ -66,8 +66,11 @@ std::string VesselClient::init_upload ( const BackupFile& bf )
     writer.Key("hash");
     writer.String( bf.get_hash_sha1().c_str() );
 
+    writer.Key("total_parts");
+    writer.Uint( bf.get_total_parts() );
+
     writer.Key("user_name");
-    writer.String( "admin" /*m_ldb->get_setting_str("username").c_str()*/ );
+    writer.String( m_ldb->get_setting_str("username").c_str() );
 
     writer.Key("storage_provider_id");
     writer.String( provider.provider_id.c_str() );
@@ -91,105 +94,32 @@ std::string VesselClient::init_upload ( const BackupFile& bf )
     //Send the init request
     send_http_request(r);
 
-    //ParseResult json_ok = doc.Parse( get_response().c_str() );
+    //Parse the upload ID from the response
+    if ( get_http_status() != 200 ) {
+        throw VesselException( VesselException::BadUpload, "Bad payload or invalid upload id");
+    }
 
-    return "";
+    Document document;
+    document.Parse( get_response().c_str() ) ;
+
+    if ( !document.HasMember("upload") ) {
+        throw VesselException( VesselException::BadUpload, "Bad payload or invalid upload id");
+    }
+
+    const Value& upload = document["upload"];
+
+    std::string upload_id = upload["upload_id"].GetString();
+
+    m_log->add_message("Initialized upload: " + upload_id, "File Upload");
+
+    return upload_id;
 
 }
 
 bool VesselClient::upload_file_part( Vessel::File::BackupFile * bf, int part_number=1 )
 {
-
-    //Validate upload id
-    if ( bf->get_upload_id() < 0 )
-        return false;
-
-    //Validate file size
-    if ( bf->get_file_size() <= 0 )
-        return false;
-
-    //Build a JSON payload of the file properties/metadata
-    Document doc;
-    doc.SetObject();
-    Document::AllocatorType& alloc = doc.GetAllocator();
-
-    std::map<std::string,Value> jmap;
-
-    std::string file_part;
-
-    if ( m_use_compression )
-    {
-        auto bfc = bf->get_compressed_copy();
-        bfc->set_chunk_size( bf->get_chunk_size() );
-        file_part = bfc->get_file_part(part_number);
-    }
-    else
-    {
-        file_part = bf->get_file_part(part_number);
-    }
-
-    //Get Activation Code from DB
-    jmap.insert( std::pair<std::string,Value>( "file_id", Value( bf->get_unique_id().c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "part_number", Value( part_number) ) );
-    jmap.insert( std::pair<std::string,Value>( "part_size", Value( file_part.size() ) ) );
-    jmap.insert( std::pair<std::string,Value>( "hash", Value( bf->get_hash_sha1(file_part).c_str(), alloc ) ) );
-    jmap.insert( std::pair<std::string,Value>( "compressed", Value( m_use_compression ) ) );
-
-    //Add values to document object
-    for ( auto &kv : jmap )
-    {
-        doc.AddMember(Value().SetString(kv.first.c_str(),alloc), kv.second, alloc );
-    }
-
-    //Write object to buffer
-    StringBuffer strbuf;
-    PrettyWriter<StringBuffer> writer(strbuf);
-
-    doc.Accept(writer);
-
-    //Build the request body
-    std::stringstream body;
-
-    //Write a boundary
-    body << "\r\n--BackupFile\r\n";
-    body << "Content-Disposition: form-data; name=\"metadata\"\r\n\r\n";
-
-    //Write JSON payload
-    body << strbuf.GetString();
-
-    body << "\r\n";
-
-    //Write a boundary
-    body << "--BackupFile\r\n";
-    body << "Content-Disposition: form-data; name=\"fileContent\"\r\n\r\n";
-
-    //Write file data
-
-    body.write( &file_part[0], file_part.size() );
-
-    body << "\r\n";
-
-    //Write a boundary
-    body << "--BackupFile--\r\n\r\n";
-
-    std::cout << "Body:\n" << body.str() << std::endl;
-
-    //Create a new HTTP request
-    HttpRequest r;
-    r.add_header("Content-Disposition: multipart/form-data");
-    r.add_header("Content-Type: multipart/form-data; boundary=BackupFile");
-    r.set_body(body.str());
-    r.set_method("POST");
-    r.set_url(m_api_path + "/file");
-
-    //std::cout << "Example body:\n" << r.get_body() << std::endl;
-
-    send_http_request(r);
-
-    std::cout << "File part response: " << get_response() << std::endl;
-
+    //TODO
     return true;
-
 }
 
 bool VesselClient::heartbeat()
@@ -226,14 +156,14 @@ bool VesselClient::heartbeat()
 
     send_http_request(r);
 
-    if ( get_http_status != 200 ) {
+    if ( get_http_status() != 200 ) {
         return false;
     }
 
     const std::string& response = get_response();
 
     //Parse Storage Providers from response
-    parse_s
+    //parse_s
 
     return true;
 
@@ -586,6 +516,9 @@ void VesselClient::install_client()
     writer.Key("client_version");
     writer.String(m_ldb->get_setting_str("client_version").c_str());
 
+    writer.Key("user_name");
+    writer.String(m_ldb->get_setting_str("username").c_str());
+
     //
     writer.EndObject();
 
@@ -614,6 +547,11 @@ void VesselClient::install_client()
     do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
 
     disconnect();
+
+    if ( http_logging() )
+    {
+        Log::get_log().add_http_message(http_request.str(), get_response(), get_http_status() );
+    }
 
     if ( get_http_status() != 200 ) //http code should always be 200
     {
@@ -665,6 +603,12 @@ void VesselClient::install_client()
 
     }
 
+    if ( document.HasMember("user") )
+    {
+        const Value& user = document["user"];
+        m_ldb->update_setting<std::string>( "user_id", user["user_id"].GetString() );
+    }
+
 }
 
 bool VesselClient::sync_storage_provider(const Value& obj)
@@ -677,12 +621,13 @@ bool VesselClient::sync_storage_provider(const Value& obj)
     providerObj.bucket_name = obj["bucket_name"].GetString();
     providerObj.description = obj["description"].GetString();
     providerObj.server = obj["server"].GetString();
+    providerObj.access_id = obj["access_id"].GetString();
     providerObj.storage_path = obj["storage_path"].GetString();
     providerObj.region = obj["region"].GetString();
     providerObj.priority = obj["priority"].GetInt();
 
     sqlite3_stmt* stmt;
-    std::string query = "REPLACE INTO backup_provider (provider_id,name,server,type,storage_path,priority,bucket_name,region) VALUES(?1,?2,?3,?4,?5,?6,?7,?8)";
+    std::string query = "REPLACE INTO backup_provider (provider_id,name,server,type,storage_path,priority,bucket_name,region,access_id) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9)";
 
     if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
         return false;
@@ -695,6 +640,7 @@ bool VesselClient::sync_storage_provider(const Value& obj)
     sqlite3_bind_int(stmt, 6, providerObj.priority );
     sqlite3_bind_text(stmt, 7, providerObj.bucket_name.c_str(), providerObj.bucket_name.size(), 0 );
     sqlite3_bind_text(stmt, 8, providerObj.region.c_str(), providerObj.region.size(), 0 );
+    sqlite3_bind_text(stmt, 9, providerObj.access_id.c_str(), providerObj.access_id.size(), 0 );
 
     int rc = sqlite3_step(stmt);
 
@@ -761,7 +707,7 @@ StorageProvider VesselClient::get_storage_provider()
 {
 
     sqlite3_stmt* stmt;
-    std::string query = "SELECT provider_id,name,description,server,type,bucket_name,region,storage_path,priority FROM backup_provider ORDER BY priority ASC LIMIT 1";
+    std::string query = "SELECT provider_id,name,description,server,type,bucket_name,region,storage_path,priority,access_id FROM backup_provider ORDER BY priority ASC LIMIT 1";
 
     if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
     {
@@ -783,6 +729,7 @@ StorageProvider VesselClient::get_storage_provider()
     provider.region = (char*)sqlite3_column_text(stmt, 6);
     provider.storage_path = (char*)sqlite3_column_text(stmt, 7);
     provider.priority = (int)sqlite3_column_int(stmt, 8);
+    provider.access_id = (char*)sqlite3_column_text(stmt, 9);
 
     //Cleanup
     sqlite3_finalize(stmt);

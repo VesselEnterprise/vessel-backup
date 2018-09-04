@@ -48,6 +48,6 @@ class StorageProvider extends Model
 		public $incrementing = false;
 		public $primaryKey = 'provider_id';
     protected $table = 'storage_provider';
-		protected $hidden = ['access_id', 'access_key','created_at','updated_at'];
-		
+		protected $hidden = ['access_key','created_at','updated_at'];
+
 }

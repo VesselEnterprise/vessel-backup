@@ -62,7 +62,7 @@ int main(int argc, char** argv)
     std::cout << "Total file parts: " << bf->get_total_parts() << std::endl;
 
     //Initialize upload
-    int upload_id = cli->init_upload(bf);
+    int upload_id = 0; //TODO
 
     if ( upload_id < 0 )
     {
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 
     std::cin.get();
 
-    bf->set_upload_id(upload_id);
+    bf->set_upload_id(""); //TODO
 
     //Create a compressed tmp file
     std::string tmp_file = "tmp/" + bf->get_file_name() + ".tmp";

@@ -16,7 +16,8 @@ namespace Exception {
                 {
                     NoError = 0,
                     NotInstalled,
-                    ProviderError
+                    ProviderError,
+                    BadUpload
                 };
 
                 VesselException(ErrorCode e, const std::string& msg) : _code(e)

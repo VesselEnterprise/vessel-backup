@@ -17,6 +17,10 @@ class FilePath extends Model
 			return 'path_id';
 		}
 
+		public function files() {
+			return $this->hasMany('App\File', 'file_path_id', 'path_id');
+		}
+
 		public $incrementing = false;
 		public $primaryKey = 'path_id';
     protected $table = 'file_path';

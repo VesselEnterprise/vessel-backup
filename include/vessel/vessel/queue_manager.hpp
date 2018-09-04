@@ -5,6 +5,7 @@
 
 #include <vessel/database/local_db.hpp>
 #include <vessel/filesystem/file.hpp>
+#include <vessel/filesystem/file_upload.hpp>
 
 using namespace Vessel::Exception;
 using namespace Vessel::Database;
@@ -20,9 +21,10 @@ class QueueManager
         ~QueueManager();
 
         BackupFile get_next_file();
+        FileUpload get_next_upload();
         int get_total_pending();
         void rebuild_queue();
-        void pop_file(unsigned char* file_id);
+        void pop_file(const unsigned char* file_id);
 
     private:
         LocalDatabase* m_database;

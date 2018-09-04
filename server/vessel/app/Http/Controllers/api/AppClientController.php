@@ -80,6 +80,15 @@ class AppClientController extends Controller
 
 			$deployment = App\Deployment::where('deployment_key', $deployment_key)->whereDate('expires_at', '>=', now() )->firstOrFail();
 
+			//Find associated user
+			$userName = $request->input('user_name');
+
+			$user = App\User::where(['user_name' => $userName, 'active' => 1])->first();
+
+			if ( !$user ) {
+				return response()->json(['error' => 'Invalid user name was provided. Please verify the user exists in the database'], 400);
+			}
+
 			//Validate Request
 			$validator = Validator::make($request->all(), [
 				'client_name' => 'required|string',
@@ -113,7 +122,8 @@ class AppClientController extends Controller
 			return response()->json([
 				'app_client' => $appClient,
 				'storage_providers' => $providers,
-				'app_settings' => $appSettings
+				'app_settings' => $appSettings,
+				'user' => $user
 			]);
 
 		}

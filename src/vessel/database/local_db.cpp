@@ -17,7 +17,7 @@ LocalDatabase::LocalDatabase()
     else
     {
         //Increase cache size
-        sqlite3_exec(m_db, "PRAGMA cache_size = 100000", NULL, NULL, NULL);
+        sqlite3_exec(m_db, "PRAGMA cache_size = -10000", NULL, NULL, NULL);
 
         if ( VACUUM_ON_LOAD )
         {
@@ -70,11 +70,11 @@ std::string LocalDatabase::get_setting_str(const std::string & s )
 
     sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
 
-    std::string val="";
+    std::string val = "";
 
     if ( sqlite3_step(stmt) == SQLITE_ROW )
     {
-        val = (char*)sqlite3_column_text(stmt,0);
+        val = get_sqlite_str( sqlite3_column_text(stmt,0) );
     }
 
     //Cleanup
@@ -234,9 +234,7 @@ void LocalDatabase::clean_files()
 
         if ( !boost::filesystem::exists(dir + PATH_SEPARATOR() + filename) )
         {
-
             purge_file(file_id);
-
         }
 
     }
@@ -455,6 +453,34 @@ void LocalDatabase::purge_file(const unsigned char* file_id)
 
         //Cleanup
         sqlite3_finalize(st);
+
+    }
+
+}
+
+void LocalDatabase::purge_upload(unsigned int upload_id)
+{
+
+    std::vector<std::string> queries;
+    queries.push_back("DELETE FROM backup_upload_part WHERE upload_id=?1");
+    queries.push_back("DELETE FROM backup_upload WHERE upload_id=?1");
+
+    for ( const auto &query : queries )
+    {
+        sqlite3_stmt* stmt;
+        if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
+            m_log->add_error("Failed to remove upload from database: " + std::to_string(upload_id), "Database Cleaner");
+            continue;
+        }
+
+        sqlite3_bind_int(stmt, 1, upload_id );
+
+        if ( sqlite3_step(stmt) != SQLITE_DONE ) {
+            m_log->add_error("Failed to remove upload from database: " + std::to_string(upload_id), "Database Cleaner");
+        }
+
+        //Cleanup
+        sqlite3_finalize(stmt);
 
     }
 

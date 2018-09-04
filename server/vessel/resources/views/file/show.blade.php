@@ -39,7 +39,7 @@
 		@csrf
 
 	<div class="ui stackable grid container">
-	  <div class="four wide column">
+	  <div class="eight wide column">
 			<div class="ui segment">
 				<p><b>File Name</b></p>
 				<span>{{ $file->file_name }}</span>
@@ -48,17 +48,27 @@
 	  <div class="four wide column">
 			<div class="ui segment">
 				<p><b>User</b></p>
-				<span>John Doe</span>
+				<span><a href="{{ route('user.show', $file->user->user_id_text) }}">{{ $file->user->first_name . " " . $file->user->last_name }}</a></td></span>
 			</div>
 		</div>
-	  <div class="four wide column">
+		<div class="four wide column">
+			@if($file->uploaded == 1)
+			<div class="ui segment green">
+			@else
+			<div class="ui segment red">
+			@endif
+				<p><b>Status</b></p>
+				<span>{{ $file->uploaded ? 'Uploaded' : 'Pending Upload' }}</span>
+			</div>
+		</div>
+	  <div class="eight wide column">
 			<div class="ui segment">
 				<p><b>File Path</b></p>
 				<div class="ui list">
 				  <div class="item">
 				    <i class="folder icon"></i>
 				    <div class="content">
-				      <div class="description">{{ $file->file_path_id }}/home/vessel/downloads</div>
+				      <div class="description">{{ $file->filePath->file_path }}</div>
 				      <div class="list">
 								<div class="item">
 				          <i class="file icon"></i>
@@ -84,32 +94,22 @@
 				<span>{{ $file->file_size }}</span>
 			</div>
 		</div>
-		<div class="four wide column">
-			<div class="ui segment">
-				<p><b>Last Backup</b></p>
-				<span>{{ $file->last_backup }}</span>
-			</div>
-		</div>
-		<div class="four wide column">
+		<div class="eight wide column">
 			<div class="ui segment">
 				<p><b>Hash</b></p>
-				<span>{{ $file->hash }}klsfd76sdfsdfs8f7sdfjs</span>
-			</div>
-		</div>
-		<div class="four wide column">
-			@if($file->uploaded == 1)
-			<div class="ui segment green">
-			@else
-			<div class="ui segment red">
-			@endif
-				<p><b>Status</b></p>
-				<span>{{ $file->uploaded ? 'Uploaded' : 'Pending Upload' }}</span>
+				<span>{{ $file->hash }}</span>
 			</div>
 		</div>
 		<div class="four wide column">
 			<div class="ui segment">
 				<p><b>Storage Provider</b></p>
-				<span>AWS</span>
+				<span><a href="{{ route('storage.show', $file->storageProvider->provider_id_text ) }}">{{ $file->storageProvider->provider_name }}</a></span>
+			</div>
+		</div>
+		<div class="four wide column">
+			<div class="ui segment">
+				<p><b>Last Backup</b></p>
+				<span>{{ $file->last_backup == "" ? 'Never' : $file->last_back }}</span>
 			</div>
 		</div>
 	</div>

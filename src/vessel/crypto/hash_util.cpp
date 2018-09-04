@@ -115,3 +115,18 @@ std::string Hash::get_hmac_256( const std::string& key, const std::string& data,
     return encoded;
 
 }
+
+std::string Hash::base64_decode(const std::string& str)
+{
+
+    std::string decoded;
+
+    StringSource ss(str, true,
+        new Base64Decoder(
+            new StringSink(decoded)
+        ) // Base64Decoder
+    ); // StringSource
+
+    return decoded;
+
+}

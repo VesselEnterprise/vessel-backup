@@ -1,6 +1,6 @@
 #include <vessel/vessel/upload_manager.hpp>
 
-UploadManager::UploadManager(const StorageProvider& provider)
+UploadManager::UploadManager(const StorageProvider& provider) : m_provider(provider)
 {
 
     m_service = get_upload_service(provider.provider_type);
@@ -28,18 +28,62 @@ void UploadManager::run_uploader()
     for ( auto i=0; i < total_pending; i++ )
     {
 
-        BackupFile file = manager->get_next_file();
+        //Free memory
+        cleanup_service();
+
+        //Get the next upload from the queue
+        FileUpload upload = manager->get_next_upload();
+
+        BackupFile file = upload.get_file();
+        const unsigned char* file_id = file.get_file_id();
+
+        //If the file no longer exists, purge it from the database
+        if ( !file.exists() ) {
+            LocalDatabase::get_database().purge_file( file_id );
+            continue;
+        }
 
         //If the file is not readable, remove from the upload queue and move on
         if ( !file.is_readable() )
         {
-            manager->pop_file(*file.get_file_id());
+            Log::get_log().add_error("Unable to read file: " + file.get_file_name(), "Filesystem" );
+            manager->pop_file( file_id );
             continue;
         }
 
-        m_service->upload_file(file);
+        std::cout << "Uploading file " << file.get_file_name() << '\n';
+
+        bool upload_success=true;
+
+        try
+        {
+            m_service->upload_file(upload);
+        }
+        catch( const std::exception& ex )
+        {
+            Log::get_log().add_error("Failed to upload file: " + file.get_file_name() + " (" + ex.what() + ")", "File upload");
+            upload_success=false;
+        }
+
+        if ( upload_success ) {
+
+            //Update the last backup time for the file
+            file.update_last_backup();
+
+            //Remove the file from the queue, regardless of success or failure
+            manager->pop_file( file_id );
+
+        }
+
+        std::cout << "File Uploaded" << '\n';
     }
 
+}
+
+void UploadManager::cleanup_service()
+{
+    m_service.reset();
+    m_service = get_upload_service(m_provider.provider_type);
 }
 
 std::shared_ptr<UploadInterface> UploadManager::get_upload_service(const std::string& type)

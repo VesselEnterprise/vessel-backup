@@ -7,6 +7,7 @@
 
 #include <vessel/vessel/vessel_exception.hpp>
 #include <vessel/filesystem/file.hpp>
+#include <vessel/filesystem/file_upload.hpp>
 #include <vessel/vessel/queue_manager.hpp>
 #include <vessel/aws/aws_s3_client.hpp>
 #include <vessel/vessel/vessel_client.hpp>
@@ -22,7 +23,7 @@ namespace Vessel
     {
         public:
             UploadInterface();
-            virtual void upload_file(const BackupFile& file) {}
+            virtual void upload_file(FileUpload& upload) {}
             virtual void resume_uploads() {}
             virtual void complete_upload() {}
 
@@ -57,7 +58,7 @@ namespace Vessel
 
             AwsUpload();
 
-            void upload_file(const BackupFile& file);
+            void upload_file(FileUpload& upload);
             void resume_uploads();
             void complete_upload();
 
@@ -87,7 +88,10 @@ namespace Vessel
             std::shared_ptr<UploadInterface> get_upload_service(const std::string& provider_type);
 
         private:
+            StorageProvider m_provider;
             std::shared_ptr<UploadInterface> m_service;
+
+            void cleanup_service();
 
     };
 }

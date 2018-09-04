@@ -35,6 +35,7 @@ namespace Vessel {
             std::string provider_name;
             std::string description;
             std::string server;
+            std::string access_id;
             std::string region;
             std::string bucket_name;
             std::string storage_path;
@@ -43,6 +44,24 @@ namespace Vessel {
             int priority;
         };
         typedef struct StorageProvider StorageProvider;
+
+        struct FilePart
+        {
+            unsigned int upload_id;
+            std::string upload_key;
+            int part_number;
+            size_t total_bytes;
+            std::string tag;
+            std::string signature;
+        };
+        typedef struct FilePart FilePart;
+
+        struct UploadTagSet
+        {
+            int part_number;
+            std::string tag;
+        };
+        typedef struct UploadTagSet UploadTagSet;
 
     }
 }
