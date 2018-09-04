@@ -1,38 +1,65 @@
-# Vessel Enterprise Backup Client/Server
+# Vessel Enterprise Backup Platform
 
+Visit our site:
 https://www.vesselenterprise.com/
 
-Vessel Enterprise Backup Server is a secure, scalable, cloud-based or on-premise backup solution for the enterprise. The server is written in PHP and can live in the cloud (AWS, Google Cloud Platform, Azure, etc) or on-premise on your internal network. Vessel will feature a number of storage options including AWS S3, Azure Cloud Storage, Google Cloud Storage, and on-premise disk storage.
+Development: IN PROGRESS  
+Release: TBD
 
-Vessel Enterprise Backup Client is a powerful cross-platform client written in C++ driven by the incredible Boost C++ library. (https://www.boost.org). The client features a direct sync to the Vessel Enterprise Server and the capability of uploading directly to 3rd party storage services such as AWS, Google, and Azure.
+## What is Vessel?
 
-Vessel aims to be the first enterprise-grade open-source backup solution. We are looking for devs! If you are interested in helping, feel free to contact us to get involved in the project.
+Vessel is an open-source enterprise platform for file backup and storage management. Vessel supports all major cloud storage providers including Amazon, Azure, and Google. You can also use your own on-premise NFS storage provider with the platform.
 
-### Features (work in progress)
+## Features
 
-- Central Management server
- - Manage users, storage targets, files, machines, settings
- - Scalable to meet capacity needs
- - LDAP integration for users and computers
- - Manage user litigation hold
-- Cross-platform desktop client
-  - Quick and easy deploy using management server
-  - Client check-in (sync user/machine data)
-  - Automatic updates
-  - Cloud or on-premise file backup
-  - Multi part file uploads
-- File download portal
-  - Authorized end users can login to a web portal to download their backed up files
-- Cloud Storage (AWS, Google, Azure)
-- Network Bandwidth throttling for client application
-- File compression
- - Decrease storage size and increase transfer speed
-- File encryption
- - Configure specific users for encryption
- - Store files securely in the cloud or on your own file storage
-- File versioning for specified filesize limits
-- File upload weight/prioritization
-- File type auto ignore
-- User-level setting overrides and custom config
-- File statistics and storage tracking
-- Statistics and logging
+** Client **
+* Builds: Cross-platform (Linux, Windows) (OSX TBD)
+* Storage: Support for AWS, Azure, Google, NFS; File Encryption
+* Network: Bandwidth throttling and uncap
+* Files: File extension bypass, weighted file priority, security issue detection
+* Deployment: Clients can obtain a secure token to communicate with the platform when bootstrapping with a deployment key
+* Heartbeat: Clients check-in with the platform regularly and upload statistics, logging, and other information
+* Encryption rules: Use Cloud Encryption by specifying a rule set to protect your CEO's files
+* Auto-updater: Clients can be configured to keep their application up-to-date with the most recent compatible platform version
+
+** Server **
+* Management Portal
+* Files: Restore, Manage, Reports
+* Storage Providers: Add your preferred cloud storage provider to the platform. Clients will automatically use the provider for file backup
+* Users: Authentication framework, LDAP integration
+* Clients: View statistics and settings for machines that communicate with the platform
+* Settings: Manage platform and user specific settings
+* Reporting: File statistics, Network utilization, Backup %, etc
+* Tools: Security issue monitoring,
+* Monitoring: Error logging and email alerts
+
+## Security
+
+Vessel uses remote signing methods for cloud providers so that IAM user secrets are never exposed to the client. Vessel clients are issued secure tokens to ensure secure communication with the Vessel API.
+
+## Management Portal
+
+Manage organization configuration, storage providers, files, and more from the portal. Create deployments to deploy the client to your user base,
+
+[[https://github.com/VesselEnterprise/vessel-backup/blob/master/etc/vessel_ui_example.png|alt=Vessel Management Portal]]
+
+## Managed Services and Setup
+
+Vessel will offer managed services and setup for organizations looking to deploy the platform. More details will be available upon release.
+
+## Documentation
+
+Documentation is currently being built. More details will come soon.
+
+## Technology stack
+
+** Client Application **
+* C++, Boost, RapidJSON, SQLite, CryptoPP
+
+** Server **
+* PHP, Laravel, MariaDB (recommended)
+* Semantic UI
+
+## Contributing
+
+If you are interested in helping out with this project, please contact me!
