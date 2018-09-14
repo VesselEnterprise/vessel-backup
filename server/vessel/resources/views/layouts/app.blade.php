@@ -24,6 +24,9 @@
 			$(document).ready( function() {
 				$('.ui.dropdown').dropdown();
 				$('.ui.checkbox').checkbox();
+				$('.vessel-menu-item').dropdown({
+					on : 'hover'
+				});
 			});
 		</script>
 
@@ -46,7 +49,8 @@
 <body>
     <div id="app">
 			<div class="ui top fluid segment" style="background-color: #2a0038;">
-				<div class="ui top attached inverted secondary icon menu">
+				<div id="vessel-header-menu" class="ui top attached inverted secondary icon menu">
+
 					<a href="https://www.vesselenterprise.com/" target="_blank" class="item">
 						Vessel
 					</a>
@@ -54,30 +58,93 @@
 						<i class="home icon"></i>
 						&nbsp;Home
 					</a>
-					<a class="item" href="{{ route('user.index') }}">
+
+					<div class="ui dropdown icon item vessel-menu-item">
 						<i class="user icon"></i>
-						&nbsp;Users
-					</a>
-					<a class="item" href="{{ route('file.index') }}">
+						<span class="text">
+							&nbsp;<a class="header-link" href="{{ route('user.index') }}">Users</a>
+						</span>
+						<div class="menu">
+							<a class="item" href="{{ route('user.index') }}">Manage Users</a>
+							<a class="item" href="{{ route('user_setting.index') }}">Manage User Settings</a>
+							<a class="item" href="{{ route('user_role.index') }}">Manage Roles</a>
+							<a class="item" href="">LDAP Import</a>
+
+						</div>
+					</div>
+
+					<div class="ui dropdown icon item vessel-menu-item">
 						<i class="file icon"></i>
-						&nbsp;Files
-					</a>
-					<a class="item" href="{{ route('storage.index') }}">
+						<span class="text">
+							&nbsp;<a class="header-link" href="{{ route('file.index') }}">Files</a>
+						</span>
+						<div class="menu">
+							<a class="item" href="{{ route('file.index') }}">Manage Files</a>
+							<a class="item" href="{{ route('file_ignore_type.index') }}">Ignored Filetypes</a>
+							<a class="item" href="{{ route('file_ignore_dir.index') }}">Ignored Directories</a>
+							<a class="item" href="">Stats</a>
+						</div>
+					</div>
+
+					<div class="ui dropdown icon item vessel-menu-item">
 						<i class="hdd icon"></i>
-						&nbsp;Storage
-					</a>
-					<a class="item" href="{{ route('client.index') }}">
+						<span class="text">
+							&nbsp;<a class="header-link" href="{{ route('storage.index') }}">Storage</a>
+						</span>
+						<div class="menu">
+							<a class="item" href="{{ route('storage.index') }}">Manage Storage Providers</a>
+							<a class="item" href="">Storage Utilization</a>
+						</div>
+					</div>
+
+					<div class="ui dropdown icon item vessel-menu-item">
 						<i class="computer icon"></i>
-						&nbsp;Clients
-					</a>
-					<a class="item" href="{{ route('setting.index') }}">
+						<span class="text">
+							&nbsp;<a class="header-link" href="{{ route('client.index') }}">Clients</a>
+						</span>
+						<div class="menu">
+							<a class="item" href="{{ route('client.index') }}">Manage Clients</a>
+							<a class="item" href="">Download Client</a>
+							<a class="item" href="">LDAP Import</a>
+						</div>
+					</div>
+
+					<div class="ui dropdown icon item vessel-menu-item">
 						<i class="setting icon"></i>
-						&nbsp;Configuration
-					</a>
-					<a class="item" href="{{ route('deployment.index') }}">
+						<span class="text">
+							&nbsp;<a class="header-link" href="{{ route('setting.index') }}">Configuration</a>
+						</span>
+						<div class="menu">
+							<a class="item" href="{{ route('setting.index') }}">Manage Settings</a>
+							<a class="item" href="">Email and Alerts</a>
+							<a class="item" href="">Network and Bandwidth</a>
+							<a class="item" href="">Encryption</a>
+						</div>
+					</div>
+
+					<div class="ui dropdown icon item vessel-menu-item">
 						<i class="power icon"></i>
-						&nbsp;Deployment
-					</a>
+						<span class="text">
+							&nbsp;<a class="header-link" href="{{ route('deployment.index') }}">Deployment</a>
+						</span>
+						<div class="menu">
+							<a class="item" href="{{ route('deployment.index') }}">Manage Deployments</a>
+							<a class="item" href="">Client Deployment</a>
+						</div>
+					</div>
+
+					<div class="ui dropdown icon item vessel-menu-item">
+						<i class="help icon"></i>
+						<span class="text">
+							&nbsp;Help
+						</span>
+						<div class="menu">
+							<a class="item" href="">Documentation</a>
+							<a class="item" target="_blank" href="https://github.com/VesselEnterprise/vessel-backup">GitHub</a>
+							<a class="item" href="">About</a>
+
+						</div>
+					</div>
 
 					<div class="right menu">
 
@@ -119,8 +186,8 @@
 
 							<!-- Search -->
 							<div class="right item">
-								<div class="ui icon input" >
-									<input type="text" placeholder="Search...">
+								<div class="ui big icon input" >
+									<input type="text" id="search-text" name="search-text" placeholder="Search..." >
 									<i class="search link icon"></i>
 								</div>
 								<div class="results"></div>

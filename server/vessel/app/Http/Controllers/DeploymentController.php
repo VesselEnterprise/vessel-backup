@@ -104,4 +104,12 @@ class DeploymentController extends Controller
     {
         //
     }
+
+		public function destroyMultiple(Request $request) {
+			$selectedIds = $request->input('selectedIds');
+			foreach( $selectedIds as $id ) {
+				App\Deployment::withUuid($id)->destroy();
+			}
+			return $this->index()->with(['success' => 'Deployments were successfully deleted']);
+		}
 }

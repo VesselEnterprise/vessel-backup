@@ -123,7 +123,7 @@ class StorageController extends Controller
         //
     }
 
-		public function destroyMany(Request $request)
+		public function destroyMultiple(Request $request)
 		{
 			if ( empty($request->input('selectedIds')) )
 			{

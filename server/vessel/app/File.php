@@ -2,12 +2,14 @@
 
 namespace App;
 
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\BinaryUuid\HasBinaryUuid;
 
 class File extends Model
 {
 		use HasBinaryUuid;
+		use Searchable;
 
 		public function user()
 		{
@@ -37,6 +39,14 @@ class File extends Model
 
 		public function getHashAttribute($value) {
 			return bin2hex($value);
+		}
+
+		function toSearchableArray() {
+			return [
+				'file_id' => $this->file_id_text,
+				'file_name' => $this->file_name,
+				'file_type' => $this->file_type
+			];
 		}
 
 		public $primaryKey = 'file_id';

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\BinaryUuid\HasBinaryUuid;
 
@@ -9,6 +10,7 @@ class AppClient extends Model
 {
 
   use HasBinaryUuid;
+	use Searchable;
 
 	//32 chars
 	public static function generateToken()
@@ -32,6 +34,16 @@ class AppClient extends Model
 
 	public function getKeyName() {
 		return 'client_id';
+	}
+
+	function toSearchableArray() {
+		return [
+			'client_id' => $this->client_id_text,
+			'client_name' => $this->client_name,
+			'os' => $this->os,
+			'ip_address' => $this->ip_address,
+			'client_version' => $this->client_version
+		];
 	}
 
 	protected $table = 'app_client';

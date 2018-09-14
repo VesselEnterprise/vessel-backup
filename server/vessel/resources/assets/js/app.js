@@ -11,3 +11,4 @@ window.$ = window.jQuery = require('jquery');
 
 require('../semantic/dist/semantic');
 require('../semantic/calendar/calendar');
+require('../vessel/vessel');

@@ -19,7 +19,7 @@
 			$('table').tablesort();
 
 			$('#delete_selected').click(function() {
-				list_form.attr('action', '{{ route('storage.provider.destroyMany') }}');
+				list_form.attr('action', '{{ route('storage.provider.destroyMultiple') }}');
 				list_form.submit();
 			});
 

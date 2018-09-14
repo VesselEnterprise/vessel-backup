@@ -41,9 +41,25 @@ class LoginController extends Controller
 
 		public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
+				$userName = $request->input('username');
+				$password = $request->input('password');
+
+				$authenticated=false;
+
+				//Allow login with user_name or email
+
+        if ( Auth::attempt(['email' => $userName, 'password' => $password, 'active' => 1]) ) {
+					$authenticated=true;
+				}
+				else if( Auth::attempt(['user_name' => $userName, 'password' => $password, 'active' => 1]) ) {
+					$authenticated=true;
+				}
+				else {
+					$authenticated=false;
+				}
+
+				if ( $authenticated ) {
 
 						//Update the user last login
 						$user = Auth::user();

@@ -69,7 +69,7 @@ class UserController extends Controller
 				$user->save();
 
 				//Manually set to incrementing id - binary uuid side effect :()
-				$user->id = $user->getLastInsertId();
+				//$user->id = $user->getLastInsertId();
 
 				//Assign the default user role
 				$user->roles()->attach( Role::where('name', 'user')->first() );
@@ -91,15 +91,10 @@ class UserController extends Controller
      */
     public function show($id)
     {
-				$user = User::withUuid($id)->with(['appSettings.setting'])->first();
-				$appSettings = $user->appSettings;
+				$user = User::withUuid($id)->first();
+				$userSettings = $user->settings;
 
-				//Serialize array UUIDs
-				foreach($appSettings as $setting) {
-					$setting['user_id'] = $id;
-				}
-
-        return view('user.show', ['user' => $user, 'appSettings' => $appSettings]);
+        return view('user.show', ['user' => $user, 'userSettings' => $userSettings]);
     }
 
     /**

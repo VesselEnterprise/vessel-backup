@@ -14,30 +14,16 @@ class User extends Authenticatable
     use Notifiable;
     use HasBinaryUuid;
     use HasApiTokens;
+		use Searchable;
 
     public function getKeyName()
     {
         return 'user_id';
     }
 
-		public function getKey()
-		{
-			return $this->id;
-		}
-
 		public static function getLastInsertId()
 		{
 			return DB::getPdo()->lastInsertId();
-		}
-
-		public function getAuthIdentifierName()
-		{
-			return 'id';
-		}
-
-		public function getAuthIdentifier()
-		{
-			return $this->id;
 		}
 
     public function roles()
@@ -53,6 +39,10 @@ class User extends Authenticatable
 		public function clients()
 		{
 			return $this->belongsToMany('App\AppClient', 'app_client_user', 'user_id', 'client_id');
+		}
+
+		public function settings() {
+			return $this->hasMany('App\UserSetting', 'user_id', 'user_id');
 		}
 
 		//Credit for role authorization funcs: https://medium.com/@ezp127/laravel-5-4-native-user-authentication-role-authorization-3dbae4049c8a
@@ -91,13 +81,27 @@ class User extends Authenticatable
 			return $this->hasMany('App\StorageProviderUser', 'user_id', 'user_id');
 		}
 
-		public function appSettings()
+		public function getKey()
     {
-        return $this->hasMany('App\AppSettingUser', 'user_id', 'user_id');
+        return $this->user_id_text;
     }
 
-		protected $primaryKey = 'id';
-		public $incrementing = true;
+		public function toSearchableArray() {
+			return [
+				'user_id' => $this->user_id_text,
+				'email' => $this->email,
+				'user_name' => $this->user_name,
+				'first_name' => $this->first_name,
+				'last_name' => $this->last_name,
+				'title' => $this->title,
+				'office' => $this->office
+			];
+		}
+
+		protected $primaryKey = 'user_id';
+		public $incrementing = false;
+		protected $table = 'users';
+		protected $uuids = ['user_id'];
 
     /**
      * The attributes that are mass assignable.
@@ -105,7 +109,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'id', 'user_id', 'first_name', 'last_name', 'email', 'password'
+        'user_id', 'first_name', 'last_name', 'email', 'password'
     ];
 
     /**
@@ -124,5 +128,7 @@ class User extends Authenticatable
 				'last_backup',
 				'last_check_in'
     ];
+
+		public $asYouType = true;
 
 }

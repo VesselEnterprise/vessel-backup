@@ -92,4 +92,13 @@ class AppClientController extends Controller
     {
         //
     }
+
+		public function destroyMultiple() {
+			$selectedIds = $request->input('selectedIds');
+			foreach( $selectedIds as $id ) {
+				App\AppClient::destroy($id);
+			}
+			return $this->index()->with(['success' => 'Client(s) were successfully deleted']);
+		}
+
 }

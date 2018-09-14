@@ -42,13 +42,13 @@
 				@endif
 			  <div class="row">
 					<div class="two wide column">
-				    <label>{{ __('E-Mail Address') }}</label>
+				    <label>{{ __('E-Mail or Username') }}</label>
 					</div>
 					<div class="four wide column field">
-						<input type="email" id="email" name="email" placeholder="john.doe@email.com" value="{{ old('email') }}" required autofocus>
-						@if ($errors->has('email'))
+						<input type="text" id="username" name="username" placeholder="john.doe@email.com" value="{{ old('username') }}" required autofocus>
+						@if ($errors->has('username'))
 								<span class="invalid-feedback" role="alert">
-										<strong>{{ $errors->first('email') }}</strong>
+										<strong>{{ $errors->first('username') }}</strong>
 								</span>
 						@endif
 					</div>

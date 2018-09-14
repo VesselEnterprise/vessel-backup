@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Spatie\BinaryUuid\HasBinaryUuid;
@@ -10,6 +11,7 @@ class StorageProvider extends Model
 {
 
 		use HasBinaryUuid;
+		use Searchable;
 
 		function getAccessKeyAttribute($value) {
 
@@ -45,8 +47,18 @@ class StorageProvider extends Model
 			return 'provider_id';
 		}
 
+		public function toSearchableArray() {
+			return [
+				'provider_id' => $this->provider_id_text,
+				'provider_name' => $this->provider_name,
+				'server' => $this->server,
+				'region' => $this->region,
+				'provider_type' => $this->provider_type
+			];
+		}
+
 		public $incrementing = false;
-		public $primaryKey = 'provider_id';
+		protected $primaryKey = 'provider_id';
     protected $table = 'storage_provider';
 		protected $hidden = ['access_key','created_at','updated_at'];
 

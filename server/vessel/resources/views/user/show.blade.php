@@ -212,8 +212,8 @@
 		<div class="ui padded bottom attached tab segment" data-tab="third">
 
 			<div class="ui stackable grid container">
-				<div class="ui three stackable cards">
-					@foreach($appSettings as $userSetting)
+				<div class="ui cards">
+					@foreach($userSettings as $userSetting)
 
 						<div class="card">
 					    <div class="content">
