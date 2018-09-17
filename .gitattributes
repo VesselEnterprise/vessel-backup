@@ -1,5 +1,8 @@
 *.css linguist-vendored
 *.scss linguist-vendored
 *.js linguist-vendored
+<<<<<<< HEAD
 server/vessel/resources/assets linguist-vendored
 server/vessel/vendor linguist-vendored
+=======
+>>>>>>> master
