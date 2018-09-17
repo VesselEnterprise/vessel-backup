@@ -28,3 +28,7 @@ mix.styles([
 	'resources/assets/semantic/dist/semantic.min.css',
 	'resources/assets/semantic/calendar/calendar.min.css'
 ], 'public/css/semantic.min.css');
+
+mix.styles([
+	'resources/assets/vessel/vessel.css',
+], 'public/css/vessel.css');

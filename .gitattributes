@@ -1,0 +1,5 @@
+*.css linguist-vendored
+*.scss linguist-vendored
+*.js linguist-vendored
+server/vessel/resources/assets linguist-vendored
+server/vessel/vendor linguist-vendored

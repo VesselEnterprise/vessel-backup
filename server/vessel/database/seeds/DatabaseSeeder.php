@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
 				$this->call(SettingSeeder::class);
 				$this->call(AppSettingSeeder::class);
 				$this->call(FileIgnoreTypeSeeder::class);
+				$this->call(StorageProviderSeeder::class);
     }
 }

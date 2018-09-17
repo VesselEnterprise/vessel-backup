@@ -275,7 +275,7 @@ void AwsS3Client::init_amz_date()
     //Generate the short version of the amz date
     std::stringstream ss;
     boost::posix_time::ptime pt( boost::posix_time::second_clock::universal_time() );
-    boost::posix_time::time_facet* input_facet = new boost::posix_time::time_facet();
+    boost::posix_time::time_facet* input_facet = new boost::posix_time::time_facet(); //No memory leak here
     input_facet->format("%Y%m%d");
     ss.imbue( std::locale(ss.getloc(), input_facet ) );
     ss << pt;
