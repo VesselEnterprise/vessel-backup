@@ -11,6 +11,7 @@
 #include <vessel/database/local_db.hpp>
 #include <vessel/log/log.hpp>
 #include <vessel/aws/aws_s3_client.hpp>
+#include <vessel/azure/azure_client.hpp>
 #include <vessel/vessel/vessel_client.hpp>
 #include <vessel/vessel/queue_manager.hpp>
 #include <vessel/filesystem/directory.hpp>

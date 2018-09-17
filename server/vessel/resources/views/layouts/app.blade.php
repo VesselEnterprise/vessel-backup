@@ -14,6 +14,9 @@
     <script src="{{ asset('js/app.js') }}"></script>
 		<script src="{{ asset('js/vue.js') }}" defer></script>
 
+		<!-- Vessel -->
+		<link rel="stylesheet" type="text/css" href="{{ asset('css/vessel.css') }}">
+
 		<!-- Semantic UI -->
 		<link rel="stylesheet" type="text/css" href="{{ asset('css/semantic.min.css') }}">
 		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
@@ -186,11 +189,13 @@
 
 							<!-- Search -->
 							<div class="right item">
-								<div class="ui big icon input" >
-									<input type="text" id="search-text" name="search-text" placeholder="Search..." >
-									<i class="search link icon"></i>
+								<div class="ui right aligned category search" style="width: 300px">
+									<div class="ui fluid large icon input">
+										<input class="prompt" type="text" id="search-text" name="search-text" placeholder="Search...">
+										<i class="search icon"></i>
+									</div>
+									<div class="results"></div>
 								</div>
-								<div class="results"></div>
 							</div>
 						@endguest
 

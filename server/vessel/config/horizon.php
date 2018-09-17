@@ -79,6 +79,13 @@ return [
                 'processes' => 10,
                 'tries' => 3,
             ],
+						'supervisor-2' => [
+                'connection' => 'redis',
+                'queue' => ['search'],
+                'balance' => 'simple',
+                'processes' => 1,
+                'tries' => 3,
+            ],
         ],
 
         'local' => [
@@ -87,6 +94,13 @@ return [
                 'queue' => ['default'],
                 'balance' => 'simple',
                 'processes' => 3,
+                'tries' => 3,
+            ],
+						'supervisor-2' => [
+                'connection' => 'redis',
+                'queue' => ['search'],
+                'balance' => 'simple',
+                'processes' => 1,
                 'tries' => 3,
             ],
         ],

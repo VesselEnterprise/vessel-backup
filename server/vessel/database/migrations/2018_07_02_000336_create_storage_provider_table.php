@@ -30,6 +30,7 @@ class CreateStorageProviderTable extends Migration
 						$table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
 						$table->index('provider_name');
 						$table->index('provider_type');
+						$table->boolean('active')->default(true);
             //$table->timestamps();
         });
     }
