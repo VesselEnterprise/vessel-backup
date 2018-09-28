@@ -7,11 +7,13 @@
 #include <string>
 #include <regex>
 #include <memory>
+#include <map>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <vessel/database/local_db.hpp>
 #include <vessel/log/log.hpp>
@@ -61,6 +63,12 @@ namespace Vessel {
                     \return Returns the HTTP headers returned in the response
                 */
                 std::string get_headers();
+
+                /*! \fn std::string get_header(const std::string& key);
+                    \brief Returns the specified HTTP header value (if exists)
+                    \return Returns the specified HTTP header value (if exists)
+                */
+                std::string get_header(const std::string& key);
 
                 /*! \fn unsigned int get_http_status();
                     \brief Returns the HTTP status code (eg. 200) of the response
@@ -136,6 +144,7 @@ namespace Vessel {
 
                 unsigned int m_http_status;
                 std::string m_header_data;
+                std::map<std::string,std::string> m_response_headers;
                 std::string m_response_data;
                 boost::system::error_code m_conn_status;
                 bool m_ssl_good;

@@ -149,6 +149,7 @@ namespace Vessel {
                 BackupFile m_file;
                 std::shared_ptr<VesselClient> m_vessel;
                 std::map<std::string,std::string> m_headers;
+                std::map<std::string,std::string> m_query_params;
                 std::string m_http_verb;
                 std::string m_query_str;
                 std::string m_region; //AWS Region for API operations
@@ -162,6 +163,7 @@ namespace Vessel {
                 std::string m_request_payload;
                 std::string m_upload_id; //Upload ID returned for Multipart uploads
                 std::string m_uri_file_path; //Relative path to the file on the cloud server
+                std::string m_user_id; //Vessel User ID
                 int m_current_part; //For multipart uploads, the current part index
                 bool m_multipart; //Indicates whether or not a multipart upload
                 bool m_streaming; //Indicates whether or not a streaming upload (for unknown filesizes)

@@ -17,6 +17,7 @@
 
 			//$('#provider_type').val('{{ $provider->provider_type }}');
 			$('#provider_type').dropdown('set selected', '{{ $provider->provider_type }}');
+			$('.provider-active').checkbox('{{ $provider->active ? 'check' : 'uncheck' }}');
 
 		});
 	</script>
@@ -37,13 +38,22 @@
 
 		<div class="ui stackable grid container segment">
 
+			<div class="sixteen wide column">
+				<div class="field">
+					<div class="ui toggle checkbox provider-active">
+					  <input type="checkbox" name="active" id="active">
+					  <label>Active</label>
+					</div>
+				</div>
+			</div>
+
 			<div class="eight wide column">
 				<div class="field">
 					<label>Select Provider Type</label>
 					<select name="provider_type" id="provider_type" class="ui dropdown">
 						<option class="item" value="vessel">Vessel</option>
 						<option value="aws_s3">AWS S3</option>
-						<option value="azure">Azure Storage</option>
+						<option value="azure_blob">Azure Blob Storage</option>
 						<option value="google">Google Cloud Storage</option>
 						<option value="user_remote">User Remote</option>
 					</select>

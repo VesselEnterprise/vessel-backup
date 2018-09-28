@@ -2,6 +2,7 @@
 #define HTTPREQUEST_H
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace Vessel {

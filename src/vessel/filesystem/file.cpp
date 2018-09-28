@@ -578,3 +578,40 @@ void BackupFile::update_last_backup(const unsigned char* file_id)
     sqlite3_finalize(stmt);
 
 }
+
+std::string BackupFile::get_chunk(size_t offset, size_t length)
+{
+
+    size_t total_bytes = get_file_size();
+
+    //Prevent exception
+    if ( offset > total_bytes )
+    {
+        return "";
+    }
+
+    //If file has already been read and content was stored, return the existing data
+    if ( !m_content.empty() )
+    {
+        return m_content.substr(offset, length);
+    }
+
+    //Read file contents
+    std::ifstream infile( get_file_path(), std::ios::in | std::ios::binary );
+    if ( !infile.is_open() ) {
+        m_readable=false;
+        return "";
+    }
+
+    std::string chunk;
+    size_t bytes_to_read = ((offset+length) > total_bytes) ? (total_bytes-offset) : length;
+
+    infile.seekg( offset, std::ios::beg );
+    chunk.resize( length ); //Pre-allocate memory
+    infile.read( &chunk[0], bytes_to_read ); //Read contents
+
+    infile.close(); //Close file
+
+    return chunk;
+
+}

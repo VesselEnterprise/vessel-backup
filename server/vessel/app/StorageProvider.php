@@ -15,6 +15,10 @@ class StorageProvider extends Model
 
 		function getAccessKeyAttribute($value) {
 
+			if ( !$value ) {
+				return '';
+			}
+
 			$decrypted = null;
 
 			try {
@@ -45,6 +49,11 @@ class StorageProvider extends Model
 
 		public function getKeyName() {
 			return 'provider_id';
+		}
+
+		public function getKey()
+		{
+				return $this->provider_id_text;
 		}
 
 		public function toSearchableArray() {

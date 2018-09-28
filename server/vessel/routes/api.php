@@ -31,3 +31,7 @@ Route::delete('/upload/{id}', 'api\UploadController@destroy')->middleware('verif
 //AWS S3 Uploads
 Route::post('/upload/aws', 'api\AwsUploadController@initUpload')->middleware('verifyClientToken');
 Route::post('/upload/aws/sign', 'api\AwsUploadController@getSigningKey')->middleware('verifyClientToken');
+
+//Azure Uploads
+Route::post('/upload/azure', 'api\AzureUploadController@initUpload')->middleware('verifyClientToken');
+Route::post('/upload/azure/sign', 'api\AzureUploadController@getSignature')->middleware('verifyClientToken');

@@ -6,6 +6,7 @@ AwsS3Client::AwsS3Client(const StorageProvider& provider) : HttpClient(provider.
     m_http_verb = "PUT"; //Default for uploading new files
     m_part_size = BackupFile::get_chunk_size();
     m_remote_signing=true;
+    m_user_id = m_ldb->get_setting_str("user_id");
     init_amz_date();
 }
 
@@ -345,6 +346,12 @@ bool AwsS3Client::upload()
 
     //Empty file content from memory
     m_file_content.reset();
+
+    int status = get_http_status();
+
+    if ( status != 200 && status != 201 ) {
+        return false;
+    }
 
     return true;
 
@@ -752,7 +759,7 @@ void AwsS3Client::set_storage_provider( const StorageProvider& provider )
 void AwsS3Client::build_file_uri_path()
 {
 
-    m_uri_file_path = m_ldb->get_setting_str("user_id") + m_file.get_parent_path() + "/" + m_file.get_file_name();
+    m_uri_file_path = m_user_id + m_file.get_parent_path() + "/" + m_file.get_file_name();
 
     #ifdef _WIN32
         boost::replace_all(m_uri_file_path, "\\", "/");

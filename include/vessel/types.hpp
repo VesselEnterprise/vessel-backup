@@ -36,6 +36,7 @@ namespace Vessel {
             std::string description;
             std::string server;
             std::string access_id;
+            std::string access_key;
             std::string region;
             std::string bucket_name;
             std::string storage_path;

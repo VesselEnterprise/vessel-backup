@@ -116,7 +116,7 @@ class AppClientController extends Controller
 			$appClient->save();
 
 			//Get storage providers
-			$providers = App\StorageProvider::all();
+			$providers = App\StorageProvider::where('active', true)->get();
 			$appSettings = App\AppSetting::all();
 
 			return response()->json([

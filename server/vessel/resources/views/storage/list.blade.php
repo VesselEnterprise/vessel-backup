@@ -74,6 +74,7 @@
 					<tr>
 						<th class="no-sort"></th>
 						<th>Name</th>
+						<th>Status</th>
 						<th>Description</th>
 						<th>Type</th>
 						<th>Server</th>
@@ -89,6 +90,7 @@
 				        </div>
 							</td>
 							<td><a href="{{ route('storage.show', $provider->uuid_text) }}">{{ $provider->provider_name }}</td>
+							<td><span style="color: {{ $provider->active ? 'green' : 'red' }}">{{ $provider->active ? 'Active' : 'Disabled' }}</span></td>
 							<td>{{ $provider->description }}</td>
 							<td>{{ $provider->provider_type }}</td>
 							<td>{{ $provider->server }}</td>

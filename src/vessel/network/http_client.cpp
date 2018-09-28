@@ -292,7 +292,7 @@ void HttpClient::read_chunked_content( const boost::system::error_code& e, size_
     chunk_stream >> chunk_sz;
     */
 
-    std::cout << "Buffer size: " << m_response_buffer->size() << "; Bytes transferred: " << bytes_transferred << '\n';
+    //std::cout << "Buffer size: " << m_response_buffer->size() << "; Bytes transferred: " << bytes_transferred << '\n';
 
     std::string chunk_sz_s;
 
@@ -301,12 +301,14 @@ void HttpClient::read_chunked_content( const boost::system::error_code& e, size_
     //Read the chunk size
     std::getline(chunk_stream, chunk_sz_s);
 
+    //std::cout << "Chunk_sz_s: " << chunk_sz_s << '\n';
+
     //Remove carriage return
     boost::replace_all(chunk_sz_s, "\r", "");
 
     int chunk_sz = std::stoul(chunk_sz_s, nullptr, 16);
 
-    std::cout << "Read chunk size: " << chunk_sz << '\n';
+    //std::cout << "Read chunk size: " << chunk_sz << '\n';
 
     if ( chunk_sz <= 0 ) //There is no more data to read
     {
@@ -314,12 +316,12 @@ void HttpClient::read_chunked_content( const boost::system::error_code& e, size_
         return;
     }
 
-    std::cout << "Response buffer after read: " << m_response_buffer->size() << '\n';
+    //std::cout << "Response buffer after read: " << m_response_buffer->size() << '\n';
 
     int buffer_sz = m_response_buffer->size();
     int bytes_to_read = ( chunk_sz - buffer_sz ) + 2; //Add two for "\r\n" delimiter
 
-    std::cout << "Bytes to read: " << bytes_to_read << '\n';
+    //std::cout << "Bytes to read: " << bytes_to_read << '\n';
 
     //Consume the buffer up until the delimiter
     //m_response_buffer->consume(bytes_transferred);
@@ -455,18 +457,22 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         std::istream response_stream( m_response_buffer.get() );
         std::noskipws( response_stream ); //Don't skip white spaces
         std::string header;
-        while (std::getline(response_stream, header) && header != "\r") {
+        while (std::getline(response_stream, header) && header != "\r")
+        {
             m_header_data += header.append("\n");
+
+            //Add to header map
+            auto pos = header.find_first_of(":");
+            if ( pos != std::string::npos )
+            {
+
+                m_response_headers.insert( std::pair<std::string,std::string>( header.substr(0, pos), header.substr( pos+2) ) );
+            }
+
+
         }
 
         std::cout << "Read headers: " << '\n' << m_header_data << '\n';
-
-        //There may be some data in the buffer to consume
-        if (m_response_buffer->size() > 0) {
-
-            read_buffer_data();
-
-        }
 
         //Check for chunked transfer encoding
         if ( m_header_data.find("Transfer-Encoding: chunked") != std::string::npos ) {
@@ -490,6 +496,14 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         }
         else
         {
+
+            //There may be some data in the buffer to consume
+            if (m_response_buffer->size() > 0) {
+
+                read_buffer_data();
+
+            }
+
             // Start reading remaining data until EOF
             if ( m_use_ssl )
             {
@@ -515,7 +529,7 @@ void HttpClient::handle_read_content( const boost::system::error_code& e, size_t
 
     std::cout << "Read some content" << '\n';
 
-    if (!e)
+    if (!e || e == boost::asio::ssl::error::stream_truncated )
     {
         //Add to response data
         /*
@@ -531,6 +545,9 @@ void HttpClient::handle_read_content( const boost::system::error_code& e, size_t
         if ( m_use_ssl )
         {
             boost::asio::async_read(*m_ssl_socket, *m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+            if ( e == boost::asio::ssl::error::stream_truncated ) {
+                m_response_ec = boost::asio::error::eof;
+            }
         }
         else
         {
@@ -610,6 +627,7 @@ void HttpClient::clear_response()
 void HttpClient::clear_headers()
 {
     m_header_data.clear();
+    m_response_headers.clear();
 }
 
 void HttpClient::set_deadline(long seconds)
@@ -787,11 +805,11 @@ int HttpClient::send_http_request( const HttpRequest& request )
     //Close connection after response
     http_stream << "Connection: close\r\n\r\n";
 
+    std::cout << "Sending request:" << '\n' << http_stream.str() << '\n';
+
     if ( send_body ) {
         http_stream << request.get_body();
     }
-
-    std::cout << "Sending request:" << '\n' << http_stream.str() << '\n';
 
     //If client is already connected, disconnect before a new attempt
     if ( is_connected() ) {
@@ -813,7 +831,8 @@ int HttpClient::send_http_request( const HttpRequest& request )
 
     if ( m_http_logging )
     {
-        m_log->add_http_message(http_stream.str(), get_response(), http_status );
+        //Truncate logs > 16kb
+        m_log->add_http_message( ((http_stream.str().size() > 16000) ? http_stream.str().substr(0, 16000) : http_stream.str()), get_response(), http_status );
     }
 
     return http_status;
@@ -828,4 +847,14 @@ bool HttpClient::http_logging()
 void HttpClient::http_logging(bool flag)
 {
     m_http_logging = flag;
+}
+
+std::string HttpClient::get_header(const std::string& key)
+{
+    if ( m_response_headers.find(key) != m_response_headers.end() )
+    {
+        return m_response_headers[key];
+    }
+
+    return "";
 }

@@ -217,6 +217,13 @@ namespace Vessel {
                 */
                 std::string get_file_part(unsigned int num);
 
+                /*! \fn std::string get_chunk(size_t offset, size_t length);
+                    \brief
+                    \return Returns a part of the file content at the specified offset and length
+                */
+                std::string get_chunk(size_t offset, size_t length);
+
+
                 /*! \fn unsigned int get_total_parts();
                     \brief
                     \return Returns the total number of file parts based on the chunk size

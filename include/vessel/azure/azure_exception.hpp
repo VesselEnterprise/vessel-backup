@@ -15,6 +15,8 @@ namespace Vessel {
                 enum ErrorCode
                 {
                     NoError = 0,
+                    BadSignature,
+                    FileNotInitialized
                 };
 
                 AzureException(ErrorCode e, const std::string& msg) : _code(e)

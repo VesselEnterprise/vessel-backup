@@ -107,6 +107,7 @@ class StorageController extends Controller
 				$provider->region = $request->input('region');
 				$provider->priority = $request->input('priority');
 				$provider->description = $request->input('description');
+				$provider->active = filter_var($request->input('active'), FILTER_VALIDATE_BOOLEAN);
 				$provider->save();
 
 				return $this->index()->with(['success' => 'Storage Provider ' . $provider->provider_name . ' was updated successfully']);

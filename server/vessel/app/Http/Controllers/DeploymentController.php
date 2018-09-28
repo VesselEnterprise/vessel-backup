@@ -48,6 +48,7 @@ class DeploymentController extends Controller
 				$deployment->deployment_name = $request->input('deployment_name');
 				$deployment->expires_at = Carbon::parse( $request->input('expires_at') )->setTimezone('UTC');
 				$deployment->deployment_key = $request->input('deployment_key');
+				$deployment->never_expires = filter_var($request->input('never_expires'), FILTER_VALIDATE_BOOLEAN);
 				$deployment->save();
 
 				return $this->index();
@@ -89,6 +90,7 @@ class DeploymentController extends Controller
         $deployment = Deployment::find($id);
 				$deployment->deployment_name = $request->input('deployment_name');
 				$deployment->expires_at = Carbon::parse( $request->input('expires_at') )->setTimezone('UTC');
+				$deployment->never_expires = filter_var($request->input('never_expires'), FILTER_VALIDATE_BOOLEAN);
 				$deployment->save();
 
 				return $this->index();
