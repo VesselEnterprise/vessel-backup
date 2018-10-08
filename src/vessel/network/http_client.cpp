@@ -49,6 +49,7 @@ void HttpClient::set_defaults()
     m_timeout = boost::posix_time::seconds(60);
     m_verify_cert = true;
     m_connected = false;
+    m_content_length = 0;
 }
 
 void HttpClient::parse_url( const std::string& host )
@@ -215,6 +216,7 @@ void HttpClient::disconnect()
     catch ( const boost::system::system_error & e )
     {
         std::cout << "ASIO Socket error: " << e.what() << "\n";
+        //TODO: Add Logging
         m_conn_status = e.code();
     }
 
@@ -271,6 +273,7 @@ void HttpClient::handle_handshake(const boost::system::error_code& e )
     {
         m_ssl_good=false;
         m_conn_status = e;
+        //TODO: Add Logging
         throw HttpException(HttpException::HandshakeFailed, e.message() );
     }
 
@@ -342,7 +345,6 @@ void HttpClient::read_chunked_content( const boost::system::error_code& e, size_
     //Read any remaining data in the buffer
     if ( m_response_buffer->size() > 0 )
     {
-        std::cout << "Read the buffer data..." << '\n';
         read_buffer_data();
 
         //Remove the delimiter from the end of data "\r\n"
@@ -436,6 +438,7 @@ void HttpClient::handle_response( const boost::system::error_code& e )
     }
     else if ( e != boost::asio::error::eof )
     {
+        //TODO: Add Logging
         std::cout << "ASIO Response Error: " << e << "\n";
     }
 
@@ -472,7 +475,7 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
 
         }
 
-        std::cout << "Read headers: " << '\n' << m_header_data << '\n';
+        //std::cout << "Read headers: " << '\n' << m_header_data << '\n';
 
         //Check for chunked transfer encoding
         if ( m_header_data.find("Transfer-Encoding: chunked") != std::string::npos ) {
@@ -518,6 +521,7 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
     }
     else
     {
+        //TODO: Add Logging
         std::cout << "ASIO Read Header Error: " << e << "\n";
         m_response_ec = e;
     }
@@ -528,6 +532,7 @@ void HttpClient::handle_read_content( const boost::system::error_code& e, size_t
 {
 
     std::cout << "Read some content" << '\n';
+    //TODO: Add bytes per second / transfer speed output
 
     if (!e || e == boost::asio::ssl::error::stream_truncated )
     {
@@ -577,7 +582,7 @@ void HttpClient::check_deadline()
     if (m_deadline_timer->expires_at() <= boost::asio::deadline_timer::traits_type::now())
     {
 
-        std::cout << "Deadline has expired!" << "\n";
+        //std::cout << "Deadline has expired!" << "\n";
 
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled. This allows the blocked
@@ -686,6 +691,7 @@ void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_
     }
     else
     {
+        //TODO: Add Logging Here
         std::cout << "ASIO Write Error: " << e.message() << "\n";
         m_response_ec = e;
     }
@@ -713,6 +719,7 @@ void HttpClient::cleanup()
     m_response_buffer.reset( new boost::asio::streambuf() );
     clear_response();
     clear_headers();
+    m_content_length=0;
 }
 
 /*
@@ -762,6 +769,7 @@ int HttpClient::send_http_request( const HttpRequest& request )
     std::string authorization = request.get_auth();
     std::string http_method = request.get_method();
     std::string content_type = request.get_content_type();
+    m_content_length = request.get_body_length();
 
     //Build the HTTP Request
     http_stream << http_method << " " << request.get_url() << " HTTP/1.1\r\n";
@@ -805,7 +813,7 @@ int HttpClient::send_http_request( const HttpRequest& request )
     //Close connection after response
     http_stream << "Connection: close\r\n\r\n";
 
-    std::cout << "Sending request:" << '\n' << http_stream.str() << '\n';
+    //std::cout << "Sending request:" << '\n' << http_stream.str() << '\n';
 
     if ( send_body ) {
         http_stream << request.get_body();
@@ -857,4 +865,14 @@ std::string HttpClient::get_header(const std::string& key)
     }
 
     return "";
+}
+
+size_t HttpClient::get_content_length()
+{
+    return m_content_length;
+}
+
+int HttpClient::get_port()
+{
+    return m_port;
 }

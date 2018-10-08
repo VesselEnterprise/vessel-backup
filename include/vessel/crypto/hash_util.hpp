@@ -26,7 +26,7 @@ namespace Vessel {
                 Hash();
                 ~Hash();
 
-                static std::unique_ptr<unsigned char*> get_sha1_hash_raw( const std::string& data );
+                static std::shared_ptr<unsigned char> get_sha1_hash_ptr( const std::string& data );
                 static std::string get_sha1_hash(const std::string& data);
                 static std::string get_sha256_hash(const std::string& data);
                 static std::string get_md5_hash(const std::string& data, bool base64=false);

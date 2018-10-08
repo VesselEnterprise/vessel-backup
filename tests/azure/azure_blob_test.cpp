@@ -14,13 +14,12 @@ BOOST_AUTO_TEST_CASE(AzureBlobTest)
     StorageProvider provider;
     std::string file_path;
 
-    std::cout << "Enter file path to upload (file must be greater than 50MB): " << '\n';
+    std::cout << "Enter file path to upload: " << '\n';
     std::cin >> file_path;
 
     std::cout << '\n';
 
     BackupFile file(file_path);
-    int total_parts = file.get_total_parts();
 
     std::cout << "Enter Azure Server URL (https://<your-account-name>.blob.core.windows.net): " << '\n';
     std::cin >> provider.server;
@@ -45,20 +44,12 @@ BOOST_AUTO_TEST_CASE(AzureBlobTest)
     AzureClient client(provider);
     client.remote_signing(false);
     client.init_upload(file);
-    client.init_block();
 
-    for ( int i=1; i <= total_parts; i++ )
-    {
-        bool block_uploaded = client.upload_part(i);
-        BOOST_TEST(block_uploaded, "Failed to upload blob block");
-        std::cout << "Uploaded Part# " << i << '\n';
-    }
-
-    bool complete = client.complete_multipart_upload(total_parts);
+    bool complete = client.upload();
 
     BOOST_TEST(complete, "Failed to complete the block upload");
 
-    std::cout << "Successfully uploaded the following blocks:" << '\n' << client.get_block_list();
+    std::cout << "Successfully uploaded " << file.get_file_name() << '\n';
 
 }
 

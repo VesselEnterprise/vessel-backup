@@ -82,7 +82,7 @@ std::string AzureClient::get_canonical_resources()
     if ( m_query_params.find("blockid") != m_query_params.end() )
     {
         ss << "\n";
-        ss << "blockid:" << m_block_id << "\ncomp:block";
+        ss << "blockid:" << m_block_id << "\ncomp:block"; //Block Id must be URL encoded
     }
     else if ( m_query_params.find("comp") != m_query_params.end() )
     {
@@ -161,7 +161,7 @@ std::string AzureClient::get_string_to_sign()
     ss << get_canonical_headers();
     ss << get_canonical_resources();
 
-    std::cout << "StringToSign: " << '\n' << ss.str() << '\n';
+    //std::cout << "StringToSign: " << '\n' << ss.str() << '\n';
 
     return ss.str();
 
@@ -302,12 +302,12 @@ bool AzureClient::upload()
     request.set_body( *m_content_body );
     request.accept("application/json");
 
-    send_http_request(request);
+    int status = send_http_request(request);
 
-    std::cout << "HTTP Status: " << get_http_status() << '\n';
-    std::cout << get_response() << '\n';
+    //std::cout << "HTTP Status: " << status << '\n';
+    //std::cout << get_response() << '\n';
 
-    if ( get_http_status() != 200 || get_http_status() != 201 ) {
+    if ( status != 200 && status != 201 ) {
         return false;
     }
 
@@ -326,7 +326,7 @@ bool AzureClient::upload_part(int part_number)
     m_content_md5 = Hash::get_md5_hash(*m_content_body, true);
     m_content_length = m_content_body->size();
     m_content_type.clear(); //Content-Type should not be passed with blocks
-    m_block_id = Hash::get_base64( std::to_string(part_number) );
+    m_block_id = Hash::get_base64( get_padded_block_id(std::to_string(part_number)) );
     m_xms_blob_type.clear(); //Do not pass when uploading a block chunk
 
     m_query_params.insert( std::pair<std::string,std::string>("comp", "block") );
@@ -338,6 +338,9 @@ bool AzureClient::upload_part(int part_number)
     //Create an HTTP Request
     HttpRequest request;
 
+    //std::cout << "Block Id: " << m_block_id << '\n';
+    //std::cout << "Encoded Block Id: " << encode_uri(m_block_id) << '\n';
+
     request.set_method("PUT");
     request.set_url("/" + m_storage_provider.bucket_name + "/" + encode_uri( m_file_uri_path ) + "?comp=block&blockid=" + encode_uri(m_block_id) );
     request.add_header("Content-MD5: " + m_content_md5);
@@ -348,9 +351,9 @@ bool AzureClient::upload_part(int part_number)
     request.set_body( *m_content_body );
     request.accept("application/json");
 
-    send_http_request(request);
+    int status = send_http_request(request);
 
-    if ( get_http_status() != 200 && get_http_status() != 201 ) {
+    if ( status != 200 && status != 201 ) {
         return false;
     }
 
@@ -390,9 +393,9 @@ bool AzureClient::init_block()
     request.set_auth_header("SharedKey " + m_storage_provider.access_id + ":" + get_ms_signature());
     request.accept("application/json");
 
-    send_http_request(request);
+    int status = send_http_request(request);
 
-    if ( get_http_status() != 200 || get_http_status() != 201 ) {
+    if ( status != 200 && status != 201 ) {
         return false;
     }
 
@@ -423,12 +426,12 @@ bool AzureClient::complete_multipart_upload(int total_parts)
 
     for ( int i=1; i <= total_parts; i++ )
     {
-        payload += "<Latest>" + Hash::get_base64( std::to_string(i) ) + "</Latest>";
+        payload += "<Latest>" + Hash::get_base64( get_padded_block_id(std::to_string(i)) ) + "</Latest>";
     }
 
     payload += "</BlockList>";
 
-    std::cout << "Payload:\n" << payload << '\n';
+    //std::cout << "Payload:\n" << payload << '\n';
 
     m_content_body = std::make_shared<std::string>(payload);
     m_content_md5 = Hash::get_md5_hash(*m_content_body, true);
@@ -495,8 +498,8 @@ std::string AzureClient::get_block_list()
 
     send_http_request(request);
 
-    std::cout << "HTTP Status: " << get_http_status() << '\n';
-    std::cout << get_response() << '\n';
+    //std::cout << "HTTP Status: " << get_http_status() << '\n';
+    //std::cout << get_response() << '\n';
 
     if ( get_http_status() != 200 && get_http_status() != 201 ) {
         return "";
@@ -509,6 +512,8 @@ std::string AzureClient::get_block_list()
 
 std::string AzureClient::api_get_signature()
 {
+
+    Log::get_log().add_message("Sent StringToSign for remote signing:\n" + get_string_to_sign(), "File Upload");
 
     std::unique_ptr<HttpClient> vessel = std::make_unique<HttpClient>( m_ldb->get_setting_str("master_server") );
 
@@ -537,4 +542,26 @@ std::string AzureClient::api_get_signature()
 
     return document["signature"].GetString();
 
+}
+
+std::string AzureClient::last_request_id()
+{
+    return get_header("x-ms-request-id");
+}
+
+std::string AzureClient::get_upload_id()
+{
+    return m_upload_id;
+}
+
+void AzureClient::set_upload_id(const std::string& upload_id)
+{
+    m_upload_id = upload_id;
+}
+
+std::string AzureClient::get_padded_block_id(const std::string& id)
+{
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(7) << id;
+    return ss.str();
 }

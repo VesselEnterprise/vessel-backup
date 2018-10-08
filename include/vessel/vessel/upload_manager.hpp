@@ -10,6 +10,7 @@
 #include <vessel/filesystem/file_upload.hpp>
 #include <vessel/vessel/queue_manager.hpp>
 #include <vessel/aws/aws_s3_client.hpp>
+#include <vessel/azure/azure_client.hpp>
 #include <vessel/vessel/vessel_client.hpp>
 
 using namespace Vessel::Types;
@@ -65,6 +66,25 @@ namespace Vessel
         private:
             std::shared_ptr<LocalDatabase> m_database;
             std::shared_ptr<AwsS3Client> m_client;
+
+            void init_upload(const BackupFile& file);
+
+    };
+
+    class AzureUpload : public UploadInterface
+    {
+
+        public:
+
+            AzureUpload();
+
+            void upload_file(FileUpload& upload);
+            void resume_uploads();
+            void complete_upload();
+
+        private:
+            std::shared_ptr<LocalDatabase> m_database;
+            std::shared_ptr<AzureClient> m_client;
 
             void init_upload(const BackupFile& file);
 

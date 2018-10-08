@@ -1,0 +1,3 @@
+// the configured options and settings for Vessel
+#define Vessel_VERSION_MAJOR @Vessel_VERSION_MAJOR@
+#define Vessel_VERSION_MINOR @Vessel_VERSION_MINOR@

@@ -2,6 +2,7 @@
 #define AZURE_HPP
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -82,6 +83,29 @@ namespace Vessel {
                 */
                 void remote_signing(bool flag);
 
+                /*! \fn std::string last_request_id();
+                    \brief Returns the last Azure request id
+                    \return Returns the last Azure request id
+                */
+                std::string last_request_id();
+
+                /*! \fn std::string get_upload_id();
+                    \brief Returns the upload ID for Azure Blob Upload
+                    \return Returns the upload ID for the Azure Blob Upload
+                */
+                std::string get_upload_id();
+
+                /*! \fn std::string set_upload_id(const std::string& upload_id);
+                    \brief Sets the upload/request id of the current Azure Blob upload
+                */
+                void set_upload_id(const std::string& upload_id);
+
+                /*! \fn std::string get_padded_block_id(const std::string& id);
+                    \brief Pads the block id (integer part number) by leading zeroes
+                    \return RPads the block id (integer part number) by leading zeroes
+                */
+                std::string get_padded_block_id(const std::string& id);
+
             private:
                 bool m_remote_signing;
                 std::string m_xms_date;
@@ -96,6 +120,7 @@ namespace Vessel {
                 std::string m_user_id;
                 std::string m_file_uri_path;
                 std::string m_block_id;
+                std::string m_upload_id;
                 std::map<std::string,std::string> m_headers;
                 std::map<std::string,std::string> m_query_params;
                 std::shared_ptr<std::string> m_content_body;

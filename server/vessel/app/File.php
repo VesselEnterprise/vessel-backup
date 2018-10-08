@@ -37,6 +37,10 @@ class File extends Model
 			return 'file_id';
 		}
 
+		public function getKey() {
+			return $this->file_id_text;
+		}
+
 		public function getHashAttribute($value) {
 			return bin2hex($value);
 		}

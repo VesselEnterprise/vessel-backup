@@ -79,7 +79,7 @@ int main(int argc, char* argv[] )
             sqlite3_stmt* stmt;
             std::string query = "INSERT OR REPLACE INTO backup_mime_type VALUES (?1,?2)";
 
-            if ( sqlite3_prepare_v2(db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+            if ( sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
                 return false;
 
             sqlite3_bind_text(stmt, 1, mime_type.c_str(), mime_type.size(), 0 );

@@ -19,13 +19,12 @@ int main(int argc, char** argv)
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
         ("help", "Display supported options")
-        ("auth-token", boost::program_options::value<std::string>(), "Sets the user auth token")
-        ("with-client-token", boost::program_options::value<std::string>(), "Sets the client token")
-        ("with-file-logging", boost::program_options::value<std::string>(), "Enables saving log output to flat files")
-        ("with-sql-logging", boost::program_options::value<std::string>(), "Enables saving log output to SQLite database")
+        ("client-token", boost::program_options::value<std::string>(), "Sets the client token")
+        ("with-file-logging", boost::program_options::value<std::string>(), "Enables saving log output to flat files") //TODO
+        ("with-sql-logging", boost::program_options::value<std::string>(), "Enables saving log output to SQLite database") //TODO
         ("with-http-logging", boost::program_options::value<std::string>(), "Enables the logging of HTTP requests and responses")
-        ("with-deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
-        ("with-scan-dir", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
+        ("deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
+        ("scan-dir", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
     ;
 
     boost::program_options::variables_map vm;
@@ -38,7 +37,8 @@ int main(int argc, char** argv)
     }
 
     //Enable HTTP Logging
-    if ( vm.count("with-http-logging") ) {
+    if ( vm.count("with-http-logging") )
+    {
         HttpClient::http_logging(true);
     }
 
@@ -53,6 +53,32 @@ int main(int argc, char** argv)
 
     //Update global settings
     db->update_global_settings();
+
+    //Check for custom initial scan directory
+    std::string scan_dir = db->get_setting_str("home_folder");
+    if ( vm.count("scan-dir") )
+    {
+        std::string tmp_dir = vm["scan-dir"].as<std::string>();
+        if ( !boost::filesystem::exists(tmp_dir) )
+        {
+            throw FileException(FileException::ErrorCode::DirNotFound, "The scan directory provided does not exist: " + tmp_dir);
+        }
+        scan_dir = tmp_dir;
+    }
+
+    //Check Deployment Key
+    if ( vm.count("deployment-key") )
+    {
+        db->update_setting<std::string>("deployment_key", vm["deployment-key"].as<std::string>() );
+        log->add_message("Updated deployment key on app init", "Client Install");
+    }
+
+    //Check Client Token
+    if ( vm.count("client-token") )
+    {
+        db->update_setting<std::string>("client_token", vm["client-token"].as<std::string>() );
+        log->add_message("Updated client token on app init", "Client Install");
+    }
 
     std::string vessel_host = db->get_setting_str("master_server");
 
@@ -85,14 +111,14 @@ int main(int argc, char** argv)
 
     //Create an empty instance of BackupDirectory for initial scan
     //TODO: This can be overridden by boost::program_options
-    BackupDirectory scan_dir ("");
+    BackupDirectory directory (scan_dir);
 
     //Add a new thread to the pool which scans the filesystem on intervals
     io_service.post([&](){
         for(;;)
         {
             //Create a file iterator object to scan the filesystem
-            std::unique_ptr<FileIterator> file_iterator = std::make_unique<FileIterator>(scan_dir);
+            std::unique_ptr<FileIterator> file_iterator = std::make_unique<FileIterator>(directory);
 
             try
             {
@@ -103,10 +129,12 @@ int main(int argc, char** argv)
                 log->add_exception(ex);
             }
 
+            //Free memory before sleep
+            file_iterator.reset();
+
             boost::this_thread::sleep( boost::posix_time::seconds(900) );
             std::cout << "Restarting scan after 15 minutes..." << '\n';
 
-            file_iterator.reset();
         }
     });
 
@@ -114,7 +142,6 @@ int main(int argc, char** argv)
     io_service.post([&](){
         for(;;)
         {
-
             //Create new upload QueueManager
             std::unique_ptr<QueueManager> queue_manager = std::make_unique<QueueManager>();
 
@@ -122,7 +149,7 @@ int main(int argc, char** argv)
             {
                 //Rebuild the queue if no uploads are remaining
                 if ( queue_manager->get_total_pending() == 0 ) {
-                    queue_manager->rebuild_queue();
+                    //queue_manager->rebuild_queue();
                 }
             }
             catch( const std::exception& ex )
@@ -130,10 +157,12 @@ int main(int argc, char** argv)
                 log->add_exception(ex);
             }
 
+            //Free memory before sleep
+            queue_manager.reset();
+
             boost::this_thread::sleep( boost::posix_time::seconds(10) );
             std::cout << "Restarting queue rebuild after 10 seconds..." << '\n';
 
-            queue_manager.reset();
         }
     });
 
@@ -152,7 +181,7 @@ int main(int argc, char** argv)
 
             try
             {
-                upload_manager->run_uploader();
+                //upload_manager->run_uploader();
             }
             catch( const std::exception& ex )
             {
@@ -161,11 +190,11 @@ int main(int argc, char** argv)
 
             }
 
+            //Free memory before sleep
             upload_manager.reset();
 
             boost::this_thread::sleep( boost::posix_time::seconds(5) );
             std::cout << "Restarting file uploader after 5 seconds..." << '\n';
-
 
         }
 

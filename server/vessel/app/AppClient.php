@@ -36,6 +36,11 @@ class AppClient extends Model
 		return 'client_id';
 	}
 
+	public function getKey()
+	{
+			return $this->client_id_text;
+	}
+
 	function toSearchableArray() {
 		return [
 			'client_id' => $this->client_id_text,

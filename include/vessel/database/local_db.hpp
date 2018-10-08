@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <sqlite3.h>
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -76,11 +77,13 @@ namespace Vessel{
                 void start_transaction();
                 void end_transaction();
 
-                void purge_file(const unsigned char* file_id);
+                void purge_file( unsigned char* file_id );
 
                 sqlite3* get_handle();
 
                 void purge_upload(unsigned int upload_id);
+
+                static std::shared_ptr<unsigned char> get_binary_id(unsigned char* id);
 
             private:
 

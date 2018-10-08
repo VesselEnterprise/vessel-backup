@@ -16,7 +16,8 @@ namespace Vessel {
                 {
                     NoError = 0,
                     FileNotFound,
-                    ReadError
+                    ReadError,
+                    DirNotFound
                 };
 
                 FileException(ErrorCode e, const std::string& msg) : _code(e)

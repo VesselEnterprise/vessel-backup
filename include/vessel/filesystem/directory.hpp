@@ -11,6 +11,8 @@
 
 #include <vessel/crypto/hash_util.hpp>
 
+using namespace Vessel::Utilities;
+
 namespace fs = boost::filesystem;
 
 namespace Vessel {
@@ -34,7 +36,6 @@ namespace Vessel {
             public:
                 BackupDirectory(const boost::filesystem::path& fp );
                 BackupDirectory(const BackupDirectory& bd );
-                ~BackupDirectory();
 
                 /*! \fn void set_path(const std::string& fp);
                     \brief Assigns a new directory path to the object. Setting the path triggers all of the associated member attributes and variables to be updated with private method update_attributes()
@@ -64,11 +65,11 @@ namespace Vessel {
                 */
                 std::string get_unique_id() const;
 
-                /*! \fn std::unique_ptr<unsigned char*> get_unique_id_raw() const;
+                /*! \fn std::shared_ptr<unsigned char> get_unique_id() const;
                     \brief
                     \return Returns a raw SHA-1 hash as a shared pointer.
                 */
-                std::unique_ptr<unsigned char*> get_unique_id_raw() const;
+                std::shared_ptr<unsigned char> get_unique_id_ptr() const;
 
                 /*! \fn unsigned int get_directory_id();
                     \brief
@@ -123,6 +124,7 @@ namespace Vessel {
                 std::string m_unique_id; //!< SHA-1 hash of the file path
                 dir_attrs m_dir_attrs; //!< Struct containing common directory attributes
                 unsigned int m_directory_id; //!< Database ID of the directory
+                std::shared_ptr<unsigned char> m_unique_id_ptr;
 
                 /*! \fn void update_attributes()
                     \brief Updates private member variables for directory properties. Called in constructor and when assigning an object a new file path

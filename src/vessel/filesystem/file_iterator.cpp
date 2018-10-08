@@ -76,25 +76,19 @@ void FileIterator::scan()
     try
     {
 
+        //Get Last Scan Time
+        auto last_scan_time = m_ldb->get_setting_int("last_file_scan");
+
+        //Insert 1000 records at a time to limit memory consumption of the page file
+        int max_inserts = 1000;
+        int total_inserts = 0;
+
         m_ldb->start_transaction(); //Speed up processing
 
         for ( ; m_itr != m_itr_end; ++m_itr )
         {
 
             const fs::path& p = m_itr->path();
-
-            /*
-            std::cout << "Testing: " << *m_itr << '\n';
-            std::cout << "Level: " << m_itr.level() << '\n';
-            std::cout << "Filename:" << m_itr->path().filename() << '\n';
-            std::cout << "Stem:" << m_itr->path().stem() << '\n';
-            std::cout << "Extension:" << m_itr->path().extension() << '\n';
-            std::cout << "Generic Path:" << m_itr->path().generic_path() << '\n';
-            std::cout << "Relative Path:" << m_itr->path().relative_path() << '\n';
-            std::cout << "Root Path:" << m_itr->path().root_path() << '\n';
-            std::cout << "Parent Path:" << m_itr->path().parent_path() << '\n';
-            */
-
 
             std::cout << "Scanning " << *m_itr << "..." << std::endl;
 
@@ -133,6 +127,13 @@ void FileIterator::scan()
                     //Create new file object
                     File::BackupFile bf(p);
 
+                    //If Last Write Time is before last scan, skip
+                    if ( bf.get_last_modified() <= last_scan_time )
+                    {
+                        m_log->add_message("Skipped file. Last modified is before last scan time: " + p.string(), "File Scanner");
+                        continue;
+                    }
+
                     //Skip empty files
                     if ( bf.get_file_size() == 0 )
                     {
@@ -163,6 +164,14 @@ void FileIterator::scan()
 
                     std::cout << "Added file " << p.filename().string() << '\n';
 
+                    //Start a new transaction
+                    if ( ++total_inserts >= max_inserts )
+                    {
+                        m_ldb->end_transaction();
+                        m_ldb->start_transaction();
+                        total_inserts = 0;
+                    }
+
                 }
                 else
                 {
@@ -177,6 +186,7 @@ void FileIterator::scan()
 
         }
 
+        //Always end the transaction
         m_ldb->end_transaction();
 
     }
@@ -191,6 +201,9 @@ void FileIterator::scan()
         return;
 
     }
+
+    //Update file last scan time
+    m_ldb->update_setting<int>("last_file_scan", (int)std::time(nullptr) );
 
 }
 
@@ -234,7 +247,7 @@ bool FileIterator::is_ignore_dir(const boost::filesystem::path& p, int level )
     sqlite3_stmt* stmt;
     std::string query = "SELECT ignore_id FROM backup_ignore_dir WHERE name=?1 AND level=?2";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
     sqlite3_bind_text(stmt, 1, folder_name.c_str(), folder_name.size(), 0 );
@@ -258,7 +271,7 @@ bool FileIterator::is_ignore_ext(const std::string& ext )
     sqlite3_stmt* stmt;
     std::string query = "SELECT extension FROM backup_ignore_ext WHERE extension=LOWER(?1)";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
     sqlite3_bind_text(stmt, 1, ext.c_str(), ext.size(), 0 );
@@ -281,14 +294,14 @@ int FileIterator::add_file( const BackupFile& bf )
     sqlite3_stmt* stmt;
     std::string query = "REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified) VALUES(?1,?2,?3,?4,?5,?6)";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
-    unsigned char* file_unique_id = *bf.get_unique_id_raw().get();
+    std::shared_ptr<unsigned char> file_id = bf.get_file_id();
     std::string file_name = bf.get_file_name();
     std::string file_type = bf.get_file_type();
 
-    sqlite3_bind_blob(stmt, 1, file_unique_id, sizeof(file_unique_id), 0 );
+    sqlite3_bind_blob(stmt, 1, file_id.get(), sizeof(file_id.get()), 0 );
     sqlite3_bind_text(stmt, 2, file_name.c_str(), file_name.size(), 0 );
     sqlite3_bind_text(stmt, 3, file_type.c_str(), file_type.size(), 0 );
     sqlite3_bind_int(stmt, 4, bf.get_file_size() );
@@ -310,13 +323,13 @@ int FileIterator::add_directory( const BackupDirectory& bd )
     sqlite3_stmt* stmt;
     std::string query = "REPLACE INTO backup_directory (directory_id,directory_hash,path,filesize,last_modified) VALUES((SELECT directory_id FROM backup_directory WHERE directory_hash=?1),?1,?2,?3,?4)";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
-    unsigned char* unique_id = *bd.get_unique_id_raw().get();
+    std::shared_ptr<unsigned char> unique_id = bd.get_unique_id_ptr();
     std::string dirpath = bd.get_canonical_path();
 
-    sqlite3_bind_blob(stmt, 1, unique_id, sizeof(unique_id), 0 );
+    sqlite3_bind_blob(stmt, 1, unique_id.get(), sizeof(unique_id.get()), 0 );
     sqlite3_bind_text(stmt, 2, dirpath.c_str(), dirpath.size(), 0 );
     sqlite3_bind_int(stmt, 3, bd.get_file_size() );
     sqlite3_bind_int(stmt, 4, bd.get_last_modified() );

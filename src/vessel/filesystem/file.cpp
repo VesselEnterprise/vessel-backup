@@ -12,20 +12,21 @@ BackupFile::BackupFile(const fs::path& fp ) : m_file_path(fp)
     update_attributes();
 }
 
-BackupFile::BackupFile(const unsigned char* file_id )
+BackupFile::BackupFile( std::shared_ptr<unsigned char> file_id )
 {
 
+    //Set the file id
     m_file_id = file_id;
 
     sqlite3_stmt* stmt;
 
     std::string query = "SELECT a.filename,a.file_ext,a.filesize,a.directory_id,a.last_modified,b.path FROM backup_file AS a INNER JOIN backup_directory AS b ON a.directory_id=b.directory_id WHERE a.file_id=?1";
 
-    if ( sqlite3_prepare_v2(LocalDatabase::get_database().get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
-        throw FileException(FileException::FileNotFound, "File does not exist in database");
+    if ( sqlite3_prepare_v2(LocalDatabase::get_database().get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
+        throw FileException(FileException::FileNotFound, "Error querying for database file");
     }
 
-    sqlite3_bind_blob(stmt, 1, m_file_id, sizeof(m_file_id), 0);
+    sqlite3_bind_blob(stmt, 1, file_id.get(), sizeof(file_id.get()), 0);
 
     if ( sqlite3_step(stmt) != SQLITE_ROW ) {
         throw FileException(FileException::FileNotFound, "File does not exist in database");
@@ -41,7 +42,6 @@ BackupFile::BackupFile(const unsigned char* file_id )
     m_file_attrs.mime_type = find_mime_type(m_file_attrs.file_type);
     m_file_attrs.file_size = (unsigned long)sqlite3_column_int(stmt,2);
     m_file_attrs.last_write_time = (unsigned long)sqlite3_column_int(stmt, 4);
-    m_unique_id = calculate_unique_id();
     m_directory_id = (int)sqlite3_column_int(stmt, 3);
 
     try
@@ -54,12 +54,13 @@ BackupFile::BackupFile(const unsigned char* file_id )
         Log::get_log().add_error( std::string("File does not exist: ") + ex.what(), "Filesystem");
     }
 
+    //Set string file id
+    m_file_id_s = Hash::get_sha1_hash(get_canonical_path());
+
     //Cleanup
     sqlite3_finalize(stmt);
 
 }
-
-BackupFile::~BackupFile() {}
 
 void BackupFile::update_attributes()
 {
@@ -72,7 +73,8 @@ void BackupFile::update_attributes()
         m_file_attrs.canonical_path = boost::filesystem::canonical(m_file_path).string();
         m_file_attrs.file_type = m_file_path.extension().string();
         m_file_attrs.mime_type = find_mime_type(m_file_attrs.file_type);
-        m_unique_id = calculate_unique_id();
+        m_file_id = Hash::get_sha1_hash_ptr(get_canonical_path());
+        m_file_id_s = Hash::get_sha1_hash(get_canonical_path());
 
         try
         {
@@ -81,6 +83,7 @@ void BackupFile::update_attributes()
         catch (const fs::filesystem_error& e )
         {
             m_file_attrs.file_size = 0;
+            Log::get_log().add_error( std::string("Unable to determine file size: " + m_file_attrs.file_name + " (") + e.what() + ")", "Filesystem");
         }
 
         try
@@ -90,7 +93,7 @@ void BackupFile::update_attributes()
         catch (const fs::filesystem_error & e )
         {
             m_file_attrs.last_write_time = 0;
-            //Add error log here?
+            Log::get_log().add_error( std::string("Unable to get file last write time: " + m_file_attrs.file_name + " (") + e.what() + ")", "Filesystem");
         }
 
     }
@@ -376,26 +379,6 @@ std::string BackupFile::get_file_contents()
 
 }
 
-std::string BackupFile::calculate_unique_id() const
-{
-        SHA1 hash;
-        std::string digest;
-
-        StringSource s(get_canonical_path(), true, new HashFilter(hash, new HexEncoder( new StringSink(digest), false ) ) );
-
-        return digest;
-}
-
-std::string BackupFile::get_unique_id() const
-{
-    return m_unique_id;
-}
-
-std::unique_ptr<unsigned char*> BackupFile::get_unique_id_raw() const
-{
-    return Hash::get_sha1_hash_raw( get_canonical_path() );
-}
-
 unsigned int BackupFile::get_directory_id() const
 {
     return m_directory_id;
@@ -406,9 +389,14 @@ void BackupFile::set_directory_id(unsigned int id)
     m_directory_id = id;
 }
 
-const unsigned char* BackupFile::get_file_id() const
+std::shared_ptr<unsigned char> BackupFile::get_file_id() const
 {
     return m_file_id;
+}
+
+std::string BackupFile::get_file_id_text() const
+{
+    return m_file_id_s;
 }
 
 void BackupFile::set_chunk_size(size_t chunk_sz)
@@ -494,8 +482,8 @@ std::shared_ptr<BackupFile> BackupFile::get_compressed_copy()
     const std::string tmp_file = ("tmp/" + get_file_name() + ".tmp");
     if ( !fs::exists(tmp_file) )
     {
-        Compressor* c = new Compressor();
-        c->compress_file( get_file_path(), tmp_file );
+        Compressor c;
+        c.compress_file( get_file_path(), tmp_file );
     }
 
     return std::make_shared<BackupFile>(tmp_file);
@@ -514,7 +502,7 @@ std::string BackupFile::find_mime_type( const std::string& ext )
     sqlite3_stmt* stmt;
     std::string query = "SELECT mime FROM backup_mime_type WHERE ext=LOWER(?1)";
 
-    if ( sqlite3_prepare_v2(ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return "";
 
     sqlite3_bind_text(stmt, 1, ext.c_str(), ext.size(), 0 );
@@ -550,12 +538,7 @@ void BackupFile::update_last_backup()
     update_last_backup( get_file_id() );
 }
 
-void BackupFile::update_last_backup(const BackupFile& file)
-{
-    update_last_backup( file.get_file_id() );
-}
-
-void BackupFile::update_last_backup(const unsigned char* file_id)
+void BackupFile::update_last_backup(std::shared_ptr<unsigned char> file_id)
 {
 
     std::time_t now = std::time(nullptr);
@@ -563,12 +546,12 @@ void BackupFile::update_last_backup(const unsigned char* file_id)
     sqlite3_stmt* stmt;
     std::string query = "UPDATE backup_file SET last_backup_time=?1 WHERE file_id=?2";
 
-    if ( sqlite3_prepare_v2(LocalDatabase::get_database().get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
+    if ( sqlite3_prepare_v2(LocalDatabase::get_database().get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
         Log::get_log().add_error("Unable to set file last backup time: " + LocalDatabase::get_database().get_last_err(), "File Backup");
     }
 
     sqlite3_bind_int(stmt, 1, now );
-    sqlite3_bind_blob(stmt, 2, file_id, sizeof(file_id), 0 );
+    sqlite3_bind_blob(stmt, 2, file_id.get(), sizeof(file_id.get()), 0 );
 
     if ( sqlite3_step(stmt) != SQLITE_DONE ) {
         Log::get_log().add_error("Unable to set file last backup time: " + LocalDatabase::get_database().get_last_err(), "File Backup");

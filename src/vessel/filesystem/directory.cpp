@@ -12,11 +12,6 @@ BackupDirectory::BackupDirectory(const BackupDirectory& bd) :  m_dir_path(bd.get
     update_attributes();
 }
 
-BackupDirectory::~BackupDirectory()
-{
-
-}
-
 void BackupDirectory::update_attributes()
 {
     if ( fs::exists(m_dir_path) )
@@ -27,6 +22,8 @@ void BackupDirectory::update_attributes()
         m_dir_attrs.parent_path = m_dir_path.parent_path().string();
         m_dir_attrs.canonical_path = boost::filesystem::canonical(m_dir_path).string();
         m_unique_id = calculate_unique_id();
+        m_unique_id_ptr.reset();
+        m_unique_id_ptr = Hash::get_sha1_hash_ptr(m_dir_attrs.canonical_path);
 
         try
         {
@@ -118,10 +115,9 @@ std::string BackupDirectory::get_unique_id() const
     return m_unique_id;
 }
 
-std::unique_ptr<unsigned char*> BackupDirectory::get_unique_id_raw() const
+std::shared_ptr<unsigned char> BackupDirectory::get_unique_id_ptr() const
 {
-    using namespace Vessel::Utilities;
-    return Hash::get_sha1_hash_raw(get_canonical_path());
+    return m_unique_id_ptr;
 }
 
 unsigned int BackupDirectory::get_directory_id() const

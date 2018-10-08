@@ -45,7 +45,6 @@ namespace Vessel {
             public:
 
                 AwsS3Client(const StorageProvider & provider);
-                ~AwsS3Client() {}
 
                 enum AwsFlags
                 {
@@ -147,12 +146,10 @@ namespace Vessel {
             private:
                 LocalDatabase* m_ldb;
                 BackupFile m_file;
-                std::shared_ptr<VesselClient> m_vessel;
                 std::map<std::string,std::string> m_headers;
                 std::map<std::string,std::string> m_query_params;
                 std::string m_http_verb;
                 std::string m_query_str;
-                std::string m_region; //AWS Region for API operations
                 std::string m_amzdate; //ISO Date of the request
                 std::string m_amzdate_short; //Shortened version of the AMZ date eg. 20130524
                 std::string m_amzdate_clean; //Example: Fri, 24 May 2013 00:00:00 GMT
@@ -170,13 +167,7 @@ namespace Vessel {
                 bool m_reduced_redundancy; //Default = False
                 bool m_remote_signing; //Remote sign S3 requests via Vessel REST API
                 size_t m_part_size; //part size bytes for multipart uploads
-                HttpRequest* m_http_request;
                 StorageProvider m_storage_provider;
-
-                /**
-                 ** Used only if remote signing is disabled (will be read from aws.key file)
-                **/
-                std::string m_secret_key;
 
                 /*! \fn std::string get_canonical_request();
                     \brief Returns the AWS S3 canonical request

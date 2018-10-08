@@ -13,15 +13,16 @@ std::string Hash::get_sha1_hash(const std::string& data)
     return digest;
 }
 
-std::unique_ptr<unsigned char*> Hash::get_sha1_hash_raw(const std::string& data)
+std::shared_ptr<unsigned char> Hash::get_sha1_hash_ptr(const std::string& data)
 {
 
-    unsigned char* digest = new unsigned char[CryptoPP::SHA1::DIGESTSIZE];
+    std::shared_ptr<unsigned char> digest( new unsigned char[CryptoPP::SHA1::DIGESTSIZE] );
 
     SHA1 hash;
-    hash.CalculateDigest( digest, (unsigned char*)data.c_str(), data.size() );
+    hash.CalculateDigest( digest.get(), (unsigned char*)data.c_str(), data.size() );
 
-    return std::make_unique<unsigned char*>(digest);
+    return digest;
+
 }
 
 std::string Hash::get_sha256_hash(const std::string& data)

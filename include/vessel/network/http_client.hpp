@@ -122,6 +122,18 @@ namespace Vessel {
                 */
                 static void http_logging(bool flag);
 
+                /*! \fn size_t get_content_length();
+                    \brief Returns the size of the content body
+                    \return Returns the size of the content body
+                */
+                size_t get_content_length();
+
+                /*! \fn int get_port();
+                    \brief Returns the port used for HTTP connection
+                    \return Returns the port used for HTTP connection
+                */
+                int get_port();
+
             private:
 
                 Vessel::Database::LocalDatabase* m_ldb;
@@ -141,6 +153,7 @@ namespace Vessel {
                 //Member Vars for Data Transfer
                 std::shared_ptr<boost::asio::streambuf> m_response_buffer;
                 std::string m_request_data; //Response Data
+                size_t m_content_length;
 
                 unsigned int m_http_status;
                 std::string m_header_data;

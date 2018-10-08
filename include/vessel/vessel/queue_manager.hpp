@@ -2,6 +2,7 @@
 #define QUEUEMGR_H
 
 #include <iostream>
+#include <memory>
 
 #include <vessel/database/local_db.hpp>
 #include <vessel/filesystem/file.hpp>
@@ -18,18 +19,17 @@ class QueueManager
 
     public:
         QueueManager();
-        ~QueueManager();
 
         BackupFile get_next_file();
         FileUpload get_next_upload();
         int get_total_pending();
         void rebuild_queue();
-        void pop_file(const unsigned char* file_id);
+        void pop_file(std::shared_ptr<unsigned char> file_id);
 
     private:
         LocalDatabase* m_database;
 
-        void push_file(unsigned char* file_id);
+        void push_file(std::shared_ptr<unsigned char> file_id);
         void apply_weights();
 
     protected:

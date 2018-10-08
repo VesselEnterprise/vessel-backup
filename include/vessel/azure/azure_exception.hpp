@@ -16,7 +16,9 @@ namespace Vessel {
                 {
                     NoError = 0,
                     BadSignature,
-                    FileNotInitialized
+                    FileNotInitialized,
+                    InitFailed,
+                    UploadFailed
                 };
 
                 AzureException(ErrorCode e, const std::string& msg) : _code(e)

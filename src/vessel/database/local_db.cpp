@@ -65,7 +65,7 @@ std::string LocalDatabase::get_setting_str(const std::string & s )
     sqlite3_stmt* stmt;
     std::string query = "SELECT value FROM backup_setting WHERE name=?1";
 
-    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return "";
 
     sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
@@ -90,7 +90,7 @@ int LocalDatabase::get_setting_int(const std::string & s )
     sqlite3_stmt* stmt;
     std::string query = "SELECT value FROM backup_setting WHERE name=?1";
 
-    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return -1;
 
     sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
@@ -115,7 +115,7 @@ bool LocalDatabase::update_setting(const std::string& key, const T& val )
     sqlite3_stmt* stmt;
     std::string query = "UPDATE backup_setting SET value = ?2 WHERE name=?1";
 
-    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
     sqlite3_bind_text(stmt, 1, key.c_str(), key.size(), 0 );
@@ -142,7 +142,7 @@ bool LocalDatabase::update_ext_count(const std::string& ext, int total )
     sqlite3_stmt* stmt;
     std::string query = "INSERT OR REPLACE INTO backup_ext_count(`extension`,`total_count`) VALUES(?1,?2)";
 
-    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
     sqlite3_bind_text(stmt, 1, ext.c_str(), ext.size(), 0 );
@@ -173,7 +173,7 @@ void LocalDatabase::clean_dirs()
     sqlite3_stmt* stmt;
     std::string query = "SELECT directory_id,path FROM backup_directory";
 
-    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return;
 
     while ( sqlite3_step(stmt) == SQLITE_ROW )
@@ -190,7 +190,7 @@ void LocalDatabase::clean_dirs()
             //Mark file as deleted
             std::string q = "DELETE FROM backup_directory WHERE directory_id=?1";
 
-            if ( sqlite3_prepare_v2(m_db, q.c_str(), q.size(), &st, NULL ) != SQLITE_OK ) {
+            if ( sqlite3_prepare_v2(m_db, q.c_str(), -1, &st, NULL ) != SQLITE_OK ) {
                 m_log->add_message("Failed to remove directory from database: " + dir, "Database Cleaner");
                 continue;
             }
@@ -220,7 +220,7 @@ void LocalDatabase::clean_files()
     sqlite3_stmt* stmt;
     std::string query = "SELECT bd.path,bf.filename,bf.file_id FROM backup_file AS bf INNER JOIN backup_directory AS bd ON bf.directory_id = bd.directory_id";
 
-    if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
         m_log->add_message("Failed to clean files", "Database Cleaner");
         return;
     }
@@ -234,7 +234,7 @@ void LocalDatabase::clean_files()
 
         if ( !boost::filesystem::exists(dir + PATH_SEPARATOR() + filename) )
         {
-            purge_file(file_id);
+            purge_file( file_id );
         }
 
     }
@@ -298,7 +298,7 @@ void LocalDatabase::update_global_settings()
 
         if ( GetVersionEx((POSVERSIONINFOA)&os_bits) != 0 )
         {
-            std::cout << "Success" << std::endl;
+            //std::cout << "Success" << std::endl;
             switch (os_bits.dwMajorVersion)
             {
                 case 10:
@@ -424,7 +424,7 @@ std::string LocalDatabase::get_sqlite_str(const void* data)
     return (data != NULL) ? (const char*)data : "";
 }
 
-void LocalDatabase::purge_file(const unsigned char* file_id)
+void LocalDatabase::purge_file( unsigned char* file_id )
 {
 
     std::vector<std::string> queries;
@@ -437,7 +437,7 @@ void LocalDatabase::purge_file(const unsigned char* file_id)
     for ( const auto &query : queries )
     {
         sqlite3_stmt* st;
-        if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &st, NULL ) != SQLITE_OK ) {
+        if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &st, NULL ) != SQLITE_OK ) {
             m_log->add_message("Failed to remove file from database: " + file_id_s, "Database Cleaner");
             continue;
         }
@@ -468,7 +468,7 @@ void LocalDatabase::purge_upload(unsigned int upload_id)
     for ( const auto &query : queries )
     {
         sqlite3_stmt* stmt;
-        if ( sqlite3_prepare_v2(m_db, query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK ) {
+        if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
             m_log->add_error("Failed to remove upload from database: " + std::to_string(upload_id), "Database Cleaner");
             continue;
         }
@@ -484,4 +484,13 @@ void LocalDatabase::purge_upload(unsigned int upload_id)
 
     }
 
+}
+
+std::shared_ptr<unsigned char> LocalDatabase::get_binary_id(unsigned char* id)
+{
+    int bytes = sizeof(id);
+    unsigned char* buffer = new unsigned char[bytes];
+    memcpy(buffer, id, bytes );
+    //std::copy ..?
+    return std::shared_ptr<unsigned char>( buffer );
 }

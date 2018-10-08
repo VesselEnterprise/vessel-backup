@@ -28,7 +28,7 @@ class AzureUploadController extends UploadController
 			}
 
 			$storageProvider = App\StorageProvider::withUuid($providerId)->firstOrFail();
-			$sharedKey = $storageProvider->access_key;
+			$sharedKey = base64_decode($storageProvider->access_key);
 
 			$signature = base64_encode(hash_hmac("sha256", $stringToSign, $sharedKey, true));
 

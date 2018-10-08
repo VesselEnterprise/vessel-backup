@@ -33,7 +33,7 @@ std::string VesselClient::get_provider_endpoint(const std::string& provider_type
 {
 
     if ( provider_type == "aws_s3") return "aws";
-    if ( provider_type == "azure") return "azure";
+    if ( provider_type == "azure_blob") return "azure";
     if ( provider_type == "vessel") return "vessel";
     if ( provider_type == "local") return "local";
 
@@ -218,7 +218,9 @@ bool VesselClient::activate()
     doc.RemoveAllMembers();
     writer.Reset(strbuf);
 
-    std::cout << "Activation response: " << get_response() << std::endl;
+    //TODO: Add Activation Response Logging here
+
+    //std::cout << "Activation response: " << get_response() << std::endl;
 
     ParseResult json_ok = doc.Parse( get_response().c_str() );
 
@@ -524,36 +526,20 @@ void VesselClient::install_client()
 
     std::string payload = strbuf.GetString();
 
-    std::cout << payload << '\n';
+    //std::cout << payload << '\n';
 
-    HttpRequestStream http_request;
-    http_request << "POST " << m_api_path << "/client/install HTTP/1.1" << "\r\n";
-    http_request << "Host: " << get_hostname() << ":8000\r\n";
-    http_request << "Content-Type: application/json" << "\r\n";
-    http_request << "Authorization: Bearer " << deployment_key << "\r\n";
-    http_request << "Accept: application/json" << "\r\n";
-    http_request << "Content-Length: " << payload.size() << "\r\n";
-    http_request << "\r\n";
-    http_request << payload;
+    HttpRequest request;
+    request.set_method("POST");
+    request.set_url(m_api_path + "/client/install");
+    request.add_header("Content-Type: application/json");
+    request.add_header("Accept: application/json");
+    request.set_auth_header("Bearer " + deployment_key);
+    request.set_body(payload);
 
-    std::cout << http_request.str() << '\n';
+    //Send the request
+    int status = send_http_request(request);
 
-    //Connect to socket
-    connect();
-
-    //Write to socket
-    write_socket(http_request.str());
-
-    do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
-
-    disconnect();
-
-    if ( http_logging() )
-    {
-        Log::get_log().add_http_message(http_request.str(), get_response(), get_http_status() );
-    }
-
-    if ( get_http_status() != 200 ) //http code should always be 200
+    if ( status != 200 ) //http code should always be 200
     {
         throw VesselException(VesselException::NotInstalled, "Failed to install the client application. Please check the auth token and/or deployment key");
     }
@@ -603,6 +589,7 @@ void VesselClient::install_client()
 
     }
 
+
     if ( document.HasMember("user") )
     {
         const Value& user = document["user"];
@@ -618,18 +605,18 @@ bool VesselClient::sync_storage_provider(const Value& obj)
     providerObj.provider_id = obj["provider_id"].GetString();
     providerObj.provider_name = obj["provider_name"].GetString();
     providerObj.provider_type = obj["provider_type"].GetString();
-    providerObj.bucket_name = obj["bucket_name"].GetString();
-    providerObj.description = obj["description"].GetString();
-    providerObj.server = obj["server"].GetString();
-    providerObj.access_id = obj["access_id"].GetString();
-    providerObj.storage_path = obj["storage_path"].GetString();
-    providerObj.region = obj["region"].GetString();
-    providerObj.priority = obj["priority"].GetInt();
+    providerObj.bucket_name = obj["bucket_name"].IsNull() ? "" : obj["bucket_name"].GetString();
+    providerObj.description = obj["description"].IsNull() ? "" : obj["description"].GetString();
+    providerObj.server = obj["server"].IsNull() ? "" : obj["server"].GetString();
+    providerObj.access_id = obj["access_id"].IsNull() ? "" : obj["access_id"].GetString();
+    providerObj.storage_path = obj["storage_path"].IsNull() ? "" : obj["storage_path"].GetString();
+    providerObj.region = obj["region"].IsNull() ? "" : obj["region"].GetString();
+    providerObj.priority = obj["priority"].IsNull() ? 0 : obj["priority"].GetInt();
 
     sqlite3_stmt* stmt;
     std::string query = "REPLACE INTO backup_provider (provider_id,name,server,type,storage_path,priority,bucket_name,region,access_id) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9)";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
     sqlite3_bind_text(stmt, 1, providerObj.provider_id.c_str(), providerObj.provider_id.size(), 0 );
@@ -661,7 +648,7 @@ void VesselClient::sync_storage_provider_all(const std::vector<std::string>& pro
     sqlite3_stmt* stmt;
     std::string query = "SELECT provider_id FROM backup_provider";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return;
 
     while ( sqlite3_step(stmt) == SQLITE_ROW )
@@ -686,7 +673,7 @@ bool VesselClient::delete_storage_provider(const std::string& id)
     sqlite3_stmt* stmt;
     std::string query = "DELETE FROM backup_provider WHERE provider_id=?1";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
         return false;
 
     sqlite3_bind_text(stmt, 1, id.c_str(), id.size(), 0 );
@@ -709,7 +696,7 @@ StorageProvider VesselClient::get_storage_provider()
     sqlite3_stmt* stmt;
     std::string query = "SELECT provider_id,name,description,server,type,bucket_name,region,storage_path,priority,access_id FROM backup_provider ORDER BY priority ASC LIMIT 1";
 
-    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), query.size(), &stmt, NULL ) != SQLITE_OK )
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
     {
         throw DatabaseException(DatabaseException::InvalidStatement, "Bad statement. Failed to get storage provider");
     }

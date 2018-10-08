@@ -58,8 +58,7 @@ namespace Vessel {
             public:
                 BackupFile(){}
                 BackupFile(const fs::path& file_path); //Load file from filesystem
-                BackupFile(const unsigned char* file_id); //Load file from database
-                ~BackupFile();
+                BackupFile(std::shared_ptr<unsigned char> file_id); //Load file from database
 
                 /*! \fn void set_path(const std::string& fp);
                     \brief Assigns a new file path to the object. Setting the path triggers all of the associated member attributes and variables to be updated with private method update_attributes()
@@ -105,18 +104,6 @@ namespace Vessel {
                 */
                 std::string get_file_contents();
 
-                /*! \fn std::string get_unique_id();
-                    \brief
-                    \return Returns a SHA-1 hash of the file path
-                */
-                std::string get_unique_id() const;
-
-                /*! \fn std::unique_ptr<unsigned char*> get_unique_id_raw() const;
-                    \brief
-                    \return Returns a raw SHA-1 hash as an unsigned char pointer. Used for file_id in database for better performance
-                */
-                std::unique_ptr<unsigned char*> get_unique_id_raw() const;
-
                 /*! \fn std::string get_hash_sha1() const;
                     \brief
                     \return Returns a SHA-1 hash of the file contents
@@ -153,11 +140,13 @@ namespace Vessel {
                 */
                 void set_directory_id(unsigned int id);
 
-                /*! \fn std::shared_ptr<unsigned char*> get_file_id() const;
+                /*! \fn std::shared_ptr<unsigned char> get_file_id();
+                    \fn std::string get_file_id() const;
                     \brief
-                    \return Returns the database unique ID of the file
+                    \return Returns the database unique ID of the file as a shared pointer
                 */
-                const unsigned char* get_file_id() const;
+                std::string get_file_id_text() const;
+                std::shared_ptr<unsigned char> get_file_id() const;
 
                 /*! \fn std::string get_file_path();
                     \brief
@@ -268,19 +257,17 @@ namespace Vessel {
 
                 /*! \fn update_last_backup();
                     \fn update_last_backup(const BackupFile& file);
-                    \fn update_last_backup(const unsigned char* file_id);
+                    \fn update_last_backup(std::shared_ptr<unsigned char> file_id);
                     \brief Sets the last backup time for the file to the current UNIX timestamp
                 */
                 void update_last_backup();
-                static void update_last_backup(const BackupFile& file);
-                static void update_last_backup(const unsigned char* file_id);
-
+                static void update_last_backup(std::shared_ptr<unsigned char> file_id);
 
             private:
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file
-                const unsigned char* m_file_id;
+                std::string m_file_id_s; //!< SHA-1 hash of the file path
+                std::shared_ptr<unsigned char> m_file_id; //!< Raw SHA-1 hash of the file path
                 std::string m_hash; //!< SHA-1 hash of the file contents
-                std::string m_unique_id; //!< SHA-1 hash of the file path
                 std::string m_content; //!< Contents of the file (binary)
                 file_attrs m_file_attrs; //!< Struct containing common file attributes
                 unsigned int m_directory_id; //!< Database ID of the parent directory
