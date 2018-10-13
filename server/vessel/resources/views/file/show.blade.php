@@ -107,9 +107,13 @@
 			</div>
 		</div>
 		<div class="four wide column">
-			<div class="ui segment">
+			@if($file->uploaded == 1)
+			<div class="ui segment green">
+			@else
+			<div class="ui segment red">
+			@endif
 				<p><b>Last Backup</b></p>
-				<span>{{ $file->last_backup == "" ? 'Never' : $file->last_back }}</span>
+				<span>{{ $file->last_backup == "" ? 'Never' : $file->last_backup }}</span>
 			</div>
 		</div>
 	</div>

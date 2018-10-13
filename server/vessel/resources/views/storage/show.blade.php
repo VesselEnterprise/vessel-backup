@@ -111,6 +111,13 @@
 						<i class="key icon"></i>
 					</div>
 				</div>
+				<div class="ui bottom attached info message">
+					<i class="close icon"></i>
+					<div class="header">
+						Encryption
+					</div>
+					<p>The Access Key is stored encrypted in the database using the application private key</p>
+				</div>
 			</div>
 
 			<div class="eight wide column">

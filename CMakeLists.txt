@@ -4,8 +4,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # The version number.
-set (Tutorial_VERSION_MAJOR 0)
-set (Tutorial_VERSION_MINOR 1)
+set (Vessel_VERSION_MAJOR 0)
+set (Vessel_VERSION_MINOR 1)
 
 #Custom CMake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -31,7 +31,7 @@ set(VESSEL_SRC_DIR "${PROJECT_SOURCE_DIR}/src/vessel")
 ###############################################
 add_executable(
 	vessel
-	client/client.cpp 
+	client/client.cpp
 	${VESSEL_SRC_DIR}/aws/aws_s3_client.cpp
 	${VESSEL_SRC_DIR}/azure/azure_client.cpp
 	${VESSEL_SRC_DIR}/compression/compress.cpp ${VESSEL_SRC_DIR}/compression/tarball.cpp

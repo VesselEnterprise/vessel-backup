@@ -48,6 +48,11 @@ return [
             'root' => storage_path('app'),
         ],
 
+				'vessel' => [
+						'driver' => 'local',
+						'root' => '/media/network/vessel', //storage_path('...'),
+				],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
