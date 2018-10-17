@@ -17,6 +17,10 @@ namespace fs = boost::filesystem;
 
 namespace Vessel {
     namespace File {
+
+        /*! \class BackupDirectory
+            \brief Helper class for file directories
+        */
         class BackupDirectory
         {
             /*! \struct dir_attrs

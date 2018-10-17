@@ -14,27 +14,30 @@ using namespace Vessel::File;
 
 #define QUEUE_MAX_ROWS 100
 
-class QueueManager
+namespace Vessel
 {
+  class QueueManager
+  {
 
-    public:
-        QueueManager();
+      public:
+          QueueManager();
 
-        BackupFile get_next_file();
-        FileUpload get_next_upload();
-        int get_total_pending();
-        void rebuild_queue();
-        void pop_file(std::shared_ptr<unsigned char> file_id);
+          BackupFile get_next_file();
+          FileUpload get_next_upload();
+          int get_total_pending();
+          void rebuild_queue();
+          void pop_file(std::shared_ptr<unsigned char> file_id);
 
-    private:
-        LocalDatabase* m_database;
+      private:
+          LocalDatabase* m_database;
 
-        void push_file(std::shared_ptr<unsigned char> file_id);
-        void apply_weights();
+          void push_file(std::shared_ptr<unsigned char> file_id);
+          void apply_weights();
 
-    protected:
-        void clear_queue();
+      protected:
+          void clear_queue();
 
-};
+  };
+}
 
 #endif

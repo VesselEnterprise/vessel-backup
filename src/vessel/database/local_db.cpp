@@ -404,11 +404,6 @@ void LocalDatabase::update_client_settings(const std::string& s )
 
 }
 
-void LocalDatabase::build_queue()
-{
-
-}
-
 void LocalDatabase::start_transaction()
 {
     sqlite3_exec(m_db, "BEGIN TRANSACTION", NULL, NULL, NULL);

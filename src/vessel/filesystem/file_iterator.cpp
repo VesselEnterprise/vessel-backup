@@ -50,10 +50,6 @@ FileIterator::FileIterator(const BackupDirectory& dir) : m_base_dir(dir), m_curr
 
 }
 
-FileIterator::~FileIterator()
-{
-}
-
 std::string FileIterator::get_base_path()
 {
     return m_base_dir.get_path();
@@ -288,14 +284,18 @@ bool FileIterator::is_ignore_ext(const std::string& ext )
 
 }
 
-int FileIterator::add_file( const BackupFile& bf )
+bool FileIterator::add_file( const BackupFile& bf )
 {
 
     sqlite3_stmt* stmt;
     std::string query = "REPLACE INTO backup_file (file_id,filename,file_ext,filesize,directory_id,last_modified) VALUES(?1,?2,?3,?4,?5,?6)";
 
     if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
-        return false;
+    {
+      m_log.add_error("Failed to add file to database: " + bf.get_file_name(), "File Scan");
+      return false;
+    }
+
 
     std::shared_ptr<unsigned char> file_id = bf.get_file_id();
     std::string file_name = bf.get_file_name();
@@ -308,12 +308,16 @@ int FileIterator::add_file( const BackupFile& bf )
     sqlite3_bind_int(stmt, 5, bf.get_directory_id() );
     sqlite3_bind_int(stmt, 6, bf.get_last_modified() );
 
-    int rc = sqlite3_step(stmt);
+    if ( sqlite3_step(stmt) != SQLITE_DONE )
+    {
+      m_log.add_error("Failed to add file to database: " + bf.get_file_name(), "File Scan");
+      return false;
+    }
 
     //Cleanup
     sqlite3_finalize(stmt);
 
-    return rc;
+    return true;
 
 }
 
@@ -324,7 +328,10 @@ int FileIterator::add_directory( const BackupDirectory& bd )
     std::string query = "REPLACE INTO backup_directory (directory_id,directory_hash,path,filesize,last_modified) VALUES((SELECT directory_id FROM backup_directory WHERE directory_hash=?1),?1,?2,?3,?4)";
 
     if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
-        return false;
+    {
+      m_log.add_error("Failed to add directory to database: " + bd.get_dir_name(), "File Scan");
+      return -1;
+    }
 
     std::shared_ptr<unsigned char> unique_id = bd.get_unique_id_ptr();
     std::string dirpath = bd.get_canonical_path();
@@ -334,7 +341,11 @@ int FileIterator::add_directory( const BackupDirectory& bd )
     sqlite3_bind_int(stmt, 3, bd.get_file_size() );
     sqlite3_bind_int(stmt, 4, bd.get_last_modified() );
 
-    sqlite3_step(stmt);
+    if ( sqlite3_step(stmt) != SQLITE_DONE)
+    {
+      m_log.add_error("Failed to add directory to database: " + bd.get_dir_name(), "File Scan");
+      return -1;
+    }
 
     //Cleanup
     sqlite3_finalize(stmt);
