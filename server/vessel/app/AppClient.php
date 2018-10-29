@@ -23,6 +23,11 @@ class AppClient extends Model
 		return $this->belongsToMany('App\User', 'app_client_user', 'client_id', 'user_id');
 	}
 
+	public function stats()
+	{
+		return $this->hasMany('App\AppClientStat', 'client_id', 'client_id');
+	}
+
   /**
    * The attributes that are mass assignable.
    *

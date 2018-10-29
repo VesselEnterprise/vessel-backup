@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 //Heartbeat
-Route::post('/heartbeat', 'api\HeartbeatController@store')->middleware('verifyClientToken');
+Route::post('/heartbeat', 'api\AppClientController@heartbeat')->middleware('verifyClientToken');
 
 //AppClient Install
 Route::post('/client/install', 'api\AppClientController@install')->middleware('verifyDeploymentKey');

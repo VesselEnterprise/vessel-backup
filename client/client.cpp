@@ -89,6 +89,7 @@ int main(int argc, char** argv)
     if ( !vessel->has_client_token() )
     {
         vessel->install_client();
+        vessel->refresh_client_token();
         log->add_message("Successfully installed client", "Installation");
     }
 
@@ -109,14 +110,51 @@ int main(int argc, char** argv)
         tpool.create_thread( [&]() { io_service.run(); });
     }
 
-    //Create an empty instance of BackupDirectory for initial scan
-    //TODO: This can be overridden by boost::program_options
-    BackupDirectory directory (scan_dir);
+    //Manage Heartbeat, Stat Calculation
+    io_service.post([&](){
+        for(;;)
+        {
+            //Create a file iterator object to scan the filesystem
+            std::unique_ptr<StatManager> stat_manager = std::make_unique<StatManager>();
+
+            try
+            {
+                stat_manager->build_stats();
+            }
+            catch( const std::exception& ex )
+            {
+                log->add_exception(ex);
+            }
+
+            //Send Heartbeat Request
+            try
+            {
+                vessel->heartbeat();
+            }
+            catch( const std::exception& ex )
+            {
+                std::cout << "Caught an exception!" << '\n';
+                log->add_exception(ex);
+            }
+
+            //Free memory before sleep
+            stat_manager.reset();
+
+            std::cout << "Sleeping!" << '\n';
+
+            boost::this_thread::sleep( boost::posix_time::seconds(5) );
+            std::cout << "Restarting heartbeat after 15 minutes..." << '\n';
+
+        }
+    });
 
     //Add a new thread to the pool which scans the filesystem on intervals
     io_service.post([&](){
         for(;;)
         {
+            //Directory for initial file scan
+            BackupDirectory directory (scan_dir);
+
             //Create a file iterator object to scan the filesystem
             std::unique_ptr<FileIterator> file_iterator = std::make_unique<FileIterator>(directory);
 

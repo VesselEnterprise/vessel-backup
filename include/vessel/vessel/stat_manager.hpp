@@ -7,6 +7,7 @@
 
 #include <vessel/database/local_db.hpp>
 
+using namespace Vessel;
 using namespace Vessel::Database;
 using namespace Vessel::Logging;
 

@@ -1,0 +1,233 @@
+\hypertarget{class_vessel_1_1_database_1_1_local_database}{}\section{Vessel\+:\+:Database\+:\+:Local\+Database Class Reference}
+\label{class_vessel_1_1_database_1_1_local_database}\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_vessel_1_1_database_1_1_local_database_af2180ec115f920bb5cf9915da9873478}{Local\+Database} (\hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database} const \&)=delete
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a498009e5019d6412452f763ea06515c1}\label{class_vessel_1_1_database_1_1_local_database_a498009e5019d6412452f763ea06515c1}} 
+void {\bfseries operator=} (\hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database} const \&)=delete
+\item 
+sqlite3 $\ast$ \hyperlink{class_vessel_1_1_database_1_1_local_database_a7df737694e981572b00a3a9b9d0a7eeb}{get\+\_\+handle} ()
+\begin{DoxyCompactList}\small\item\em Returns a handle to the sqlite database. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_database_1_1_local_database_aaeca7268517cb884b7aa7ea4b7f3db04}{get\+\_\+setting\+\_\+str} (const std\+::string \&s)
+\begin{DoxyCompactList}\small\item\em Returns string value of a setting from the Database. \end{DoxyCompactList}\item 
+int \hyperlink{class_vessel_1_1_database_1_1_local_database_af37832c98d2e9eabe40b2a45f5035133}{get\+\_\+setting\+\_\+int} (const std\+::string \&s)
+\begin{DoxyCompactList}\small\item\em Returns int value of a setting from the Database. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename T $>$ }\\bool \hyperlink{class_vessel_1_1_database_1_1_local_database_a94da226c9c5561a4cb88290c6aa334a3}{update\+\_\+setting} (const std\+::string \&key, const T \&val)
+\begin{DoxyCompactList}\small\item\em Updates a setting value in the database. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a6894636c19e4781f619b2f6a50ae7994}\label{class_vessel_1_1_database_1_1_local_database_a6894636c19e4781f619b2f6a50ae7994}} 
+bool {\bfseries update\+\_\+ext\+\_\+count} (const std\+::string \&ext, int total)
+\item 
+std\+::string \hyperlink{class_vessel_1_1_database_1_1_local_database_a2604bed46b522977ba77140626282f3d}{get\+\_\+last\+\_\+err} ()
+\begin{DoxyCompactList}\small\item\em Returns the last error from the database (if any) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_ac8639c0eb1ed8757b080de38e0314222}\label{class_vessel_1_1_database_1_1_local_database_ac8639c0eb1ed8757b080de38e0314222}} 
+void \hyperlink{class_vessel_1_1_database_1_1_local_database_ac8639c0eb1ed8757b080de38e0314222}{update\+\_\+global\+\_\+settings} ()
+\begin{DoxyCompactList}\small\item\em Updates global environment settings. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_ae43917bc8ebb0f0269da1ac68685a040}\label{class_vessel_1_1_database_1_1_local_database_ae43917bc8ebb0f0269da1ac68685a040}} 
+void \hyperlink{class_vessel_1_1_database_1_1_local_database_ae43917bc8ebb0f0269da1ac68685a040}{update\+\_\+client\+\_\+settings} (const std\+::string \&s)
+\begin{DoxyCompactList}\small\item\em Parses client settings J\+S\+ON from Vessel R\+E\+ST A\+PI and saves to database. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a4863f63ed1a6ad1dbbcce0208759a5d7}\label{class_vessel_1_1_database_1_1_local_database_a4863f63ed1a6ad1dbbcce0208759a5d7}} 
+void \hyperlink{class_vessel_1_1_database_1_1_local_database_a4863f63ed1a6ad1dbbcce0208759a5d7}{clean} ()
+\begin{DoxyCompactList}\small\item\em Scans the directory and file table for non-\/existent files/directories and removes them from the database. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a1a5348e3de490bb8b1fb7c923dc5d9de}\label{class_vessel_1_1_database_1_1_local_database_a1a5348e3de490bb8b1fb7c923dc5d9de}} 
+void \hyperlink{class_vessel_1_1_database_1_1_local_database_a1a5348e3de490bb8b1fb7c923dc5d9de}{start\+\_\+transaction} ()
+\begin{DoxyCompactList}\small\item\em Starts a database transaction. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_aae0ba68d8107d44d7fdc1137675ff0c6}\label{class_vessel_1_1_database_1_1_local_database_aae0ba68d8107d44d7fdc1137675ff0c6}} 
+void \hyperlink{class_vessel_1_1_database_1_1_local_database_aae0ba68d8107d44d7fdc1137675ff0c6}{end\+\_\+transaction} ()
+\begin{DoxyCompactList}\small\item\em Ends a database transaction. \end{DoxyCompactList}\item 
+void \hyperlink{class_vessel_1_1_database_1_1_local_database_ab6315c29e00efda7ac808f68a054f0ea}{purge\+\_\+file} (unsigned char $\ast$file\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Removes a file from the database. \end{DoxyCompactList}\item 
+void \hyperlink{class_vessel_1_1_database_1_1_local_database_a328b2ea5ed242bacc70ea6bf248bf44d}{purge\+\_\+upload} (unsigned int upload\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Removes an upload from the database. \end{DoxyCompactList}\item 
+std\+::map$<$ std\+::string, int $>$ \hyperlink{class_vessel_1_1_database_1_1_local_database_ab55e12266822635ba8d4e74b9ca17a7d}{get\+\_\+stats} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database} \& \hyperlink{class_vessel_1_1_database_1_1_local_database_ad5d9f9dda2ad243ca640f7cf07de34d7}{get\+\_\+database} ()
+\begin{DoxyCompactList}\small\item\em Static singleton factory constructor which returns an instance to \hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database}. \end{DoxyCompactList}\item 
+static std\+::string \hyperlink{class_vessel_1_1_database_1_1_local_database_a1561145d386751e09b23b80a723735c4}{get\+\_\+sqlite\+\_\+str} (const void $\ast$data)
+\begin{DoxyCompactList}\small\item\em Wrapper for sqlite3\+\_\+column\+\_\+text which prevents a segfault if N\+U\+LL is returned from the database. \end{DoxyCompactList}\item 
+static std\+::shared\+\_\+ptr$<$ unsigned char $>$ \hyperlink{class_vessel_1_1_database_1_1_local_database_a2fabf54b26f3d3b0b29b1a682f8ed718}{get\+\_\+binary\+\_\+id} (unsigned char $\ast$id)
+\begin{DoxyCompactList}\small\item\em Makes a copy of a binary id and returns a shared\+\_\+ptr of the copy. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_af2180ec115f920bb5cf9915da9873478}\label{class_vessel_1_1_database_1_1_local_database_af2180ec115f920bb5cf9915da9873478}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!Local\+Database@{Local\+Database}}
+\index{Local\+Database@{Local\+Database}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{Local\+Database()}{LocalDatabase()}}
+{\footnotesize\ttfamily Vessel\+::\+Database\+::\+Local\+Database\+::\+Local\+Database (\begin{DoxyParamCaption}\item[{\hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database} const \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
+No Assignment or Copies allowed 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a2fabf54b26f3d3b0b29b1a682f8ed718}\label{class_vessel_1_1_database_1_1_local_database_a2fabf54b26f3d3b0b29b1a682f8ed718}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+binary\+\_\+id@{get\+\_\+binary\+\_\+id}}
+\index{get\+\_\+binary\+\_\+id@{get\+\_\+binary\+\_\+id}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+binary\+\_\+id()}{get\_binary\_id()}}
+{\footnotesize\ttfamily static std\+::shared\+\_\+ptr$<$ unsigned char $>$ Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+binary\+\_\+id (\begin{DoxyParamCaption}\item[{unsigned char $\ast$}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Makes a copy of a binary id and returns a shared\+\_\+ptr of the copy. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & Some binary/raw id \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_ad5d9f9dda2ad243ca640f7cf07de34d7}\label{class_vessel_1_1_database_1_1_local_database_ad5d9f9dda2ad243ca640f7cf07de34d7}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+database@{get\+\_\+database}}
+\index{get\+\_\+database@{get\+\_\+database}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+database()}{get\_database()}}
+{\footnotesize\ttfamily static \hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database} \& Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+database (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Static singleton factory constructor which returns an instance to \hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database}. 
+
+\begin{DoxyReturn}{Returns}
+Singleton instance to \hyperlink{class_vessel_1_1_database_1_1_local_database}{Local\+Database} 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a7df737694e981572b00a3a9b9d0a7eeb}\label{class_vessel_1_1_database_1_1_local_database_a7df737694e981572b00a3a9b9d0a7eeb}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+handle@{get\+\_\+handle}}
+\index{get\+\_\+handle@{get\+\_\+handle}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+handle()}{get\_handle()}}
+{\footnotesize\ttfamily sqlite3 $\ast$ Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+handle (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns a handle to the sqlite database. 
+
+\begin{DoxyReturn}{Returns}
+Returns a handle to the sqlite database 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a2604bed46b522977ba77140626282f3d}\label{class_vessel_1_1_database_1_1_local_database_a2604bed46b522977ba77140626282f3d}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+last\+\_\+err@{get\+\_\+last\+\_\+err}}
+\index{get\+\_\+last\+\_\+err@{get\+\_\+last\+\_\+err}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+last\+\_\+err()}{get\_last\_err()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+last\+\_\+err (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the last error from the database (if any) 
+
+\begin{DoxyReturn}{Returns}
+Returns the last error from the database (if any) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_af37832c98d2e9eabe40b2a45f5035133}\label{class_vessel_1_1_database_1_1_local_database_af37832c98d2e9eabe40b2a45f5035133}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+setting\+\_\+int@{get\+\_\+setting\+\_\+int}}
+\index{get\+\_\+setting\+\_\+int@{get\+\_\+setting\+\_\+int}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+setting\+\_\+int()}{get\_setting\_int()}}
+{\footnotesize\ttfamily int Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+setting\+\_\+int (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{s }\end{DoxyParamCaption})}
+
+
+
+Returns int value of a setting from the Database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & Name of the setting to retrieve \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns int value of a setting from the Database 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_aaeca7268517cb884b7aa7ea4b7f3db04}\label{class_vessel_1_1_database_1_1_local_database_aaeca7268517cb884b7aa7ea4b7f3db04}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+setting\+\_\+str@{get\+\_\+setting\+\_\+str}}
+\index{get\+\_\+setting\+\_\+str@{get\+\_\+setting\+\_\+str}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+setting\+\_\+str()}{get\_setting\_str()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+setting\+\_\+str (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{s }\end{DoxyParamCaption})}
+
+
+
+Returns string value of a setting from the Database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & Name of the setting to retrieve \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns string value of a setting from the Database 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a1561145d386751e09b23b80a723735c4}\label{class_vessel_1_1_database_1_1_local_database_a1561145d386751e09b23b80a723735c4}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+sqlite\+\_\+str@{get\+\_\+sqlite\+\_\+str}}
+\index{get\+\_\+sqlite\+\_\+str@{get\+\_\+sqlite\+\_\+str}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+sqlite\+\_\+str()}{get\_sqlite\_str()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+sqlite\+\_\+str (\begin{DoxyParamCaption}\item[{const void $\ast$}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Wrapper for sqlite3\+\_\+column\+\_\+text which prevents a segfault if N\+U\+LL is returned from the database. 
+
+\begin{DoxyReturn}{Returns}
+Returns the string value from the database, or empty string if N\+U\+LL 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_ab55e12266822635ba8d4e74b9ca17a7d}\label{class_vessel_1_1_database_1_1_local_database_ab55e12266822635ba8d4e74b9ca17a7d}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!get\+\_\+stats@{get\+\_\+stats}}
+\index{get\+\_\+stats@{get\+\_\+stats}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{get\+\_\+stats()}{get\_stats()}}
+{\footnotesize\ttfamily std\+::map$<$ std\+::string, int $>$ Vessel\+::\+Database\+::\+Local\+Database\+::get\+\_\+stats (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\begin{DoxyReturn}{Returns}
+Returns a vector of stat key/value pairs 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_ab6315c29e00efda7ac808f68a054f0ea}\label{class_vessel_1_1_database_1_1_local_database_ab6315c29e00efda7ac808f68a054f0ea}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!purge\+\_\+file@{purge\+\_\+file}}
+\index{purge\+\_\+file@{purge\+\_\+file}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{purge\+\_\+file()}{purge\_file()}}
+{\footnotesize\ttfamily void Vessel\+::\+Database\+::\+Local\+Database\+::purge\+\_\+file (\begin{DoxyParamCaption}\item[{unsigned char $\ast$}]{file\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Removes a file from the database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+id} & Binary File ID \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a328b2ea5ed242bacc70ea6bf248bf44d}\label{class_vessel_1_1_database_1_1_local_database_a328b2ea5ed242bacc70ea6bf248bf44d}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!purge\+\_\+upload@{purge\+\_\+upload}}
+\index{purge\+\_\+upload@{purge\+\_\+upload}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{purge\+\_\+upload()}{purge\_upload()}}
+{\footnotesize\ttfamily void Vessel\+::\+Database\+::\+Local\+Database\+::purge\+\_\+upload (\begin{DoxyParamCaption}\item[{unsigned int}]{upload\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Removes an upload from the database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em upload\+\_\+id} & Database Upload Id \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_vessel_1_1_database_1_1_local_database_a94da226c9c5561a4cb88290c6aa334a3}\label{class_vessel_1_1_database_1_1_local_database_a94da226c9c5561a4cb88290c6aa334a3}} 
+\index{Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}!update\+\_\+setting@{update\+\_\+setting}}
+\index{update\+\_\+setting@{update\+\_\+setting}!Vessel\+::\+Database\+::\+Local\+Database@{Vessel\+::\+Database\+::\+Local\+Database}}
+\subsubsection{\texorpdfstring{update\+\_\+setting()}{update\_setting()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+bool Vessel\+::\+Database\+::\+Local\+Database\+::update\+\_\+setting (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{key,  }\item[{const T \&}]{val }\end{DoxyParamCaption})}
+
+
+
+Updates a setting value in the database. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Name of the setting to update \\
+\hline
+{\em val} & New value of the setting \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if updated successfully 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/database/local\+\_\+db.\+hpp\end{DoxyCompactItemize}

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sqlite3.h>
 #include <algorithm>
+#include <map>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -44,7 +45,7 @@ namespace Vessel{
 
             public:
 
-                /*! \constructor static LocalDatabase& get_database()
+                /*! \fn static LocalDatabase& get_database()
                     \brief Static singleton factory constructor which returns an instance to LocalDatabase
                     \return Singleton instance to LocalDatabase
                 */
@@ -148,6 +149,11 @@ namespace Vessel{
                     \brief Makes a copy of a binary id and returns a shared_ptr of the copy
                 */
                 static std::shared_ptr<unsigned char> get_binary_id(unsigned char* id);
+
+                /*! \fn std::map<std::string,int> get_stats();
+                    \return Returns a vector of stat key/value pairs
+                */
+                std::map<std::string,int> get_stats();
 
             private:
                 sqlite3* m_db;

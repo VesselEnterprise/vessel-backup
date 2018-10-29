@@ -292,7 +292,7 @@ bool FileIterator::add_file( const BackupFile& bf )
 
     if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
     {
-      m_log.add_error("Failed to add file to database: " + bf.get_file_name(), "File Scan");
+      m_log->add_error("Failed to add file to database: " + bf.get_file_name(), "File Scan");
       return false;
     }
 
@@ -310,7 +310,7 @@ bool FileIterator::add_file( const BackupFile& bf )
 
     if ( sqlite3_step(stmt) != SQLITE_DONE )
     {
-      m_log.add_error("Failed to add file to database: " + bf.get_file_name(), "File Scan");
+      m_log->add_error("Failed to add file to database: " + bf.get_file_name(), "File Scan");
       return false;
     }
 
@@ -329,7 +329,7 @@ int FileIterator::add_directory( const BackupDirectory& bd )
 
     if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
     {
-      m_log.add_error("Failed to add directory to database: " + bd.get_dir_name(), "File Scan");
+      m_log->add_error("Failed to add directory to database: " + bd.get_dir_name(), "File Scan");
       return -1;
     }
 
@@ -343,7 +343,7 @@ int FileIterator::add_directory( const BackupDirectory& bd )
 
     if ( sqlite3_step(stmt) != SQLITE_DONE)
     {
-      m_log.add_error("Failed to add directory to database: " + bd.get_dir_name(), "File Scan");
+      m_log->add_error("Failed to add directory to database: " + bd.get_dir_name(), "File Scan");
       return -1;
     }
 

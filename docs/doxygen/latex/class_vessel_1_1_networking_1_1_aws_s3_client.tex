@@ -1,0 +1,199 @@
+\hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client}{}\section{Vessel\+:\+:Networking\+:\+:Aws\+S3\+Client Class Reference}
+\label{class_vessel_1_1_networking_1_1_aws_s3_client}\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+Inheritance diagram for Vessel\+:\+:Networking\+:\+:Aws\+S3\+Client\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_vessel_1_1_networking_1_1_aws_s3_client}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a0dd37e7d17b27a7772cc0534c5bd5537}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a0dd37e7d17b27a7772cc0534c5bd5537}} 
+enum {\bfseries Aws\+Flags} \{ \newline
+{\bfseries No\+Flags} = 0, 
+{\bfseries Reduced\+Redundancy} = 1, 
+{\bfseries Multipart} = 2, 
+{\bfseries Streaming} = 4, 
+\newline
+{\bfseries Encrypted} = 6, 
+{\bfseries Skip\+Multi\+Init} = 8
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a298d769b7ef2478a29eb7289039e67e2}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a298d769b7ef2478a29eb7289039e67e2}} 
+{\bfseries Aws\+S3\+Client} (const \hyperlink{struct_vessel_1_1_types_1_1_storage_provider}{Storage\+Provider} \&provider)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a50dc6763024104c359dfca61ae3e2f90}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a50dc6763024104c359dfca61ae3e2f90}} 
+void {\bfseries set\+\_\+http\+\_\+request} (const \hyperlink{class_vessel_1_1_networking_1_1_http_request}{Http\+Request} \&r)
+\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_a2e08698221d54ca88ac5055d991eb21f}{init\+\_\+upload} (const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} \&bf, Aws\+Flags flags=Aws\+Flags\+::\+Reduced\+Redundancy)
+\begin{DoxyCompactList}\small\item\em Initializes the A\+WS S3 upload. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_ab9e7eb4b95cece8a1283d12d9e72b55c}\label{class_vessel_1_1_networking_1_1_aws_s3_client_ab9e7eb4b95cece8a1283d12d9e72b55c}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_ab9e7eb4b95cece8a1283d12d9e72b55c}{set\+\_\+part\+\_\+size} (size\+\_\+t part\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Sets the part size in bytes for multipart uploads. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_ae78ce420213ab93e81b6fee0911c4746}{upload} ()
+\begin{DoxyCompactList}\small\item\em Uploads a single file to the A\+WS S3 R\+E\+ST A\+PI. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_a2588b9b6a22ea6610e4a4eddec2973de}{upload\+\_\+part} (int part\+\_\+number, const std\+::string \&upload\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Uploads a single file to the A\+WS S3 R\+E\+ST A\+PI. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_add76f620364375f1a54730175e869de9}{complete\+\_\+multipart\+\_\+upload} (const std\+::vector$<$ \hyperlink{struct_vessel_1_1_types_1_1_upload_tag_set}{Upload\+Tag\+Set} $>$ \&etags, const std\+::string \&upload\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Completes a multipart upload and returns the E\+Tag for the file upload. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_aa5d5c62b27ceb78262a33d835abaa8be}{upload\+\_\+stream\+\_\+chunk} (int part\+\_\+number, const std\+::string \&prev\+\_\+signature)
+\begin{DoxyCompactList}\small\item\em Streaming file upload to the A\+WS S3 R\+E\+ST A\+PI. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_ad606a5dd675054cbf1598d662ff90443}{get\+\_\+last\+\_\+signature} ()
+\begin{DoxyCompactList}\small\item\em Returns the signature for the previous upload part. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_af255a5ea67ccd234e90518d149737603}{get\+\_\+upload\+\_\+id} ()
+\begin{DoxyCompactList}\small\item\em Returns the upload ID for Multipart uploads. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a71ddd6a81d15eec7e5423cee6d064451}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a71ddd6a81d15eec7e5423cee6d064451}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_a71ddd6a81d15eec7e5423cee6d064451}{set\+\_\+upload\+\_\+id} (const std\+::string \&upload\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Sets the upload id of the A\+WS S3 upload. Can be used for resuming uploads or performing other operations. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a947727d7f26407fafd7c5987e1a68c88}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a947727d7f26407fafd7c5987e1a68c88}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_a947727d7f26407fafd7c5987e1a68c88}{set\+\_\+file} (const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} \&bf)
+\begin{DoxyCompactList}\small\item\em Sets a pointer to the Backup\+File. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a5dbe469161a506de0a5e6ec74461328a}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a5dbe469161a506de0a5e6ec74461328a}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_a5dbe469161a506de0a5e6ec74461328a}{remote\+\_\+signing} (bool flag)
+\begin{DoxyCompactList}\small\item\em If enabled, the request will be signed remotely via the Vessel A\+PI. Otherwise, a local key file will be used. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a96e454d8d46844fcddc7a72e639aa80e}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a96e454d8d46844fcddc7a72e639aa80e}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_a96e454d8d46844fcddc7a72e639aa80e}{set\+\_\+storage\+\_\+provider} (const \hyperlink{struct_vessel_1_1_types_1_1_storage_provider}{Storage\+Provider} \&provider)
+\begin{DoxyCompactList}\small\item\em Sets the internal storage provider for the A\+WS client. Used for key signing. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_a00d6b781a56662ed5e80c9032fe1c380}{get\+\_\+file\+\_\+uri\+\_\+path} ()
+\begin{DoxyCompactList}\small\item\em Returns the relative path to the file on the cloud server. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{class_vessel_1_1_networking_1_1_aws_s3_client_ae836c56e69d9ac911f660d0c4d8d0ebc}{get\+\_\+current\+\_\+part\+\_\+size} ()
+\begin{DoxyCompactList}\small\item\em Returns the total size in bytes of the current part to be uploaded. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a65721bc87df7845108fc1d6bffee63f7}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a65721bc87df7845108fc1d6bffee63f7}} 
+Aws\+Flags {\bfseries operator$\vert$} (Aws\+Flags a, Aws\+Flags b)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_acf095f8ff202c0997eb2c85460498f56}\label{class_vessel_1_1_networking_1_1_aws_s3_client_acf095f8ff202c0997eb2c85460498f56}} 
+Aws\+Flags {\bfseries operator \&} (Aws\+Flags a, Aws\+Flags b)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_add76f620364375f1a54730175e869de9}\label{class_vessel_1_1_networking_1_1_aws_s3_client_add76f620364375f1a54730175e869de9}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!complete\+\_\+multipart\+\_\+upload@{complete\+\_\+multipart\+\_\+upload}}
+\index{complete\+\_\+multipart\+\_\+upload@{complete\+\_\+multipart\+\_\+upload}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{complete\+\_\+multipart\+\_\+upload()}{complete\_multipart\_upload()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::complete\+\_\+multipart\+\_\+upload (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ \hyperlink{struct_vessel_1_1_types_1_1_upload_tag_set}{Upload\+Tag\+Set} $>$ \&}]{etags,  }\item[{const std\+::string \&}]{upload\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Completes a multipart upload and returns the E\+Tag for the file upload. 
+
+\begin{DoxyReturn}{Returns}
+Completes a multipart upload and returns the E\+Tag for the file upload 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_ae836c56e69d9ac911f660d0c4d8d0ebc}\label{class_vessel_1_1_networking_1_1_aws_s3_client_ae836c56e69d9ac911f660d0c4d8d0ebc}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!get\+\_\+current\+\_\+part\+\_\+size@{get\+\_\+current\+\_\+part\+\_\+size}}
+\index{get\+\_\+current\+\_\+part\+\_\+size@{get\+\_\+current\+\_\+part\+\_\+size}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+current\+\_\+part\+\_\+size()}{get\_current\_part\_size()}}
+{\footnotesize\ttfamily size\+\_\+t Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::get\+\_\+current\+\_\+part\+\_\+size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the total size in bytes of the current part to be uploaded. 
+
+\begin{DoxyReturn}{Returns}
+Returns the total size in bytes of the current part to be uploaded 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a00d6b781a56662ed5e80c9032fe1c380}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a00d6b781a56662ed5e80c9032fe1c380}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!get\+\_\+file\+\_\+uri\+\_\+path@{get\+\_\+file\+\_\+uri\+\_\+path}}
+\index{get\+\_\+file\+\_\+uri\+\_\+path@{get\+\_\+file\+\_\+uri\+\_\+path}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+uri\+\_\+path()}{get\_file\_uri\_path()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::get\+\_\+file\+\_\+uri\+\_\+path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the relative path to the file on the cloud server. 
+
+\begin{DoxyReturn}{Returns}
+Returns the relative path to the file on the cloud server 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_ad606a5dd675054cbf1598d662ff90443}\label{class_vessel_1_1_networking_1_1_aws_s3_client_ad606a5dd675054cbf1598d662ff90443}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!get\+\_\+last\+\_\+signature@{get\+\_\+last\+\_\+signature}}
+\index{get\+\_\+last\+\_\+signature@{get\+\_\+last\+\_\+signature}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+last\+\_\+signature()}{get\_last\_signature()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::get\+\_\+last\+\_\+signature (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the signature for the previous upload part. 
+
+\begin{DoxyReturn}{Returns}
+Returns the signature for the previous upload part 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_af255a5ea67ccd234e90518d149737603}\label{class_vessel_1_1_networking_1_1_aws_s3_client_af255a5ea67ccd234e90518d149737603}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!get\+\_\+upload\+\_\+id@{get\+\_\+upload\+\_\+id}}
+\index{get\+\_\+upload\+\_\+id@{get\+\_\+upload\+\_\+id}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+upload\+\_\+id()}{get\_upload\_id()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::get\+\_\+upload\+\_\+id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the upload ID for Multipart uploads. 
+
+\begin{DoxyReturn}{Returns}
+Returns the upload ID for Multipart uploads 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a2e08698221d54ca88ac5055d991eb21f}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a2e08698221d54ca88ac5055d991eb21f}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!init\+\_\+upload@{init\+\_\+upload}}
+\index{init\+\_\+upload@{init\+\_\+upload}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{init\+\_\+upload()}{init\_upload()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::init\+\_\+upload (\begin{DoxyParamCaption}\item[{const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} \&}]{bf,  }\item[{Aws\+Flags}]{flags = {\ttfamily AwsFlags\+:\+:ReducedRedundancy} }\end{DoxyParamCaption})}
+
+
+
+Initializes the A\+WS S3 upload. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the upload was initialized 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_ae78ce420213ab93e81b6fee0911c4746}\label{class_vessel_1_1_networking_1_1_aws_s3_client_ae78ce420213ab93e81b6fee0911c4746}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!upload@{upload}}
+\index{upload@{upload}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{upload()}{upload()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::upload (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Uploads a single file to the A\+WS S3 R\+E\+ST A\+PI. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the upload was successful, or false if there was an error 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_a2588b9b6a22ea6610e4a4eddec2973de}\label{class_vessel_1_1_networking_1_1_aws_s3_client_a2588b9b6a22ea6610e4a4eddec2973de}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!upload\+\_\+part@{upload\+\_\+part}}
+\index{upload\+\_\+part@{upload\+\_\+part}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{upload\+\_\+part()}{upload\_part()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::upload\+\_\+part (\begin{DoxyParamCaption}\item[{int}]{part\+\_\+number,  }\item[{const std\+::string \&}]{upload\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Uploads a single file to the A\+WS S3 R\+E\+ST A\+PI. 
+
+\begin{DoxyReturn}{Returns}
+Returns the Etag for the upload part if successful 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_aws_s3_client_aa5d5c62b27ceb78262a33d835abaa8be}\label{class_vessel_1_1_networking_1_1_aws_s3_client_aa5d5c62b27ceb78262a33d835abaa8be}} 
+\index{Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}!upload\+\_\+stream\+\_\+chunk@{upload\+\_\+stream\+\_\+chunk}}
+\index{upload\+\_\+stream\+\_\+chunk@{upload\+\_\+stream\+\_\+chunk}!Vessel\+::\+Networking\+::\+Aws\+S3\+Client@{Vessel\+::\+Networking\+::\+Aws\+S3\+Client}}
+\subsubsection{\texorpdfstring{upload\+\_\+stream\+\_\+chunk()}{upload\_stream\_chunk()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Aws\+S3\+Client\+::upload\+\_\+stream\+\_\+chunk (\begin{DoxyParamCaption}\item[{int}]{part\+\_\+number,  }\item[{const std\+::string \&}]{prev\+\_\+signature }\end{DoxyParamCaption})}
+
+
+
+Streaming file upload to the A\+WS S3 R\+E\+ST A\+PI. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the upload was successful, or false if there was an error 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/aws/aws\+\_\+s3\+\_\+client.\+hpp\end{DoxyCompactItemize}

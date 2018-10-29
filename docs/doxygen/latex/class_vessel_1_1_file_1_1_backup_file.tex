@@ -1,0 +1,337 @@
+\hypertarget{class_vessel_1_1_file_1_1_backup_file}{}\section{Vessel\+:\+:File\+:\+:Backup\+File Class Reference}
+\label{class_vessel_1_1_file_1_1_backup_file}\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a0c550a745101ab5e79b79d3639442205}\label{class_vessel_1_1_file_1_1_backup_file_a0c550a745101ab5e79b79d3639442205}} 
+{\bfseries Backup\+File} (const fs\+::path \&file\+\_\+path)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ac9b3d29d5104a413073016d377029a03}\label{class_vessel_1_1_file_1_1_backup_file_ac9b3d29d5104a413073016d377029a03}} 
+{\bfseries Backup\+File} (std\+::shared\+\_\+ptr$<$ unsigned char $>$ file\+\_\+id)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a095b34be54d2f67a8eb69ee746e168d9}\label{class_vessel_1_1_file_1_1_backup_file_a095b34be54d2f67a8eb69ee746e168d9}} 
+void \hyperlink{class_vessel_1_1_file_1_1_backup_file_a095b34be54d2f67a8eb69ee746e168d9}{set\+\_\+path} (const std\+::string \&fp)
+\begin{DoxyCompactList}\small\item\em Assigns a new file path to the object. Setting the path triggers all of the associated member attributes and variables to be updated with private method update\+\_\+attributes() \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_aeeb8b7494f20413b0114eefe0a4a7c4e}\label{class_vessel_1_1_file_1_1_backup_file_aeeb8b7494f20413b0114eefe0a4a7c4e}} 
+void \hyperlink{class_vessel_1_1_file_1_1_backup_file_aeeb8b7494f20413b0114eefe0a4a7c4e}{set\+\_\+path} (const fs\+::path \&file\+\_\+path)
+\begin{DoxyCompactList}\small\item\em Assigns a new file path to the object. Setting the path triggers all of the associated member attributes and variables to be updated with private method update\+\_\+attributes() \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_ace86a0294d9ec4c1c5fb547faa5a62f1}{get\+\_\+file\+\_\+name} () const
+\item 
+size\+\_\+t \hyperlink{class_vessel_1_1_file_1_1_backup_file_a0b803c1b83538be4cd6f8b68325ce040}{get\+\_\+file\+\_\+size} () const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_ac8c6bd1d97350bfff857a4d2ac66a705}{get\+\_\+file\+\_\+type} () const
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ab22d34fcc6b8fa3b7b16ea4681b31d2c}\label{class_vessel_1_1_file_1_1_backup_file_ab22d34fcc6b8fa3b7b16ea4681b31d2c}} 
+std\+::string {\bfseries get\+\_\+mime\+\_\+type} () const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_ac174329c938bd09c196e63a52540e33b}{get\+\_\+file\+\_\+contents} ()
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ac30eea3eb40d059a325627f8ff01bfe2}\label{class_vessel_1_1_file_1_1_backup_file_ac30eea3eb40d059a325627f8ff01bfe2}} 
+std\+::string {\bfseries get\+\_\+hash\+\_\+sha1} ()
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_a88f93dc773a3b2e81ca44f425ecba64a}{get\+\_\+hash\+\_\+sha1} () const
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a4e8831f4e19ac25219ca232cf3718be9}\label{class_vessel_1_1_file_1_1_backup_file_a4e8831f4e19ac25219ca232cf3718be9}} 
+std\+::string {\bfseries get\+\_\+hash\+\_\+sha1} (const std\+::string \&data) const
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a09d660faba0aec8c9b8e28af40481dce}\label{class_vessel_1_1_file_1_1_backup_file_a09d660faba0aec8c9b8e28af40481dce}} 
+std\+::string {\bfseries get\+\_\+hash\+\_\+sha256} (const std\+::string \&data) const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_ab7c424cc0644011f0d86bdd1475a5986}{get\+\_\+hash\+\_\+sha256} ()
+\item 
+unsigned int \hyperlink{class_vessel_1_1_file_1_1_backup_file_a720b6578b0c1fe64fb3edd391b006de9}{get\+\_\+directory\+\_\+id} () const
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a71d2aa2d423fda9336cba07f063552f6}\label{class_vessel_1_1_file_1_1_backup_file_a71d2aa2d423fda9336cba07f063552f6}} 
+void \hyperlink{class_vessel_1_1_file_1_1_backup_file_a71d2aa2d423fda9336cba07f063552f6}{set\+\_\+directory\+\_\+id} (unsigned int id)
+\begin{DoxyCompactList}\small\item\em Sets the associated database directory ID for the file (object only) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a8b31129882d0fcfbfe66d6d554b607ba}\label{class_vessel_1_1_file_1_1_backup_file_a8b31129882d0fcfbfe66d6d554b607ba}} 
+std\+::string {\bfseries get\+\_\+file\+\_\+id\+\_\+text} () const
+\item 
+std\+::shared\+\_\+ptr$<$ unsigned char $>$ \hyperlink{class_vessel_1_1_file_1_1_backup_file_aceb6698bc333c64694303919eece6628}{get\+\_\+file\+\_\+id} () const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_abc780ca5943b825b42f6769fce3d19d7}{get\+\_\+file\+\_\+path} () const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_abbaa301d14ea7f03bac25b81d2e3149d}{get\+\_\+parent\+\_\+path} () const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_aaa9162554abefd5a1473218917168b65}{get\+\_\+relative\+\_\+path} () const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_a593c9c1cb98892defc3f628d9c393390}{get\+\_\+canonical\+\_\+path} () const
+\item 
+unsigned long \hyperlink{class_vessel_1_1_file_1_1_backup_file_a3112129047c78a7fc52cf9db6448cdcd}{get\+\_\+last\+\_\+modified} () const
+\item 
+bool \hyperlink{class_vessel_1_1_file_1_1_backup_file_adb103b7830a36fea586802dbe5aa7288}{exists} ()
+\item 
+bool \hyperlink{class_vessel_1_1_file_1_1_backup_file_a1a9de8dd9494e2e9639cf0f889586281}{is\+\_\+compressed} ()
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_acef6a4af732f6773e341e8a8c0016063}{get\+\_\+file\+\_\+part} (unsigned int num)
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_a6a7b3eef42db8e72ae5ed7fbe50c6457}{get\+\_\+chunk} (size\+\_\+t offset, size\+\_\+t length)
+\item 
+unsigned int \hyperlink{class_vessel_1_1_file_1_1_backup_file_ab206576fee90fd5549d8d12dc6ea5848}{get\+\_\+total\+\_\+parts} () const
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_af323ffd61bf4576cafb45ab38d24a71d}\label{class_vessel_1_1_file_1_1_backup_file_af323ffd61bf4576cafb45ab38d24a71d}} 
+void \hyperlink{class_vessel_1_1_file_1_1_backup_file_af323ffd61bf4576cafb45ab38d24a71d}{set\+\_\+upload\+\_\+id} (unsigned int upload\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Sets the database internal upload id for the file. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a943a0b10391929ee1dab1f2455da917e}\label{class_vessel_1_1_file_1_1_backup_file_a943a0b10391929ee1dab1f2455da917e}} 
+void \hyperlink{class_vessel_1_1_file_1_1_backup_file_a943a0b10391929ee1dab1f2455da917e}{set\+\_\+upload\+\_\+key} (const std\+::string \&upload\+\_\+key)
+\begin{DoxyCompactList}\small\item\em Sets the server upload id/key for the file. \end{DoxyCompactList}\item 
+unsigned int \hyperlink{class_vessel_1_1_file_1_1_backup_file_a9bcd229287d4aff827dde16311d7ebe1}{get\+\_\+upload\+\_\+id} () const
+\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_a198abedc7ad1c1d101750317f607e7a1}{get\+\_\+upload\+\_\+key} () const
+\item 
+std\+::shared\+\_\+ptr$<$ \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} $>$ \hyperlink{class_vessel_1_1_file_1_1_backup_file_a1ca4b7b8dbc8ea016662fdf1e58b309b}{get\+\_\+compressed\+\_\+copy} ()
+\begin{DoxyCompactList}\small\item\em Creates a compressed copy of the file stored in the tmp directory. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_file_1_1_backup_file_aca36a170c08cb07d83babdb7a0476a15}{is\+\_\+readable} ()
+\begin{DoxyCompactList}\small\item\em Returns whether or not the file can be opened for reading. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a849062bf65572a4b02bd15b381b49483}\label{class_vessel_1_1_file_1_1_backup_file_a849062bf65572a4b02bd15b381b49483}} 
+void {\bfseries update\+\_\+last\+\_\+backup} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::string \hyperlink{class_vessel_1_1_file_1_1_backup_file_aad30aceff344be7bc06f632e98303ac9}{get\+\_\+mime\+\_\+type} (const std\+::string \&file\+\_\+type)
+\begin{DoxyCompactList}\small\item\em Queries the local database by the file type to locate the M\+I\+ME type. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a994e23eb96c22a0200a3d23fa076f70e}\label{class_vessel_1_1_file_1_1_backup_file_a994e23eb96c22a0200a3d23fa076f70e}} 
+static void \hyperlink{class_vessel_1_1_file_1_1_backup_file_a994e23eb96c22a0200a3d23fa076f70e}{set\+\_\+chunk\+\_\+size} (size\+\_\+t chunk\+\_\+sz)
+\begin{DoxyCompactList}\small\item\em Sets the size of chunks of bytes returned from a file part for multi part uploads. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_afcb9ec4a98b6d3e6fdb80df2b10e893b}\label{class_vessel_1_1_file_1_1_backup_file_afcb9ec4a98b6d3e6fdb80df2b10e893b}} 
+static size\+\_\+t \hyperlink{class_vessel_1_1_file_1_1_backup_file_afcb9ec4a98b6d3e6fdb80df2b10e893b}{get\+\_\+chunk\+\_\+size} ()
+\begin{DoxyCompactList}\small\item\em Returns the chunk size in bytes for multipart uploads. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a8035a850faea49c0216c499bae5160d0}\label{class_vessel_1_1_file_1_1_backup_file_a8035a850faea49c0216c499bae5160d0}} 
+static std\+::string {\bfseries find\+\_\+mime\+\_\+type} (const std\+::string \&ext)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a6c70e380298c462c9f7e36600e63ee8f}\label{class_vessel_1_1_file_1_1_backup_file_a6c70e380298c462c9f7e36600e63ee8f}} 
+static void \hyperlink{class_vessel_1_1_file_1_1_backup_file_a6c70e380298c462c9f7e36600e63ee8f}{update\+\_\+last\+\_\+backup} (std\+::shared\+\_\+ptr$<$ unsigned char $>$ file\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Sets the last backup time for the file to the current U\+N\+IX timestamp. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_adb103b7830a36fea586802dbe5aa7288}\label{class_vessel_1_1_file_1_1_backup_file_adb103b7830a36fea586802dbe5aa7288}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!exists@{exists}}
+\index{exists@{exists}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{exists()}{exists()}}
+{\footnotesize\ttfamily bool Vessel\+::\+File\+::\+Backup\+File\+::exists (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\begin{DoxyReturn}{Returns}
+Returns whether or not the file exists 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a593c9c1cb98892defc3f628d9c393390}\label{class_vessel_1_1_file_1_1_backup_file_a593c9c1cb98892defc3f628d9c393390}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+canonical\+\_\+path@{get\+\_\+canonical\+\_\+path}}
+\index{get\+\_\+canonical\+\_\+path@{get\+\_\+canonical\+\_\+path}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+canonical\+\_\+path()}{get\_canonical\_path()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+canonical\+\_\+path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the canonical (complete/full) path of the file as a string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a6a7b3eef42db8e72ae5ed7fbe50c6457}\label{class_vessel_1_1_file_1_1_backup_file_a6a7b3eef42db8e72ae5ed7fbe50c6457}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+chunk@{get\+\_\+chunk}}
+\index{get\+\_\+chunk@{get\+\_\+chunk}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+chunk()}{get\_chunk()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+chunk (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{offset,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})}
+
+\begin{DoxyReturn}{Returns}
+Returns a part of the file content at the specified offset and length 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a1ca4b7b8dbc8ea016662fdf1e58b309b}\label{class_vessel_1_1_file_1_1_backup_file_a1ca4b7b8dbc8ea016662fdf1e58b309b}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+compressed\+\_\+copy@{get\+\_\+compressed\+\_\+copy}}
+\index{get\+\_\+compressed\+\_\+copy@{get\+\_\+compressed\+\_\+copy}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+compressed\+\_\+copy()}{get\_compressed\_copy()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} $>$ Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+compressed\+\_\+copy (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Creates a compressed copy of the file stored in the tmp directory. 
+
+\begin{DoxyReturn}{Returns}
+Returns a \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} reference to the tmp compressed copy 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a720b6578b0c1fe64fb3edd391b006de9}\label{class_vessel_1_1_file_1_1_backup_file_a720b6578b0c1fe64fb3edd391b006de9}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+directory\+\_\+id@{get\+\_\+directory\+\_\+id}}
+\index{get\+\_\+directory\+\_\+id@{get\+\_\+directory\+\_\+id}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+directory\+\_\+id()}{get\_directory\_id()}}
+{\footnotesize\ttfamily unsigned int Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+directory\+\_\+id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the database ID of the directory 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ac174329c938bd09c196e63a52540e33b}\label{class_vessel_1_1_file_1_1_backup_file_ac174329c938bd09c196e63a52540e33b}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+file\+\_\+contents@{get\+\_\+file\+\_\+contents}}
+\index{get\+\_\+file\+\_\+contents@{get\+\_\+file\+\_\+contents}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+contents()}{get\_file\_contents()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+file\+\_\+contents (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\begin{DoxyReturn}{Returns}
+Returns the file contents 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_aceb6698bc333c64694303919eece6628}\label{class_vessel_1_1_file_1_1_backup_file_aceb6698bc333c64694303919eece6628}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+file\+\_\+id@{get\+\_\+file\+\_\+id}}
+\index{get\+\_\+file\+\_\+id@{get\+\_\+file\+\_\+id}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+id()}{get\_file\_id()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+file\+\_\+id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the database unique ID of the file as a shared pointer 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ace86a0294d9ec4c1c5fb547faa5a62f1}\label{class_vessel_1_1_file_1_1_backup_file_ace86a0294d9ec4c1c5fb547faa5a62f1}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+file\+\_\+name@{get\+\_\+file\+\_\+name}}
+\index{get\+\_\+file\+\_\+name@{get\+\_\+file\+\_\+name}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+name()}{get\_file\_name()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+file\+\_\+name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the filename 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_acef6a4af732f6773e341e8a8c0016063}\label{class_vessel_1_1_file_1_1_backup_file_acef6a4af732f6773e341e8a8c0016063}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+file\+\_\+part@{get\+\_\+file\+\_\+part}}
+\index{get\+\_\+file\+\_\+part@{get\+\_\+file\+\_\+part}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+part()}{get\_file\_part()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+file\+\_\+part (\begin{DoxyParamCaption}\item[{unsigned int}]{num }\end{DoxyParamCaption})}
+
+\begin{DoxyReturn}{Returns}
+Returns the bytes of a file for the given part number 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_abc780ca5943b825b42f6769fce3d19d7}\label{class_vessel_1_1_file_1_1_backup_file_abc780ca5943b825b42f6769fce3d19d7}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+file\+\_\+path@{get\+\_\+file\+\_\+path}}
+\index{get\+\_\+file\+\_\+path@{get\+\_\+file\+\_\+path}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+path()}{get\_file\_path()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+file\+\_\+path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the complete file path as a string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a0b803c1b83538be4cd6f8b68325ce040}\label{class_vessel_1_1_file_1_1_backup_file_a0b803c1b83538be4cd6f8b68325ce040}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+file\+\_\+size@{get\+\_\+file\+\_\+size}}
+\index{get\+\_\+file\+\_\+size@{get\+\_\+file\+\_\+size}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+size()}{get\_file\_size()}}
+{\footnotesize\ttfamily size\+\_\+t Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+file\+\_\+size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the file size 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ac8c6bd1d97350bfff857a4d2ac66a705}\label{class_vessel_1_1_file_1_1_backup_file_ac8c6bd1d97350bfff857a4d2ac66a705}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+file\+\_\+type@{get\+\_\+file\+\_\+type}}
+\index{get\+\_\+file\+\_\+type@{get\+\_\+file\+\_\+type}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+file\+\_\+type()}{get\_file\_type()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+file\+\_\+type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the file extension as a string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a88f93dc773a3b2e81ca44f425ecba64a}\label{class_vessel_1_1_file_1_1_backup_file_a88f93dc773a3b2e81ca44f425ecba64a}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+hash\+\_\+sha1@{get\+\_\+hash\+\_\+sha1}}
+\index{get\+\_\+hash\+\_\+sha1@{get\+\_\+hash\+\_\+sha1}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+hash\+\_\+sha1()}{get\_hash\_sha1()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+hash\+\_\+sha1 (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns a S\+H\+A-\/1 hash of the file contents 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ab7c424cc0644011f0d86bdd1475a5986}\label{class_vessel_1_1_file_1_1_backup_file_ab7c424cc0644011f0d86bdd1475a5986}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+hash\+\_\+sha256@{get\+\_\+hash\+\_\+sha256}}
+\index{get\+\_\+hash\+\_\+sha256@{get\+\_\+hash\+\_\+sha256}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+hash\+\_\+sha256()}{get\_hash\_sha256()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+hash\+\_\+sha256 (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\begin{DoxyReturn}{Returns}
+Returns a S\+H\+A-\/256 hash of the file contents 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a3112129047c78a7fc52cf9db6448cdcd}\label{class_vessel_1_1_file_1_1_backup_file_a3112129047c78a7fc52cf9db6448cdcd}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+last\+\_\+modified@{get\+\_\+last\+\_\+modified}}
+\index{get\+\_\+last\+\_\+modified@{get\+\_\+last\+\_\+modified}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+last\+\_\+modified()}{get\_last\_modified()}}
+{\footnotesize\ttfamily unsigned long Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+last\+\_\+modified (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the last write time of the file as a Unix timestamp 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_aad30aceff344be7bc06f632e98303ac9}\label{class_vessel_1_1_file_1_1_backup_file_aad30aceff344be7bc06f632e98303ac9}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+mime\+\_\+type@{get\+\_\+mime\+\_\+type}}
+\index{get\+\_\+mime\+\_\+type@{get\+\_\+mime\+\_\+type}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+mime\+\_\+type()}{get\_mime\_type()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+mime\+\_\+type (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{file\+\_\+type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Queries the local database by the file type to locate the M\+I\+ME type. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+type} & The extension of the file (eg. \char`\"{}.\+jpg\char`\"{}) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns the M\+I\+ME type for the file extension (if it exists) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_abbaa301d14ea7f03bac25b81d2e3149d}\label{class_vessel_1_1_file_1_1_backup_file_abbaa301d14ea7f03bac25b81d2e3149d}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+parent\+\_\+path@{get\+\_\+parent\+\_\+path}}
+\index{get\+\_\+parent\+\_\+path@{get\+\_\+parent\+\_\+path}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+parent\+\_\+path()}{get\_parent\_path()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+parent\+\_\+path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the parent path of the file as a string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_aaa9162554abefd5a1473218917168b65}\label{class_vessel_1_1_file_1_1_backup_file_aaa9162554abefd5a1473218917168b65}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+relative\+\_\+path@{get\+\_\+relative\+\_\+path}}
+\index{get\+\_\+relative\+\_\+path@{get\+\_\+relative\+\_\+path}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+relative\+\_\+path()}{get\_relative\_path()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+relative\+\_\+path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the relative path of the file as a string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_ab206576fee90fd5549d8d12dc6ea5848}\label{class_vessel_1_1_file_1_1_backup_file_ab206576fee90fd5549d8d12dc6ea5848}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+total\+\_\+parts@{get\+\_\+total\+\_\+parts}}
+\index{get\+\_\+total\+\_\+parts@{get\+\_\+total\+\_\+parts}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+total\+\_\+parts()}{get\_total\_parts()}}
+{\footnotesize\ttfamily unsigned int Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+total\+\_\+parts (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the total number of file parts based on the chunk size 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a9bcd229287d4aff827dde16311d7ebe1}\label{class_vessel_1_1_file_1_1_backup_file_a9bcd229287d4aff827dde16311d7ebe1}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+upload\+\_\+id@{get\+\_\+upload\+\_\+id}}
+\index{get\+\_\+upload\+\_\+id@{get\+\_\+upload\+\_\+id}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+upload\+\_\+id()}{get\_upload\_id()}}
+{\footnotesize\ttfamily unsigned int Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+upload\+\_\+id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the database upload id from the file 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a198abedc7ad1c1d101750317f607e7a1}\label{class_vessel_1_1_file_1_1_backup_file_a198abedc7ad1c1d101750317f607e7a1}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!get\+\_\+upload\+\_\+key@{get\+\_\+upload\+\_\+key}}
+\index{get\+\_\+upload\+\_\+key@{get\+\_\+upload\+\_\+key}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{get\+\_\+upload\+\_\+key()}{get\_upload\_key()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+Backup\+File\+::get\+\_\+upload\+\_\+key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+Returns the server upload id/key from the file 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_a1a9de8dd9494e2e9639cf0f889586281}\label{class_vessel_1_1_file_1_1_backup_file_a1a9de8dd9494e2e9639cf0f889586281}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!is\+\_\+compressed@{is\+\_\+compressed}}
+\index{is\+\_\+compressed@{is\+\_\+compressed}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{is\+\_\+compressed()}{is\_compressed()}}
+{\footnotesize\ttfamily bool Vessel\+::\+File\+::\+Backup\+File\+::is\+\_\+compressed (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\begin{DoxyReturn}{Returns}
+Returns whether or not the file is compressed 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_backup_file_aca36a170c08cb07d83babdb7a0476a15}\label{class_vessel_1_1_file_1_1_backup_file_aca36a170c08cb07d83babdb7a0476a15}} 
+\index{Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}!is\+\_\+readable@{is\+\_\+readable}}
+\index{is\+\_\+readable@{is\+\_\+readable}!Vessel\+::\+File\+::\+Backup\+File@{Vessel\+::\+File\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{is\+\_\+readable()}{is\_readable()}}
+{\footnotesize\ttfamily bool Vessel\+::\+File\+::\+Backup\+File\+::is\+\_\+readable (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns whether or not the file can be opened for reading. 
+
+\begin{DoxyReturn}{Returns}
+Returns whether or not the file can be opened for reading 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/filesystem/file.\+hpp\end{DoxyCompactItemize}

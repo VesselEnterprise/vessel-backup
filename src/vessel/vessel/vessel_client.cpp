@@ -122,300 +122,69 @@ bool VesselClient::upload_file_part( Vessel::File::BackupFile * bf, int part_num
     return true;
 }
 
-bool VesselClient::heartbeat()
+void VesselClient::heartbeat()
 {
 
-    //Create JSON for client heartbeat
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
+    //UNIX Timestamp of Last Heartbeat
+    long last_heartbeat = m_ldb->get_setting_int("last_heartbeat");
 
-    std::map<std::string,std::string> jmap;
-    jmap.insert( std::pair<std::string,std::string>("host_name", m_ldb->get_setting_str("hostname")) );
-    jmap.insert( std::pair<std::string,std::string>("os", m_ldb->get_setting_str("host_os")) );
-    jmap.insert( std::pair<std::string,std::string>("client_version", m_ldb->get_setting_str("client_version")) );
-    jmap.insert( std::pair<std::string,std::string>("domain", m_ldb->get_setting_str("host_domain")) );
+    //Write some JSON
+    StringBuffer strbuf;
+    PrettyWriter<StringBuffer> writer(strbuf);
 
-    for ( auto &kv : jmap )
+    writer.StartObject();
+
+    writer.Key("user_id");
+    writer.String( m_ldb->get_setting_str("user_id").c_str() );
+
+    writer.Key("host_name");
+    writer.String( m_ldb->get_setting_str("hostname").c_str() );
+
+    writer.Key("os");
+    writer.String( m_ldb->get_setting_str("host_os").c_str() );
+
+    writer.Key("client_version");
+    writer.String( m_ldb->get_setting_str("client_version").c_str() );
+
+    writer.Key("domain");
+    writer.String( m_ldb->get_setting_str("host_domain").c_str() );
+
+    //
+    writer.Key("stats");
+    writer.StartObject();
+
+    std::map<std::string,int> stats = m_ldb->get_stats();
+    for ( auto itr = stats.begin(); itr != stats.end(); ++itr )
     {
-        rapidjson::Value key(kv.first.c_str(), alloc);
-        rapidjson::Value value(kv.second.c_str(), alloc);
-        doc.AddMember(key, value, alloc );
+        writer.Key(itr->first.c_str());
+        writer.Int(itr->second);
     }
 
-    rapidjson::StringBuffer strbuf;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(strbuf);
+    writer.EndObject();
 
-    doc.Accept(writer);
+    //
+    writer.EndObject();
+
+    std::string payload = strbuf.GetString();
+
+    //Send the Heartbeat Request
 
     HttpRequest r;
+    r.set_auth_header("Bearer " + m_client_token);
+    r.accept("application/json");
     r.set_content_type("application/json");
     r.set_method("POST");
     r.set_url(m_api_path + "/heartbeat");
-    r.set_body( strbuf.GetString() );
+    r.set_body( payload );
 
     send_http_request(r);
 
-    if ( get_http_status() != 200 ) {
-        return false;
-    }
+    std::cout << "Sent HTTP Request!" << '\n';
 
-    const std::string& response = get_response();
+    int status_code = get_http_status();
 
-    //Parse Storage Providers from response
-    //parse_s
-
-    return true;
-
-}
-
-std::string VesselClient::get_client_settings()
-{
-
-    if ( m_auth_token == "" ) //Don't try to get settings if no auth token is present
-        return "{}";
-
-    HttpRequest r;
-    r.set_content_type("application/json");
-    r.set_method("GET");
-    r.set_url(m_api_path + "/settings");
-
-    send_http_request(r);
-
-    return get_response();
-
-}
-
-bool VesselClient::activate()
-{
-
-    Document doc;
-    doc.SetObject();
-    Document::AllocatorType& alloc = doc.GetAllocator();
-
-    //Get Activation Code from DB
-    Value activation_code( m_ldb->get_setting_str("activation_code").c_str(), alloc );
-    Value user_name( m_ldb->get_setting_str("username").c_str(), alloc );
-
-    doc.AddMember("user_name", user_name, alloc );
-    doc.AddMember("activation_code", activation_code, alloc );
-
-    StringBuffer strbuf;
-    PrettyWriter<StringBuffer> writer(strbuf);
-
-    doc.Accept(writer);
-
-    HttpRequest r;
-    r.set_method("POST");
-    r.set_url(m_api_path + "/activate");
-    r.set_content_type("application/json");
-    r.set_body( strbuf.GetString() );
-
-    send_http_request( r );
-
-    //Reset Document
-    strbuf.Clear();
-    doc.RemoveAllMembers();
-    writer.Reset(strbuf);
-
-    //TODO: Add Activation Response Logging here
-
-    //std::cout << "Activation response: " << get_response() << std::endl;
-
-    ParseResult json_ok = doc.Parse( get_response().c_str() );
-
-    if ( !json_ok )
-    {
-        handle_json_error(json_ok);
-        return false;
-    }
-
-    doc.Accept(writer);
-
-    //Check if access token is present
-    const Value& response = doc["response"];
-
-    if ( !response.HasMember("access_token") ) {
-        m_activated=false;
-        return false;
-    }
-
-    //Set auth token
-    std::string token = response["access_token"].GetString();
-
-    //If the access token is empty, and the flag is false, activation failed
-    if ( response["is_activated"].GetBool() ) {
-        m_activated=true;
-    }
-
-    //Set Auth Token?
-    if ( token != "" )
-    {
-        //Update DB w/ new token and set member var
-        m_ldb->update_setting("auth_token", token );
-        m_auth_token = token;
-
-         //Set DB User ID provided w/ user activation
-        if ( response.HasMember("user_id") )
-        {
-            std::string user_id = response["user_id"].GetString();
-            if ( !user_id.empty() )
-            {
-                m_ldb->update_setting("user_id", user_id );
-                m_user_id = user_id;
-            }
-        }
-
-        //Generate a new authorization header for subsequent requests
-        m_auth_header = get_auth_header(token, m_user_id);
-
-    }
-
-    //Set Refresh token
-    if ( response.HasMember("refresh_token") )
-    {
-        m_ldb->update_setting("refresh_token", response["refresh_token"].GetString() );
-    }
-
-    return m_activated;
-
-}
-
-bool VesselClient::is_activated()
-{
-    return m_activated;
-}
-
-void VesselClient::use_compression(bool flag)
-{
-    m_use_compression=flag;
-}
-
-bool VesselClient::refresh_token()
-{
-
-    //Create new JSON document
-    Document doc;
-    doc.SetObject();
-
-    //Get document allocator
-    Document::AllocatorType& alloc = doc.GetAllocator();
-
-    //Get refresh token from LocalDatabase
-    std::string refresh_token = m_ldb->get_setting_str("refresh_token");
-
-    //Get user ID from LocalDatabase
-    std::string user_id = m_ldb->get_setting_str("user_id");
-
-    //Prepare JSON request
-    Value refresh_token_v( refresh_token.c_str(), refresh_token.size(), alloc );
-    Value user_id_v( user_id.c_str(), user_id.size(), alloc );
-
-    doc.AddMember( "refresh_token", refresh_token_v, alloc );
-    doc.AddMember( "user_id", user_id_v, alloc );
-
-    //Write JSON
-    StringBuffer strbuf;
-    PrettyWriter<StringBuffer> writer(strbuf);
-    doc.Accept(writer);
-
-    //Send Http Request
-    HttpRequest r;
-    r.set_method("POST");
-    r.set_url(m_api_path + "/refresh_token");
-    r.set_content_type("application/json");
-    r.set_body( strbuf.GetString() );
-
-    send_http_request( r );
-
-    //Clear existing JSON document
-    strbuf.Clear();
-    doc.RemoveAllMembers();
-    writer.Reset(strbuf);
-
-    //std::cout << "Refresh response: " << m_response_data << std::endl;
-
-    //Parse response and update database
-    ParseResult json_ok = doc.Parse( get_response().c_str() );
-
-    if ( !json_ok )
-    {
-        handle_json_error(json_ok);
-        return false;
-    }
-
-    doc.Accept(writer);
-
-    //Handle errors
-    if ( get_http_status() != 200 )
-        return false;
-    else if ( !doc.HasMember("response") )
-        return false;
-
-    const Value& response = doc["response"];
-
-    //Invalid JSON
-    if ( !response.HasMember("access_token") )
-    {
-        return false;
-    }
-
-    std::string token = response["access_token"].GetString();
-
-    //Update LocalDatabase Settings
-    m_ldb->update_setting("auth_token", token );
-    m_ldb->update_setting("refresh_token", response["refresh_token"].GetString() );
-    m_ldb->update_setting("token_expiry", response["token_expiry"].GetInt() );
-
-    //Update Authorization header
-    m_auth_header = get_auth_header(token, user_id );
-
-    return true;
-
-}
-
-void VesselClient::handle_auth_error()
-{
-
-    if ( get_http_status() != 401 ) //http code should always be 401 for auth errors
-        return;
-
-    //Try to parse the 401 response
-    Document doc;
-    ParseResult json_ok = doc.Parse( get_response().c_str() );
-
-    if ( !json_ok )
-    {
-        handle_json_error(json_ok);
-        return;
-    }
-
-    if ( !doc.HasMember("error") )
-    {
-        m_log->add_message("Unable to parse 401 authorization response JSON", "Authentication failure");
-        return;
-    }
-
-    const Value& auth_error = doc["error"];
-
-    //Log an error message if it was returned
-    if ( auth_error.HasMember("message") )
-    {
-        m_log->add_message(auth_error["message"].GetString(), "Authentication failure");
-    }
-
-    if ( auth_error.HasMember("token_expired") )
-    {
-        if ( auth_error["token_expired"].GetBool() == true )
-        {
-            //Try to refresh the token
-            m_log->add_message("Access token is expired. Trying to refresh", "Authentication failure");
-            refresh_token();
-        }
-    }
-    else {
-        //Try to activate the client?
-        //activate();
+    if ( status_code != 200 ) {
+        Log::get_log().add_error("Heartbeat failed with status code: " + std::to_string(status_code), "Heartbeat");
     }
 
 }
@@ -436,43 +205,6 @@ std::string VesselClient::get_auth_header(const std::string& token, const std::s
 
     return encoded;
 
-}
-
-void VesselClient::handle_api_error()
-{
-
-    Document doc;
-    ParseResult json_ok = doc.Parse( get_response().c_str() );
-
-    if ( !json_ok )
-    {
-        handle_json_error(json_ok);
-        return;
-    }
-
-    if ( !doc.HasMember("error") )
-        return; //Nothing to do
-
-    const Value& error = doc["error"];
-
-    if ( error.HasMember("message") )
-    {
-        std::stringstream ss;
-        ss << "API Error: ";
-        ss << error["message"].GetString();
-        ss << ". Status Code: " << std::to_string(get_http_status());
-        m_log->add_message(ss.str(), "API");
-
-    }
-
-}
-
-void VesselClient::handle_json_error(const ParseResult& res)
-{
-    std::stringstream ss;
-    ss << "JSON parser error: ";
-    ss << GetParseError_En(res.Code());
-    m_log->add_message(ss.str(), "JSON");
 }
 
 bool VesselClient::has_deployment_key()
@@ -723,4 +455,9 @@ StorageProvider VesselClient::get_storage_provider()
 
     return provider;
 
+}
+
+void VesselClient::refresh_client_token()
+{
+    m_client_token = m_ldb->get_setting_str("client_token");
 }

@@ -11,16 +11,23 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/chrono.hpp>
 #include <boost/bind.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <vessel/database/local_db.hpp>
 #include <vessel/log/log.hpp>
 #include <vessel/network/http_stream.hpp>
 #include <vessel/network/http_exception.hpp>
 #include <vessel/network/http_request.hpp>
+#include <vessel/network/token_bucket.hpp>
 
+#define MIN_TRANSFER_SPEED 500
+
+using namespace Vessel;
+using namespace Vessel::Database;
 using namespace Vessel::Exception;
 using namespace Vessel::Logging;
 
@@ -134,35 +141,59 @@ namespace Vessel {
                 */
                 int get_port();
 
+                /*! \fn std::string make_test_str(size_t length)
+                    \brief Makes a test string of length bytes
+                    \return Returns a test string of length bytes
+                */
+                std::string make_test_str(size_t length);
+
+                /*! \fn void max_transfer_speed(size_t limit);
+                    \brief Sets the max transfer speed for HTTP requests
+                */
+                void max_transfer_speed(size_t limit);
+
             private:
 
-                Vessel::Database::LocalDatabase* m_ldb;
+                LocalDatabase* m_ldb;
+                Log* m_log;
                 std::string m_hostname;
                 std::string m_protocol;
+                std::string m_header_data;
+                std::string m_response_data;
+                std::string m_error_message;
                 unsigned int m_port; //or service name
+                unsigned int m_http_status;
+                size_t m_content_length;
+                size_t m_max_transfer_speed;
                 bool m_connected;
                 bool m_use_ssl;
+                bool m_verify_cert;
+                bool m_ssl_good;
+                bool m_chunked_encoding;
+                bool m_stopped;
+                static bool m_http_logging;
+                long m_transfer_start_time;
+                long m_last_write_time;
+                size_t m_last_bytes_transferred;
+
                 boost::asio::ssl::context m_ssl_ctx;
                 boost::posix_time::time_duration m_timeout;
-                bool m_verify_cert;
+
                 boost::asio::io_service m_io_service;
+                std::shared_ptr<boost::asio::io_service::work> m_work;
                 std::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
                 std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> m_ssl_socket;
                 std::shared_ptr<boost::asio::deadline_timer> m_deadline_timer;
-
-                //Member Vars for Data Transfer
                 std::shared_ptr<boost::asio::streambuf> m_response_buffer;
-                std::string m_request_data; //Response Data
-                size_t m_content_length;
 
-                unsigned int m_http_status;
-                std::string m_header_data;
                 std::map<std::string,std::string> m_response_headers;
-                std::string m_response_data;
+
                 boost::system::error_code m_conn_status;
-                bool m_ssl_good;
                 boost::system::error_code m_response_ec;
-                bool m_chunked_encoding;
+
+                std::shared_ptr<TokenBucket> m_token_bucket;
+                std::shared_ptr<std::string> m_request_data;
+
 
                 void parse_url(const std::string& host );
 
@@ -173,19 +204,20 @@ namespace Vessel {
                 void handle_handshake(const boost::system::error_code& e );
                 void handle_response( const boost::system::error_code& e );
                 void handle_write( const boost::system::error_code& e, size_t bytes_transferred );
+                void handle_write_throttled( const boost::system::error_code& e, size_t bytes_transferred );
                 void handle_read_content( const boost::system::error_code& e, size_t bytes_transferred );
                 void handle_read_headers( const boost::system::error_code& e );
                 void read_chunked_content( const boost::system::error_code& e, size_t bytes_transferred );
                 void read_buffer_data();
+                void cancel_deadline();
+                void init_deadline_timer();
 
                 void cleanup();
                 void set_defaults();
 
-                /** Logging and errors **/
-                Vessel::Logging::Log* m_log;
-                std::string m_error_message;
 
-                static bool m_http_logging;
+                void write_socket( const std::string& str );
+                void run_io_service();
 
             protected:
 
@@ -207,10 +239,6 @@ namespace Vessel {
                 void set_deadline(long seconds);
 
                 void clear_error_code();
-
-                void write_socket( const std::string& str );
-
-                void run_io_service();
 
         };
 

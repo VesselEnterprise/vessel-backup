@@ -233,12 +233,6 @@ namespace Vessel {
                 */
                 void init_multipart_upload();
 
-                /*! \fn std::string get_5mb_test_str();
-                    \brief Returns a 5MB text string used for testing the Multipart upload API
-                    \return Returns a 5MB text string used for testing the Multipart upload API
-                */
-                std::string get_5mb_test_str();
-
                 /*! \fn std::string parse_upload_id( const std::string& response );
                     \brief Returns the upload id from the response after initiating a multipart upload
                     \return Returns the upload id from the response after initiating a multipart upload

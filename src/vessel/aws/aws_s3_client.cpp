@@ -459,23 +459,6 @@ void AwsS3Client::set_upload_id(const std::string& upload_id)
     m_upload_id = upload_id;
 }
 
-std::string AwsS3Client::get_5mb_test_str()
-{
-
-    std::string test_string;
-    std::string pattern = "Test";
-    size_t total_bytes = 5 * 1024 * 1024;
-    size_t total_copies = static_cast< uint32_t >( total_bytes / pattern.size() + 1 );
-
-    for ( size_t i=0; i < total_copies; i++ )
-    {
-        test_string.append(pattern);
-    }
-
-    return test_string;
-
-}
-
 std::string AwsS3Client::parse_upload_id(const std::string& response)
 {
 

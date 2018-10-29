@@ -489,3 +489,29 @@ std::shared_ptr<unsigned char> LocalDatabase::get_binary_id(unsigned char* id)
     //std::copy ..?
     return std::shared_ptr<unsigned char>( buffer );
 }
+
+std::map<std::string,int> LocalDatabase::get_stats()
+{
+
+    std::map<std::string, int> stats;
+
+    std::string query = "SELECT name,value FROM backup_stat";
+
+    sqlite3_stmt* stmt;
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
+        m_log->add_error("Failed to retrieve stats", "Stats");
+        return stats;
+    }
+
+    while ( sqlite3_step(stmt) == SQLITE_ROW )
+    {
+        std::string name = get_sqlite_str( sqlite3_column_text(stmt, 0) );
+        stats.insert( std::pair<std::string, int>(name, sqlite3_column_int(stmt, 1) ));
+    }
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    return stats;
+
+}

@@ -8,6 +8,7 @@
 #include <vessel/filesystem/file.hpp>
 #include <vessel/filesystem/file_upload.hpp>
 
+using namespace Vessel;
 using namespace Vessel::Exception;
 using namespace Vessel::Database;
 using namespace Vessel::File;

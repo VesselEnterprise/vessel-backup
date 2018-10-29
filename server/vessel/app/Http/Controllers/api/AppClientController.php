@@ -7,6 +7,7 @@ use Validator;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AppClientController extends Controller
 {
@@ -105,7 +106,7 @@ class AppClientController extends Controller
 			$appClient->client_name = $request->input('client_name');
 			$appClient->dns_name = $request->input('client_name');
 			$appClient->client_version = $request->input('client_version');
-			$appClient->ip_address = $request->input('ip_address');
+			$appClient->ip_address = $request->ip();
 			//$appClient->mac_address = $request->input('mac_address');
 			$appClient->os = $request->input('os');
 			$appClient->domain = $request->input('domain');
@@ -114,6 +115,12 @@ class AppClientController extends Controller
 				$appClient->token = App\AppClient::generateToken();
 			}
 			$appClient->save();
+
+			//Associate User with client
+			DB::table('app_client_user')->insert([
+				'client_id' => $appClient->client_id,
+				'user_id' => $user->user_id
+			]);
 
 			//Get storage providers
 			$providers = App\StorageProvider::where('active', true)->get();
@@ -125,6 +132,41 @@ class AppClientController extends Controller
 				'app_settings' => $appSettings,
 				'user' => $user
 			]);
+
+		}
+
+		public function heartbeat(Request $request)
+		{
+
+			$client = App\AppClient::where('token', $request->bearerToken() )->firstOrFail();
+
+			if ( !$client ) {
+				return response()->json(['error' => 'Bad client'], 400);
+			}
+
+			$user = App\User::withUuid($request->input('user_id'))->firstOrFail();
+
+			//Update Client Information
+			$client->client_name = $request->input('host_name');
+			$client->os = $request->input('os');
+			$client->client_version = $request->input('client_version');
+			$client->domain = $request->input('domain');
+			$client->last_check_in = Carbon::now();
+			$client->save();
+
+			//Parse Stats
+			$clientStats = $request->input('stats');
+
+			foreach($clientStats as $key => $value) {
+					DB::table('app_client_stat')->insert([
+						'client_id' => $client->client_id,
+						'user_id' => $user->user_id,
+						'stat_name' => $key,
+						'value' => $value
+					]);
+			}
+
+			return response()->json(['message' => '♥']);
 
 		}
 

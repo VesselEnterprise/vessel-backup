@@ -60,6 +60,7 @@ class UserProfileController extends Controller
 			$user->first_name = $request->input('first_name');
 			$user->last_name = $request->input('last_name');
 			$user->email = $request->input('email');
+			$user->user_name = $request->input('user_name');
 			$user->title = $request->input('title');
 			$user->office = $request->input('office');
 			$user->mobile = $request->input('mobile');

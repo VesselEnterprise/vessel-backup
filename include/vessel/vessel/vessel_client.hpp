@@ -75,34 +75,10 @@ namespace Vessel {
                 */
                 bool upload_file_part( Vessel::File::BackupFile * bf, int part_number );
 
-                /*! \fn bool heartbeat();
+                /*! \fn void heartbeat();
                     \brief Sends a heartbeat payload to the Vessel API. API returns client settings and other data back to the client
-                    \return Returns true if successful, false if errors
                 */
-                bool heartbeat();
-
-                /*! \fn std::string get_client_settings();
-                    \brief Returns client settings and overrides from the master server
-                    \return Returns client settings and overrides from the master server
-                */
-                std::string get_client_settings();
-
-                /*! \fn bool activate();
-                    \brief Attempts to activate the user with the master server
-                    \return Returns true if successful, false if not
-                */
-                bool activate();
-
-                /*! \fn bool is_activated();
-                    \brief Returns whether or not the user has been activated
-                    \return Returns true if the user is activated, false if not
-                */
-                bool is_activated();
-
-                /*! \fn void use_compression(bool flag);
-                    \brief Set to true to use Zlib compression for the file content before sending. Reduces transfer sizes but increases CPU processing
-                */
-                void use_compression(bool flag);
+                void heartbeat();
 
                 /*! \fn bool has_deployment_key();
                     \brief Returns true if the deployment_key setting has been set
@@ -127,19 +103,15 @@ namespace Vessel {
                 */
                 StorageProvider get_storage_provider();
 
+                /*! \fn void set_client_token();
+                    \brief Refreshes the client token from the database
+                */
+                void refresh_client_token();
+
             private:
 
                 LocalDatabase* m_ldb;
                 Log* m_log;
-
-                /** Authorization **/
-                void handle_auth_error();
-
-                /*! \fn bool refresh_token();
-                    \brief Sends a token refresh request to the API
-                    \return Returns true if the token was refreshed successfully, false if otherwise
-                */
-                bool refresh_token();
 
                 std::string get_auth_header(const std::string& token, const std::string& user_id);
 
@@ -148,18 +120,6 @@ namespace Vessel {
                 std::string m_client_token;
                 std::string m_api_path;
                 std::string m_user_id;
-                bool m_activated;
-                bool m_use_compression; //Send file content compressed
-
-                /*! \fn void handle_api_error();
-                    \brief Parses a JSON error response from the server and saves to log
-                */
-                void handle_api_error();
-
-                /*! \fn void handle_json_error(const ParseResult& res);
-                    \brief Handles a JSON parsing error and saves it to the log
-                */
-                void handle_json_error(const ParseResult& res);
 
                 /*! \fn bool sync_storage_provider(const Value& obj);
                     \brief Syncs a single storage provider to the local database

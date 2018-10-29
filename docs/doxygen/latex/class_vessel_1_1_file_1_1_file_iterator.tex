@@ -1,0 +1,116 @@
+\hypertarget{class_vessel_1_1_file_1_1_file_iterator}{}\section{Vessel\+:\+:File\+:\+:File\+Iterator Class Reference}
+\label{class_vessel_1_1_file_1_1_file_iterator}\index{Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}}
+
+
+Helper class for scanning files and adding them to the database.  
+
+
+
+
+{\ttfamily \#include $<$file\+\_\+iterator.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_file_iterator_a0607caa735b9d506bfa7dcdc635416a2}\label{class_vessel_1_1_file_1_1_file_iterator_a0607caa735b9d506bfa7dcdc635416a2}} 
+{\bfseries File\+Iterator} (const \hyperlink{class_vessel_1_1_file_1_1_backup_directory}{Backup\+Directory} \&bd)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_file_iterator_a23c4a395200a4a77abacd716fed5cb14}\label{class_vessel_1_1_file_1_1_file_iterator_a23c4a395200a4a77abacd716fed5cb14}} 
+void \hyperlink{class_vessel_1_1_file_1_1_file_iterator_a23c4a395200a4a77abacd716fed5cb14}{scan} ()
+\begin{DoxyCompactList}\small\item\em Scans the filesystem for files and directories. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_file_1_1_file_iterator_a8701998833ac62c2618d815fc100f6d1}{get\+\_\+base\+\_\+path} ()
+\begin{DoxyCompactList}\small\item\em Returns the default scan path for the current user. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_file_1_1_file_iterator_aed179f0336b6955a56fc97905404faef}{is\+\_\+ignore\+\_\+dir} (const boost\+::filesystem\+::path \&p, int level)
+\begin{DoxyCompactList}\small\item\em Checks if the directory is being ignored. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_file_1_1_file_iterator_a6f285e42ac14fcb265d72299131b1ffe}{is\+\_\+ignore\+\_\+ext} (const std\+::string \&ext)
+\begin{DoxyCompactList}\small\item\em Checks if the file extension is ignored. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_file_1_1_file_iterator_a89f4f4d25b18640d3201c558d56cbb5d}{add\+\_\+file} (const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} \&bf)
+\begin{DoxyCompactList}\small\item\em Adds a file to the database. \end{DoxyCompactList}\item 
+int \hyperlink{class_vessel_1_1_file_1_1_file_iterator_a131ad68618d2f9d649ca28cf5fa923f5}{add\+\_\+directory} (const \hyperlink{class_vessel_1_1_file_1_1_backup_directory}{Backup\+Directory} \&bd)
+\begin{DoxyCompactList}\small\item\em Adds a directory to the database. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Helper class for scanning files and adding them to the database. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_file_iterator_a131ad68618d2f9d649ca28cf5fa923f5}\label{class_vessel_1_1_file_1_1_file_iterator_a131ad68618d2f9d649ca28cf5fa923f5}} 
+\index{Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}!add\+\_\+directory@{add\+\_\+directory}}
+\index{add\+\_\+directory@{add\+\_\+directory}!Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}}
+\subsubsection{\texorpdfstring{add\+\_\+directory()}{add\_directory()}}
+{\footnotesize\ttfamily int Vessel\+::\+File\+::\+File\+Iterator\+::add\+\_\+directory (\begin{DoxyParamCaption}\item[{const \hyperlink{class_vessel_1_1_file_1_1_backup_directory}{Backup\+Directory} \&}]{bd }\end{DoxyParamCaption})}
+
+
+
+Adds a directory to the database. 
+
+\begin{DoxyReturn}{Returns}
+Returns the database directory id (integer) or -\/1 if the operation fails 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_file_iterator_a89f4f4d25b18640d3201c558d56cbb5d}\label{class_vessel_1_1_file_1_1_file_iterator_a89f4f4d25b18640d3201c558d56cbb5d}} 
+\index{Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}!add\+\_\+file@{add\+\_\+file}}
+\index{add\+\_\+file@{add\+\_\+file}!Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}}
+\subsubsection{\texorpdfstring{add\+\_\+file()}{add\_file()}}
+{\footnotesize\ttfamily int Vessel\+::\+File\+::\+File\+Iterator\+::add\+\_\+file (\begin{DoxyParamCaption}\item[{const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} \&}]{bf }\end{DoxyParamCaption})}
+
+
+
+Adds a file to the database. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the file extension is ignored 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_file_iterator_a8701998833ac62c2618d815fc100f6d1}\label{class_vessel_1_1_file_1_1_file_iterator_a8701998833ac62c2618d815fc100f6d1}} 
+\index{Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}!get\+\_\+base\+\_\+path@{get\+\_\+base\+\_\+path}}
+\index{get\+\_\+base\+\_\+path@{get\+\_\+base\+\_\+path}!Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}}
+\subsubsection{\texorpdfstring{get\+\_\+base\+\_\+path()}{get\_base\_path()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+File\+::\+File\+Iterator\+::get\+\_\+base\+\_\+path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the default scan path for the current user. 
+
+\begin{DoxyReturn}{Returns}
+Returns the default scan path for the current user 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_file_iterator_aed179f0336b6955a56fc97905404faef}\label{class_vessel_1_1_file_1_1_file_iterator_aed179f0336b6955a56fc97905404faef}} 
+\index{Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}!is\+\_\+ignore\+\_\+dir@{is\+\_\+ignore\+\_\+dir}}
+\index{is\+\_\+ignore\+\_\+dir@{is\+\_\+ignore\+\_\+dir}!Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}}
+\subsubsection{\texorpdfstring{is\+\_\+ignore\+\_\+dir()}{is\_ignore\_dir()}}
+{\footnotesize\ttfamily bool Vessel\+::\+File\+::\+File\+Iterator\+::is\+\_\+ignore\+\_\+dir (\begin{DoxyParamCaption}\item[{const boost\+::filesystem\+::path \&}]{p,  }\item[{int}]{level }\end{DoxyParamCaption})}
+
+
+
+Checks if the directory is being ignored. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em level} & Enforces the nesting level of the directory \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the directory is being ignored 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_file_1_1_file_iterator_a6f285e42ac14fcb265d72299131b1ffe}\label{class_vessel_1_1_file_1_1_file_iterator_a6f285e42ac14fcb265d72299131b1ffe}} 
+\index{Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}!is\+\_\+ignore\+\_\+ext@{is\+\_\+ignore\+\_\+ext}}
+\index{is\+\_\+ignore\+\_\+ext@{is\+\_\+ignore\+\_\+ext}!Vessel\+::\+File\+::\+File\+Iterator@{Vessel\+::\+File\+::\+File\+Iterator}}
+\subsubsection{\texorpdfstring{is\+\_\+ignore\+\_\+ext()}{is\_ignore\_ext()}}
+{\footnotesize\ttfamily bool Vessel\+::\+File\+::\+File\+Iterator\+::is\+\_\+ignore\+\_\+ext (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{ext }\end{DoxyParamCaption})}
+
+
+
+Checks if the file extension is ignored. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ext} & The file extension (eg. .jpg) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the file extension is ignored 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/filesystem/file\+\_\+iterator.\+hpp\end{DoxyCompactItemize}

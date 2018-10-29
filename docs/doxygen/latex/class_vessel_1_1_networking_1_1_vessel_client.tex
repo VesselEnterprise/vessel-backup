@@ -1,0 +1,114 @@
+\hypertarget{class_vessel_1_1_networking_1_1_vessel_client}{}\section{Vessel\+:\+:Networking\+:\+:Vessel\+Client Class Reference}
+\label{class_vessel_1_1_networking_1_1_vessel_client}\index{Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}}
+Inheritance diagram for Vessel\+:\+:Networking\+:\+:Vessel\+Client\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_vessel_1_1_networking_1_1_vessel_client}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_a8ab68fa2eff83b6439e92194d2077100}\label{class_vessel_1_1_networking_1_1_vessel_client_a8ab68fa2eff83b6439e92194d2077100}} 
+{\bfseries Vessel\+Client} (const std\+::string \&hostname)
+\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_vessel_client_af024f2016833bd9887d8717e7902f1f4}{init\+\_\+upload} (const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Vessel\+::\+File\+::\+Backup\+File} \&bf)
+\begin{DoxyCompactList}\small\item\em Initialize a new file upload with the Vessel R\+E\+ST A\+PI. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_vessel_client_ad24179750d17d6314c1c76b0836935b7}{upload\+\_\+file\+\_\+part} (\hyperlink{class_vessel_1_1_file_1_1_backup_file}{Vessel\+::\+File\+::\+Backup\+File} $\ast$bf, int part\+\_\+number)
+\begin{DoxyCompactList}\small\item\em Sends part of a file (or the entire file) to the server with metadata. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_a0b2ae6947b82965aa086eed7214a6e38}\label{class_vessel_1_1_networking_1_1_vessel_client_a0b2ae6947b82965aa086eed7214a6e38}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_vessel_client_a0b2ae6947b82965aa086eed7214a6e38}{heartbeat} ()
+\begin{DoxyCompactList}\small\item\em Sends a heartbeat payload to the Vessel A\+PI. A\+PI returns client settings and other data back to the client. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_vessel_client_ac9236da3c448454791a1c0dff1103f8a}{has\+\_\+deployment\+\_\+key} ()
+\begin{DoxyCompactList}\small\item\em Returns true if the deployment\+\_\+key setting has been set. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_vessel_client_af517d80b8e5a5941ee532faae46660be}{has\+\_\+client\+\_\+token} ()
+\begin{DoxyCompactList}\small\item\em Returns true if the client\+\_\+token setting has been set. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_a6f16e4d275f2a4e8e1671b825e708ceb}\label{class_vessel_1_1_networking_1_1_vessel_client_a6f16e4d275f2a4e8e1671b825e708ceb}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_vessel_client_a6f16e4d275f2a4e8e1671b825e708ceb}{install\+\_\+client} ()
+\begin{DoxyCompactList}\small\item\em Installs and initializes the client application with the Vessel A\+PI using the deployment key. \end{DoxyCompactList}\item 
+\hyperlink{struct_vessel_1_1_types_1_1_storage_provider}{Storage\+Provider} \hyperlink{class_vessel_1_1_networking_1_1_vessel_client_abebbf619a43e9d72ba8b6a4868b396e3}{get\+\_\+storage\+\_\+provider} ()
+\begin{DoxyCompactList}\small\item\em Returns the highest priority storage provider. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_ae4c7ae341a369a4d310998a6a2eb76b9}\label{class_vessel_1_1_networking_1_1_vessel_client_ae4c7ae341a369a4d310998a6a2eb76b9}} 
+void {\bfseries refresh\+\_\+client\+\_\+token} ()
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_abebbf619a43e9d72ba8b6a4868b396e3}\label{class_vessel_1_1_networking_1_1_vessel_client_abebbf619a43e9d72ba8b6a4868b396e3}} 
+\index{Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}!get\+\_\+storage\+\_\+provider@{get\+\_\+storage\+\_\+provider}}
+\index{get\+\_\+storage\+\_\+provider@{get\+\_\+storage\+\_\+provider}!Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+storage\+\_\+provider()}{get\_storage\_provider()}}
+{\footnotesize\ttfamily \hyperlink{struct_vessel_1_1_types_1_1_storage_provider}{Storage\+Provider} Vessel\+::\+Networking\+::\+Vessel\+Client\+::get\+\_\+storage\+\_\+provider (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the highest priority storage provider. 
+
+\begin{DoxyReturn}{Returns}
+Returns the highest priority storage provider 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_af517d80b8e5a5941ee532faae46660be}\label{class_vessel_1_1_networking_1_1_vessel_client_af517d80b8e5a5941ee532faae46660be}} 
+\index{Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}!has\+\_\+client\+\_\+token@{has\+\_\+client\+\_\+token}}
+\index{has\+\_\+client\+\_\+token@{has\+\_\+client\+\_\+token}!Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}}
+\subsubsection{\texorpdfstring{has\+\_\+client\+\_\+token()}{has\_client\_token()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Vessel\+Client\+::has\+\_\+client\+\_\+token (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns true if the client\+\_\+token setting has been set. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the client\+\_\+token setting has been set 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_ac9236da3c448454791a1c0dff1103f8a}\label{class_vessel_1_1_networking_1_1_vessel_client_ac9236da3c448454791a1c0dff1103f8a}} 
+\index{Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}!has\+\_\+deployment\+\_\+key@{has\+\_\+deployment\+\_\+key}}
+\index{has\+\_\+deployment\+\_\+key@{has\+\_\+deployment\+\_\+key}!Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}}
+\subsubsection{\texorpdfstring{has\+\_\+deployment\+\_\+key()}{has\_deployment\_key()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Vessel\+Client\+::has\+\_\+deployment\+\_\+key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns true if the deployment\+\_\+key setting has been set. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the deployment\+\_\+key setting has been set 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_af024f2016833bd9887d8717e7902f1f4}\label{class_vessel_1_1_networking_1_1_vessel_client_af024f2016833bd9887d8717e7902f1f4}} 
+\index{Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}!init\+\_\+upload@{init\+\_\+upload}}
+\index{init\+\_\+upload@{init\+\_\+upload}!Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}}
+\subsubsection{\texorpdfstring{init\+\_\+upload()}{init\_upload()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Vessel\+Client\+::init\+\_\+upload (\begin{DoxyParamCaption}\item[{const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Vessel\+::\+File\+::\+Backup\+File} \&}]{bf }\end{DoxyParamCaption})}
+
+
+
+Initialize a new file upload with the Vessel R\+E\+ST A\+PI. 
+
+\begin{DoxyReturn}{Returns}
+Returns the Vessel file id from the A\+PI 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_vessel_client_ad24179750d17d6314c1c76b0836935b7}\label{class_vessel_1_1_networking_1_1_vessel_client_ad24179750d17d6314c1c76b0836935b7}} 
+\index{Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}!upload\+\_\+file\+\_\+part@{upload\+\_\+file\+\_\+part}}
+\index{upload\+\_\+file\+\_\+part@{upload\+\_\+file\+\_\+part}!Vessel\+::\+Networking\+::\+Vessel\+Client@{Vessel\+::\+Networking\+::\+Vessel\+Client}}
+\subsubsection{\texorpdfstring{upload\+\_\+file\+\_\+part()}{upload\_file\_part()}}
+{\footnotesize\ttfamily Vessel\+::\+Networking\+::\+Vessel\+Client\+::upload\+\_\+file\+\_\+part (\begin{DoxyParamCaption}\item[{\hyperlink{class_vessel_1_1_file_1_1_backup_file}{Vessel\+::\+File\+::\+Backup\+File} $\ast$}]{bf,  }\item[{int}]{part\+\_\+number }\end{DoxyParamCaption})}
+
+
+
+Sends part of a file (or the entire file) to the server with metadata. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bf} & Backup\+File object \\
+\hline
+{\em part\+\_\+number} & The part or chunk number of the file content being uploaded \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if successful, false if there were errors 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/vessel/vessel\+\_\+client.\+hpp\end{DoxyCompactItemize}

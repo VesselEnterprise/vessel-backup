@@ -1,0 +1,140 @@
+\hypertarget{class_vessel_1_1_utilities_1_1_hash}{}\section{Vessel\+:\+:Utilities\+:\+:Hash Class Reference}
+\label{class_vessel_1_1_utilities_1_1_hash}\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::shared\+\_\+ptr$<$ unsigned char $>$ \hyperlink{class_vessel_1_1_utilities_1_1_hash_aae24b1d2642ec244551857894a13f533}{get\+\_\+sha1\+\_\+hash\+\_\+ptr} (const std\+::string \&data)
+\begin{DoxyCompactList}\small\item\em Returns a shared\+\_\+ptr to a binary id (unsigned char$\ast$) \end{DoxyCompactList}\item 
+static std\+::string \hyperlink{class_vessel_1_1_utilities_1_1_hash_aac0daddfa7414c8e9ee27c1f4b811e6c}{get\+\_\+sha1\+\_\+hash} (const std\+::string \&data)
+\begin{DoxyCompactList}\small\item\em Returns a sha-\/1 hash string. \end{DoxyCompactList}\item 
+static std\+::string \hyperlink{class_vessel_1_1_utilities_1_1_hash_ac2947d4601160bd693f94fbb03a567c2}{get\+\_\+sha256\+\_\+hash} (const std\+::string \&data)
+\begin{DoxyCompactList}\small\item\em Returns a sha-\/256 hash string. \end{DoxyCompactList}\item 
+static std\+::string \hyperlink{class_vessel_1_1_utilities_1_1_hash_a453b9f3c511af3c444b8aca245ee9405}{get\+\_\+md5\+\_\+hash} (const std\+::string \&data, bool base64=false)
+\begin{DoxyCompactList}\small\item\em Returns a md5 hash string. \end{DoxyCompactList}\item 
+static std\+::string \hyperlink{class_vessel_1_1_utilities_1_1_hash_ae618a6d2856efcf77399aab0dc8d7848}{get\+\_\+base64} (const std\+::string \&data)
+\begin{DoxyCompactList}\small\item\em Returns a base64 encoded string. \end{DoxyCompactList}\item 
+static std\+::string \hyperlink{class_vessel_1_1_utilities_1_1_hash_af263070a887f314a5ea27316258a87ac}{get\+\_\+hmac\+\_\+256} (const std\+::string \&key, const std\+::string \&data, bool hex=true)
+\begin{DoxyCompactList}\small\item\em Returns a H\+M\+AC S\+H\+A-\/256 string. \end{DoxyCompactList}\item 
+static std\+::string \hyperlink{class_vessel_1_1_utilities_1_1_hash_a0e1b698d8ab1aea9f1d7a47789e055ea}{base64\+\_\+decode} (const std\+::string \&str)
+\begin{DoxyCompactList}\small\item\em Returns a base64 decoded string. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+class for common crypto style functions 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_utilities_1_1_hash_a0e1b698d8ab1aea9f1d7a47789e055ea}\label{class_vessel_1_1_utilities_1_1_hash_a0e1b698d8ab1aea9f1d7a47789e055ea}} 
+\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}!base64\+\_\+decode@{base64\+\_\+decode}}
+\index{base64\+\_\+decode@{base64\+\_\+decode}!Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsubsection{\texorpdfstring{base64\+\_\+decode()}{base64\_decode()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+Utilities\+::\+Hash\+::base64\+\_\+decode (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{str }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns a base64 decoded string. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em str} & Base64 encoded string to decode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns a base64 decoded string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_utilities_1_1_hash_ae618a6d2856efcf77399aab0dc8d7848}\label{class_vessel_1_1_utilities_1_1_hash_ae618a6d2856efcf77399aab0dc8d7848}} 
+\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}!get\+\_\+base64@{get\+\_\+base64}}
+\index{get\+\_\+base64@{get\+\_\+base64}!Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsubsection{\texorpdfstring{get\+\_\+base64()}{get\_base64()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+Utilities\+::\+Hash\+::get\+\_\+base64 (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns a base64 encoded string. 
+
+\begin{DoxyReturn}{Returns}
+Returns a base64 encoded string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_utilities_1_1_hash_af263070a887f314a5ea27316258a87ac}\label{class_vessel_1_1_utilities_1_1_hash_af263070a887f314a5ea27316258a87ac}} 
+\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}!get\+\_\+hmac\+\_\+256@{get\+\_\+hmac\+\_\+256}}
+\index{get\+\_\+hmac\+\_\+256@{get\+\_\+hmac\+\_\+256}!Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsubsection{\texorpdfstring{get\+\_\+hmac\+\_\+256()}{get\_hmac\_256()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+Utilities\+::\+Hash\+::get\+\_\+hmac\+\_\+256 (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{key,  }\item[{const std\+::string \&}]{data,  }\item[{bool}]{hex = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns a H\+M\+AC S\+H\+A-\/256 string. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Key string used to generate the H\+M\+AC \\
+\hline
+{\em data} & Data to be used when calculating the H\+M\+AC \\
+\hline
+{\em hex} & Hex encodes the string if set to true \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns a H\+M\+AC S\+H\+A-\/256 string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_utilities_1_1_hash_a453b9f3c511af3c444b8aca245ee9405}\label{class_vessel_1_1_utilities_1_1_hash_a453b9f3c511af3c444b8aca245ee9405}} 
+\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}!get\+\_\+md5\+\_\+hash@{get\+\_\+md5\+\_\+hash}}
+\index{get\+\_\+md5\+\_\+hash@{get\+\_\+md5\+\_\+hash}!Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsubsection{\texorpdfstring{get\+\_\+md5\+\_\+hash()}{get\_md5\_hash()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+Utilities\+::\+Hash\+::get\+\_\+md5\+\_\+hash (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{data,  }\item[{bool}]{base64 = {\ttfamily false} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns a md5 hash string. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em base64} & Base64 encodes the string if set to true \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns a md5 hash string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_utilities_1_1_hash_aac0daddfa7414c8e9ee27c1f4b811e6c}\label{class_vessel_1_1_utilities_1_1_hash_aac0daddfa7414c8e9ee27c1f4b811e6c}} 
+\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}!get\+\_\+sha1\+\_\+hash@{get\+\_\+sha1\+\_\+hash}}
+\index{get\+\_\+sha1\+\_\+hash@{get\+\_\+sha1\+\_\+hash}!Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsubsection{\texorpdfstring{get\+\_\+sha1\+\_\+hash()}{get\_sha1\_hash()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+Utilities\+::\+Hash\+::get\+\_\+sha1\+\_\+hash (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns a sha-\/1 hash string. 
+
+\begin{DoxyReturn}{Returns}
+Returns a sha-\/1 hash string 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_utilities_1_1_hash_aae24b1d2642ec244551857894a13f533}\label{class_vessel_1_1_utilities_1_1_hash_aae24b1d2642ec244551857894a13f533}} 
+\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}!get\+\_\+sha1\+\_\+hash\+\_\+ptr@{get\+\_\+sha1\+\_\+hash\+\_\+ptr}}
+\index{get\+\_\+sha1\+\_\+hash\+\_\+ptr@{get\+\_\+sha1\+\_\+hash\+\_\+ptr}!Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsubsection{\texorpdfstring{get\+\_\+sha1\+\_\+hash\+\_\+ptr()}{get\_sha1\_hash\_ptr()}}
+{\footnotesize\ttfamily static std\+::shared\+\_\+ptr$<$ unsigned char $>$ Vessel\+::\+Utilities\+::\+Hash\+::get\+\_\+sha1\+\_\+hash\+\_\+ptr (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns a shared\+\_\+ptr to a binary id (unsigned char$\ast$) 
+
+\begin{DoxyReturn}{Returns}
+Returns a shared\+\_\+ptr to a binary id (unsigned char$\ast$) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_utilities_1_1_hash_ac2947d4601160bd693f94fbb03a567c2}\label{class_vessel_1_1_utilities_1_1_hash_ac2947d4601160bd693f94fbb03a567c2}} 
+\index{Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}!get\+\_\+sha256\+\_\+hash@{get\+\_\+sha256\+\_\+hash}}
+\index{get\+\_\+sha256\+\_\+hash@{get\+\_\+sha256\+\_\+hash}!Vessel\+::\+Utilities\+::\+Hash@{Vessel\+::\+Utilities\+::\+Hash}}
+\subsubsection{\texorpdfstring{get\+\_\+sha256\+\_\+hash()}{get\_sha256\_hash()}}
+{\footnotesize\ttfamily static std\+::string Vessel\+::\+Utilities\+::\+Hash\+::get\+\_\+sha256\+\_\+hash (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns a sha-\/256 hash string. 
+
+\begin{DoxyReturn}{Returns}
+Returns a sha-\/256 hash string 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/crypto/hash\+\_\+util.\+hpp\end{DoxyCompactItemize}

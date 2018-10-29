@@ -17,6 +17,7 @@
 #include <vessel/filesystem/directory.hpp>
 #include <vessel/filesystem/file_iterator.hpp>
 #include <vessel/vessel/upload_manager.hpp>
+#include <vessel/vessel/stat_manager.hpp>
 
 using namespace Vessel;
 using namespace Vessel::Types;

@@ -6,13 +6,13 @@ bool HttpClient::m_http_logging = false;
 
 HttpClient::HttpClient(const std::string& uri) : m_ssl_ctx(boost::asio::ssl::context::tlsv12)
 {
-    set_defaults();
-
      //Set local database object
-    m_ldb = &Vessel::Database::LocalDatabase::get_database();
+    m_ldb = &LocalDatabase::get_database();
 
         //Create new log obj
     m_log = &Log::get_log();
+
+    set_defaults();
 
     //Set SSL Opts
     m_ssl_ctx.set_default_verify_paths();
@@ -50,6 +50,11 @@ void HttpClient::set_defaults()
     m_verify_cert = true;
     m_connected = false;
     m_content_length = 0;
+    m_stopped=true;
+
+    //Set Max Transfer Speed (if defined)
+    size_t db_max_speed = m_ldb->get_setting_int("max_transfer_speed");
+    m_max_transfer_speed = (db_max_speed >= MIN_TRANSFER_SPEED) ?  db_max_speed : -1;
 }
 
 void HttpClient::parse_url( const std::string& host )
@@ -123,23 +128,35 @@ void HttpClient::set_ssl(bool flag)
     m_use_ssl = flag;
 }
 
+void HttpClient::init_deadline_timer()
+{
+    //Reset deadline timer
+    m_deadline_timer.reset ( new boost::asio::deadline_timer(m_io_service) );
+    m_stopped=false;
+}
+
 bool HttpClient::connect()
 {
+
+    m_io_service.stop();
+    m_io_service.reset();
+
+    //Create work object
+    m_work.reset( new boost::asio::io_service::work(m_io_service) );
 
     //Reset sockets
     m_socket.reset( new boost::asio::ip::tcp::socket(m_io_service) );
     m_ssl_socket.reset( new boost::asio::ssl::stream<boost::asio::ip::tcp::socket>(m_io_service,m_ssl_ctx) );
 
-    //Reset deadline timer
-    m_deadline_timer.reset ( new boost::asio::deadline_timer(m_io_service) );
+    //Init deadline timer for timeout
+    init_deadline_timer();
 
     //Clear connection status code
     m_conn_status.clear();
 
     //Set timeout
     m_deadline_timer->expires_from_now(m_timeout); //m_deadline_timer.expires_at(boost::posix_time::pos_infin);
-
-    check_deadline(); //Run indefinitely
+    check_deadline(); //Handle connect timeout
 
     boost::asio::ip::tcp::resolver resolver(m_io_service);
     boost::asio::ip::tcp::resolver::query query( m_hostname.c_str(), std::to_string(m_port) );
@@ -169,7 +186,7 @@ bool HttpClient::connect()
     }
 
     //Run ASYNC connect until operation completed
-    do m_io_service.run_one(); while (m_conn_status == boost::asio::error::would_block);
+    m_io_service.run();
 
     if ( !m_conn_status )
     {
@@ -181,6 +198,9 @@ bool HttpClient::connect()
         m_connected=false;
         throw HttpException(HttpException::ConnectFailed, std::string("Failed to connect to " + m_hostname) );
     }
+
+    m_io_service.stop();
+    m_io_service.reset();
 
     return m_connected;
 }
@@ -205,11 +225,9 @@ void HttpClient::disconnect()
                 m_ssl_socket->lowest_layer().close(); //Close the TCP socket
             }
         }
-        //Cancel the deadline
-        m_deadline_timer->cancel();
 
         if ( disconnect_ec ) {
-            //Handle disconnect error
+            //TODO: Handle disconnect error
             //m_log->....
         }
     }
@@ -220,6 +238,7 @@ void HttpClient::disconnect()
         m_conn_status = e.code();
     }
 
+    cancel_deadline();
     m_io_service.stop();
     m_io_service.reset();
     m_socket.reset();
@@ -240,15 +259,14 @@ void HttpClient::handle_connect(const boost::system::error_code& e)
         if ( !m_use_ssl )
         {
             m_conn_status = e;
+            cancel_deadline();
+            m_work.reset();
             return;
         }
         else //SSL client must perform handshake
         {
             m_ssl_good=false; //Reset flag
             m_ssl_socket->async_handshake(boost::asio::ssl::stream_base::client,boost::bind(&HttpClient::handle_handshake, this, boost::asio::placeholders::error) );
-
-            //Do not return until handshake is complete
-            do m_io_service.run_one(); while (m_conn_status == boost::asio::error::would_block && !m_ssl_good);
         }
 
     }
@@ -277,6 +295,9 @@ void HttpClient::handle_handshake(const boost::system::error_code& e )
         throw HttpException(HttpException::HandshakeFailed, e.message() );
     }
 
+    cancel_deadline();
+    m_work.reset();
+
 }
 
 void HttpClient::read_chunked_content( const boost::system::error_code& e, size_t bytes_transferred )
@@ -285,15 +306,9 @@ void HttpClient::read_chunked_content( const boost::system::error_code& e, size_
     if ( bytes_transferred <= 0 )
     {
         m_response_ec = boost::asio::error::eof;
+        m_work.reset();
         return;
     }
-
-    /*
-    std::string data( (std::istreambuf_iterator<char>(m_response_buffer.get()) ), std::istreambuf_iterator<char>() );
-    std::stringstream chunk_stream;
-    chunk_stream << std::hex << chunk_sz_s;
-    chunk_stream >> chunk_sz;
-    */
 
     //std::cout << "Buffer size: " << m_response_buffer->size() << "; Bytes transferred: " << bytes_transferred << '\n';
 
@@ -316,6 +331,7 @@ void HttpClient::read_chunked_content( const boost::system::error_code& e, size_
     if ( chunk_sz <= 0 ) //There is no more data to read
     {
         m_response_ec = boost::asio::error::eof;
+        m_work.reset();
         return;
     }
 
@@ -373,9 +389,6 @@ void HttpClient::handle_response( const boost::system::error_code& e )
     if (!e)
     {
 
-        //Set the deadline timer
-        //m_deadline_timer->expires_from_now(boost::posix_time::seconds(10));
-
         //Reset HTTP Status
         m_http_status = 0;
 
@@ -395,6 +408,7 @@ void HttpClient::handle_response( const boost::system::error_code& e )
         {
             m_log->add_message("There was an error processing the HTTP response headers: " + e.message(), "ASIO");
             m_response_ec = boost::asio::error::operation_aborted; //Handle status error
+            m_work.reset();
             return;
         }
 
@@ -440,6 +454,7 @@ void HttpClient::handle_response( const boost::system::error_code& e )
     {
         //TODO: Add Logging
         std::cout << "ASIO Response Error: " << e << "\n";
+        m_work.reset();
     }
 
 }
@@ -501,10 +516,9 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         {
 
             //There may be some data in the buffer to consume
-            if (m_response_buffer->size() > 0) {
-
+            if (m_response_buffer->size() > 0)
+            {
                 read_buffer_data();
-
             }
 
             // Start reading remaining data until EOF
@@ -524,6 +538,7 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
         //TODO: Add Logging
         std::cout << "ASIO Read Header Error: " << e << "\n";
         m_response_ec = e;
+        m_work.reset();
     }
 
 }
@@ -536,13 +551,6 @@ void HttpClient::handle_read_content( const boost::system::error_code& e, size_t
 
     if (!e || e == boost::asio::ssl::error::stream_truncated )
     {
-        //Add to response data
-        /*
-        std::ostringstream oss;
-        oss << m_response_buffer.get();
-        m_response_data.append(oss.str());
-        */
-
         //Append response data
         read_buffer_data();
 
@@ -552,6 +560,7 @@ void HttpClient::handle_read_content( const boost::system::error_code& e, size_t
             boost::asio::async_read(*m_ssl_socket, *m_response_buffer, boost::asio::transfer_at_least(1), boost::bind(&HttpClient::handle_read_content, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
             if ( e == boost::asio::ssl::error::stream_truncated ) {
                 m_response_ec = boost::asio::error::eof;
+                m_work.reset();
             }
         }
         else
@@ -565,17 +574,25 @@ void HttpClient::handle_read_content( const boost::system::error_code& e, size_t
         /** Some other error occurred while reading the response **/
         m_log->add_message("Unknown error occurred while reading the HTTP response: " + e.message(), "ASIO");
         m_response_ec = boost::asio::error::eof; //Signal eof to start reading
+        m_work.reset();
     }
     else
     {
         /** Response should be read at this point **/
         m_response_ec = boost::asio::error::eof;
+        m_work.reset();
     }
 
 }
 
 void HttpClient::check_deadline()
 {
+
+    if ( m_stopped )
+    {
+        return;
+    }
+
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
@@ -585,18 +602,24 @@ void HttpClient::check_deadline()
         //std::cout << "Deadline has expired!" << "\n";
 
         // The deadline has passed. The socket is closed so that any outstanding
-        // asynchronous operations are cancelled. This allows the blocked
+        // asynchronous operations are cancelled. this allows the blocked
         // connect(), read_line() or write_line() functions to return.
         disconnect();
 
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
-        //m_deadline_timer->expires_at(boost::posix_time::pos_infin);
+        m_deadline_timer->expires_at(boost::posix_time::pos_infin);
     }
 
     // Put the actor back to sleep.
     m_deadline_timer->async_wait(boost::bind(&HttpClient::check_deadline, this));
 
+}
+
+void HttpClient::cancel_deadline()
+{
+    m_stopped=true;
+    m_deadline_timer->cancel();
 }
 
 void HttpClient::set_error( const std::string& msg )
@@ -655,38 +678,114 @@ bool HttpClient::is_https()
     return m_use_ssl;
 }
 
-void HttpClient::write_socket( const std::string& http_request)
+void HttpClient::write_socket( const std::string& http_request )
 {
 
     //Cleanup buffers / data
     cleanup();
 
-    m_deadline_timer->expires_at(boost::posix_time::pos_infin); //Transfer indefinitely
+    //Reset IO Service for next operation
+    m_io_service.reset();
+
+    //Create work object
+    m_work.reset( new boost::asio::io_service::work(m_io_service) );
 
     std::cout << "Transferring " << http_request.size() << " bytes..." << '\n';
 
-    //TODO: Implement bandwidth throttling, limit transfer speed somewhere in here
-
-    if ( !m_use_ssl )
-        boost::asio::async_write(*m_socket, boost::asio::buffer(http_request), boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
-    else
-        boost::asio::async_write(*m_ssl_socket, boost::asio::buffer(http_request), boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
-
-}
-
-void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_transferred )
-{
-
-    //std::cout << "Sent " << bytes_transferred << " bytes" << '\n';
-    //std::cout << "Buffer size: " << m_request_buffer->size() << " bytes" << '\n';
-
-    if (!e)
+    //If Maximum Transfer Speed is > 0, throttle the transfer
+    //Multiple writes are required
+    if ( m_max_transfer_speed > 0 && (m_max_transfer_speed < http_request.size()) )
     {
+        size_t bytes_to_read = (m_max_transfer_speed > http_request.size()) ? http_request.size() : m_max_transfer_speed;
+
+        //Create a shared pointer of the request data to ensure lifetime through async calls
+        m_request_data.reset();
+        m_request_data = std::make_shared<std::string>(http_request);
+
+        //Create a new token bucket for the duration of the transfer
+        m_token_bucket.reset( new TokenBucket( m_max_transfer_speed, m_request_data->size() ) );
 
         if ( !m_use_ssl )
-            boost::asio::async_read_until(*m_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+        {
+            m_socket->async_write_some( boost::asio::buffer(m_request_data->substr(0,bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+        }
         else
-            boost::asio::async_read_until(*m_ssl_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+        {
+            m_ssl_socket->async_write_some( boost::asio::buffer(m_request_data->substr(0,bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+        }
+    }
+    else
+    {
+
+        //Send the entire request in one write
+
+        if ( !m_use_ssl )
+        {
+            boost::asio::async_write(*m_socket, boost::asio::buffer(http_request), boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
+        }
+        else
+        {
+            boost::asio::async_write(*m_ssl_socket, boost::asio::buffer(http_request), boost::bind(&HttpClient::handle_write, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred )) ;
+        }
+
+    }
+}
+
+void HttpClient::handle_write_throttled( const boost::system::error_code& e, size_t bytes_transferred )
+{
+
+    m_token_bucket->transfer(bytes_transferred);
+    double transfer_rate = m_token_bucket->transfer_rate();
+    size_t total_bytes_transferred = m_token_bucket->bytes_transferred();
+    size_t bytes_remaining = m_request_data->size() - total_bytes_transferred;
+
+    std::cout.precision(2);
+    std::cout << "Wrote " << bytes_transferred << " bytes" << '\n';
+    std::cout << "Total Bytes Transferred " << total_bytes_transferred << " bytes" << '\n';
+    std::cout << "Transfer rate: " << std::fixed << transfer_rate << "bps" << '\n';
+    std::cout << "Bytes Remaining: " << bytes_remaining << '\n';
+    std::cout << "Estimated Time Remaining: " << ((bytes_remaining*1.0)/transfer_rate) << " seconds" << '\n';
+
+    if ( !e )
+    {
+        if ( m_token_bucket->bytes_transferred() >= m_token_bucket->total_bytes() )
+        {
+            //Request has been sent, read response
+            m_request_data.reset(); //Free memory
+
+            if ( !m_use_ssl )
+            {
+                boost::asio::async_read_until(*m_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+            }
+            else
+            {
+                boost::asio::async_read_until(*m_ssl_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+            }
+
+        }
+        else
+        {
+            //Determine the amount of time we need to sleep to meet max_transfer_speed
+            if ( transfer_rate > m_max_transfer_speed )
+            {
+                double sleep_time_secs = ( (transfer_rate*1.0) / (m_token_bucket->max_transfer_speed()*1.0) );
+                long sleep_time_ms = sleep_time_secs * 1000;
+                std::cout << "Bandwidth has been exceeded - limiting transfer speed - waiting " << sleep_time_secs << " seconds..." << '\n';
+                boost::this_thread::sleep_for( boost::chrono::milliseconds(sleep_time_ms) );
+            }
+
+            size_t bytes_to_read = ((total_bytes_transferred + m_max_transfer_speed) > m_request_data->size()) ? bytes_remaining : m_max_transfer_speed;
+
+            if ( !m_use_ssl )
+            {
+                m_socket->async_write_some( boost::asio::buffer(m_request_data->substr(bytes_transferred, bytes_to_read)), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+            }
+            else
+            {
+                m_ssl_socket->async_write_some( boost::asio::buffer(m_request_data->substr(bytes_transferred, bytes_to_read)), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+            }
+
+        }
 
     }
     else
@@ -694,13 +793,42 @@ void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_
         //TODO: Add Logging Here
         std::cout << "ASIO Write Error: " << e.message() << "\n";
         m_response_ec = e;
+        m_work.reset(); //No more work
+    }
+}
+
+void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_transferred )
+{
+
+    std::cout << "Sent " << bytes_transferred << " bytes" << '\n';
+    //std::cout << "Buffer size: " << m_request_buffer->size() << " bytes" << '\n';
+
+    if (!e)
+    {
+
+        if ( !m_use_ssl )
+        {
+            boost::asio::async_read_until(*m_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+        }
+        else
+        {
+            boost::asio::async_read_until(*m_ssl_socket, *m_response_buffer, "\r\n", boost::bind(&HttpClient::handle_response, this, boost::asio::placeholders::error));
+        }
+
+    }
+    else
+    {
+        //TODO: Add Logging Here
+        std::cout << "ASIO Write Error: " << e.message() << "\n";
+        m_response_ec = e;
+        m_work.reset(); //No more work
     }
 
 }
 
 void HttpClient::run_io_service()
 {
-    m_io_service.run_one();
+    m_io_service.run();
 }
 
 boost::system::error_code HttpClient::get_error_code()
@@ -831,7 +959,7 @@ int HttpClient::send_http_request( const HttpRequest& request )
     write_socket(http_stream.str());
 
     //Run the handlers until the response sets the status code or EOF
-    do { run_io_service(); std::cout << "..." << '\n'; } while ( !get_error_code() );
+    run_io_service();
 
     disconnect();
 
@@ -875,4 +1003,24 @@ size_t HttpClient::get_content_length()
 int HttpClient::get_port()
 {
     return m_port;
+}
+
+std::string HttpClient::make_test_str(size_t length)
+{
+
+    std::string data;
+    std::string pattern = "0";
+
+    for ( size_t i=0; i < length; i++ )
+    {
+        data.append(pattern);
+    }
+
+    return data;
+
+}
+
+void HttpClient::max_transfer_speed(size_t limit)
+{
+    m_max_transfer_speed = (limit > 0) ? limit : -1;
 }

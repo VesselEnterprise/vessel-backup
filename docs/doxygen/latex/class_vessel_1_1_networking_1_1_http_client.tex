@@ -1,0 +1,265 @@
+\hypertarget{class_vessel_1_1_networking_1_1_http_client}{}\section{Vessel\+:\+:Networking\+:\+:Http\+Client Class Reference}
+\label{class_vessel_1_1_networking_1_1_http_client}\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+Inheritance diagram for Vessel\+:\+:Networking\+:\+:Http\+Client\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.830065cm]{class_vessel_1_1_networking_1_1_http_client}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_aa71e7a5b4db62ae2a71e058145f6160e}\label{class_vessel_1_1_networking_1_1_http_client_aa71e7a5b4db62ae2a71e058145f6160e}} 
+{\bfseries Http\+Client} (const std\+::string \&uri)
+\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_http_client_a36f814eda4b6b35e2e6991bbd0f8f672}{is\+\_\+connected} ()
+\begin{DoxyCompactList}\small\item\em Return whether or not the client is currently connected. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_aa1a40ba8a7c7d6b6ff684fae7f431860}\label{class_vessel_1_1_networking_1_1_http_client_aa1a40ba8a7c7d6b6ff684fae7f431860}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_http_client_aa1a40ba8a7c7d6b6ff684fae7f431860}{set\+\_\+timeout} (boost\+::posix\+\_\+time\+::time\+\_\+duration t)
+\begin{DoxyCompactList}\small\item\em Sets the connection timeout. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_aca87333d6add0bd783183092eaa2d552}\label{class_vessel_1_1_networking_1_1_http_client_aca87333d6add0bd783183092eaa2d552}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_http_client_aca87333d6add0bd783183092eaa2d552}{set\+\_\+ssl} (bool f)
+\begin{DoxyCompactList}\small\item\em Set whether or not to use S\+SL when connecting. Automatically determined from U\+RL typically. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_http_client_a55ce6fc94f87558d5d93f71ddbf86849}{get\+\_\+response} ()
+\begin{DoxyCompactList}\small\item\em Returns the H\+T\+TP response payload. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_http_client_ad5ffe2d677a1ea783a66d3ea8d57d948}{get\+\_\+headers} ()
+\begin{DoxyCompactList}\small\item\em Returns the H\+T\+TP headers returned in the response. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_http_client_abc244e7785648a4bd016a69f374a7e0b}{get\+\_\+header} (const std\+::string \&key)
+\begin{DoxyCompactList}\small\item\em Returns the specified H\+T\+TP header value (if exists) \end{DoxyCompactList}\item 
+unsigned int \hyperlink{class_vessel_1_1_networking_1_1_http_client_a0bb9af88cb6fa0cda2d613165c9a7a24}{get\+\_\+http\+\_\+status} ()
+\begin{DoxyCompactList}\small\item\em Returns the H\+T\+TP status code (eg. 200) of the response. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_http_client_a3038fd22cae695a56ce50aba86cad642}{get\+\_\+error} ()
+\begin{DoxyCompactList}\small\item\em Returns the most recent error message recorded from the last operation. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_http_client_a71876628efd404463072ea3741c5cd03}{get\+\_\+hostname} ()
+\begin{DoxyCompactList}\small\item\em Returns the hostname of the U\+RI. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_http_client_ac6f264effcb5e9dc5804b3582467eb98}{is\+\_\+https} ()
+\begin{DoxyCompactList}\small\item\em Returns whether or not the connection uses H\+T\+T\+PS (secure) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a97220e27c1c9d24792d05462d64978ff}\label{class_vessel_1_1_networking_1_1_http_client_a97220e27c1c9d24792d05462d64978ff}} 
+boost\+::system\+::error\+\_\+code {\bfseries get\+\_\+error\+\_\+code} ()
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a68b254d8debf5b9dd7e5cc27fd5e60fe}\label{class_vessel_1_1_networking_1_1_http_client_a68b254d8debf5b9dd7e5cc27fd5e60fe}} 
+std\+::string {\bfseries encode\+\_\+uri} (const std\+::string \&uri)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a42f4fc88293de8997e0ce1405db04cc5}\label{class_vessel_1_1_networking_1_1_http_client_a42f4fc88293de8997e0ce1405db04cc5}} 
+std\+::string {\bfseries decode\+\_\+uri} (const std\+::string \&uri)
+\item 
+int \hyperlink{class_vessel_1_1_networking_1_1_http_client_a5aa9df2a1026a4aa10b6e4e51931ba04}{send\+\_\+http\+\_\+request} (const \hyperlink{class_vessel_1_1_networking_1_1_http_request}{Http\+Request} \&request)
+\begin{DoxyCompactList}\small\item\em Sends a new H\+T\+TP request and writes to the socket. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_http_client_ad30f53d43a676892ac19ba2f86188ca2}{http\+\_\+logging} ()
+\begin{DoxyCompactList}\small\item\em Returns true if http logging is enabled. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{class_vessel_1_1_networking_1_1_http_client_a8c236189b1456f690a4315fa98e0d469}{get\+\_\+content\+\_\+length} ()
+\begin{DoxyCompactList}\small\item\em Returns the size of the content body. \end{DoxyCompactList}\item 
+int \hyperlink{class_vessel_1_1_networking_1_1_http_client_a5ad06cb85c0c5359f46df21182e908e5}{get\+\_\+port} ()
+\begin{DoxyCompactList}\small\item\em Returns the port used for H\+T\+TP connection. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_http_client_a3a32bbeadd12e311c4934c2841c1122d}{make\+\_\+test\+\_\+str} (size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Makes a test string of length bytes. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a9446438a103e2690a51996c8032278c3}\label{class_vessel_1_1_networking_1_1_http_client_a9446438a103e2690a51996c8032278c3}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_http_client_a9446438a103e2690a51996c8032278c3}{max\+\_\+transfer\+\_\+speed} (size\+\_\+t limit)
+\begin{DoxyCompactList}\small\item\em Sets the max transfer speed for H\+T\+TP requests. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a50c01c4bbf1e2ef74caea768ad3f4401}\label{class_vessel_1_1_networking_1_1_http_client_a50c01c4bbf1e2ef74caea768ad3f4401}} 
+static void \hyperlink{class_vessel_1_1_networking_1_1_http_client_a50c01c4bbf1e2ef74caea768ad3f4401}{http\+\_\+logging} (bool flag)
+\begin{DoxyCompactList}\small\item\em Enables or disables H\+T\+TP logging. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a9cd9e9802dbaa9f8c2c63cb5e93b5262}\label{class_vessel_1_1_networking_1_1_http_client_a9cd9e9802dbaa9f8c2c63cb5e93b5262}} 
+bool \hyperlink{class_vessel_1_1_networking_1_1_http_client_a9cd9e9802dbaa9f8c2c63cb5e93b5262}{connect} ()
+\begin{DoxyCompactList}\small\item\em Connect to the master server. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_aef341ffac0b8a90420255f22edf38766}\label{class_vessel_1_1_networking_1_1_http_client_aef341ffac0b8a90420255f22edf38766}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_http_client_aef341ffac0b8a90420255f22edf38766}{disconnect} ()
+\begin{DoxyCompactList}\small\item\em Disconnect from the master server. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_add0d106ed5f671a9e1c60fcb439c0add}\label{class_vessel_1_1_networking_1_1_http_client_add0d106ed5f671a9e1c60fcb439c0add}} 
+void {\bfseries set\+\_\+error} (const std\+::string \&msg)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a4144a8d41fe448b00d0303714dddda43}\label{class_vessel_1_1_networking_1_1_http_client_a4144a8d41fe448b00d0303714dddda43}} 
+void {\bfseries clear\+\_\+response} ()
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a74d8a93a37464787afb8a5a30419b5f6}\label{class_vessel_1_1_networking_1_1_http_client_a74d8a93a37464787afb8a5a30419b5f6}} 
+void {\bfseries clear\+\_\+headers} ()
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a7d8918a5ff92aaa011ff9d2228a2b5da}\label{class_vessel_1_1_networking_1_1_http_client_a7d8918a5ff92aaa011ff9d2228a2b5da}} 
+void {\bfseries set\+\_\+deadline} (long seconds)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_ac880ff449e873473e041b0b7fd6e0881}\label{class_vessel_1_1_networking_1_1_http_client_ac880ff449e873473e041b0b7fd6e0881}} 
+void {\bfseries clear\+\_\+error\+\_\+code} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a8c236189b1456f690a4315fa98e0d469}\label{class_vessel_1_1_networking_1_1_http_client_a8c236189b1456f690a4315fa98e0d469}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+content\+\_\+length@{get\+\_\+content\+\_\+length}}
+\index{get\+\_\+content\+\_\+length@{get\+\_\+content\+\_\+length}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+content\+\_\+length()}{get\_content\_length()}}
+{\footnotesize\ttfamily size\+\_\+t Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+content\+\_\+length (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the size of the content body. 
+
+\begin{DoxyReturn}{Returns}
+Returns the size of the content body 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a3038fd22cae695a56ce50aba86cad642}\label{class_vessel_1_1_networking_1_1_http_client_a3038fd22cae695a56ce50aba86cad642}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+error@{get\+\_\+error}}
+\index{get\+\_\+error@{get\+\_\+error}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+error()}{get\_error()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+error (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the most recent error message recorded from the last operation. 
+
+\begin{DoxyReturn}{Returns}
+Returns the most recent error message recorded from the last operation 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_abc244e7785648a4bd016a69f374a7e0b}\label{class_vessel_1_1_networking_1_1_http_client_abc244e7785648a4bd016a69f374a7e0b}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+header@{get\+\_\+header}}
+\index{get\+\_\+header@{get\+\_\+header}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+header()}{get\_header()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+header (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{key }\end{DoxyParamCaption})}
+
+
+
+Returns the specified H\+T\+TP header value (if exists) 
+
+\begin{DoxyReturn}{Returns}
+Returns the specified H\+T\+TP header value (if exists) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_ad5ffe2d677a1ea783a66d3ea8d57d948}\label{class_vessel_1_1_networking_1_1_http_client_ad5ffe2d677a1ea783a66d3ea8d57d948}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+headers@{get\+\_\+headers}}
+\index{get\+\_\+headers@{get\+\_\+headers}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+headers()}{get\_headers()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+headers (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the H\+T\+TP headers returned in the response. 
+
+\begin{DoxyReturn}{Returns}
+Returns the H\+T\+TP headers returned in the response 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a71876628efd404463072ea3741c5cd03}\label{class_vessel_1_1_networking_1_1_http_client_a71876628efd404463072ea3741c5cd03}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+hostname@{get\+\_\+hostname}}
+\index{get\+\_\+hostname@{get\+\_\+hostname}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+hostname()}{get\_hostname()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+hostname (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the hostname of the U\+RI. 
+
+\begin{DoxyReturn}{Returns}
+Returns the hostname of the U\+RI 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a0bb9af88cb6fa0cda2d613165c9a7a24}\label{class_vessel_1_1_networking_1_1_http_client_a0bb9af88cb6fa0cda2d613165c9a7a24}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+http\+\_\+status@{get\+\_\+http\+\_\+status}}
+\index{get\+\_\+http\+\_\+status@{get\+\_\+http\+\_\+status}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+http\+\_\+status()}{get\_http\_status()}}
+{\footnotesize\ttfamily unsigned int Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+http\+\_\+status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the H\+T\+TP status code (eg. 200) of the response. 
+
+\begin{DoxyReturn}{Returns}
+Returns the H\+T\+TP status code (eg. 200) of the response 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a5ad06cb85c0c5359f46df21182e908e5}\label{class_vessel_1_1_networking_1_1_http_client_a5ad06cb85c0c5359f46df21182e908e5}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+port@{get\+\_\+port}}
+\index{get\+\_\+port@{get\+\_\+port}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+port()}{get\_port()}}
+{\footnotesize\ttfamily int Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+port (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the port used for H\+T\+TP connection. 
+
+\begin{DoxyReturn}{Returns}
+Returns the port used for H\+T\+TP connection 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a55ce6fc94f87558d5d93f71ddbf86849}\label{class_vessel_1_1_networking_1_1_http_client_a55ce6fc94f87558d5d93f71ddbf86849}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!get\+\_\+response@{get\+\_\+response}}
+\index{get\+\_\+response@{get\+\_\+response}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+response()}{get\_response()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Http\+Client\+::get\+\_\+response (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the H\+T\+TP response payload. 
+
+\begin{DoxyReturn}{Returns}
+Returns the H\+T\+TP response payload 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_ad30f53d43a676892ac19ba2f86188ca2}\label{class_vessel_1_1_networking_1_1_http_client_ad30f53d43a676892ac19ba2f86188ca2}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!http\+\_\+logging@{http\+\_\+logging}}
+\index{http\+\_\+logging@{http\+\_\+logging}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{http\+\_\+logging()}{http\_logging()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Http\+Client\+::http\+\_\+logging (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns true if http logging is enabled. 
+
+\begin{DoxyReturn}{Returns}
+True if http logging is enabled 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a36f814eda4b6b35e2e6991bbd0f8f672}\label{class_vessel_1_1_networking_1_1_http_client_a36f814eda4b6b35e2e6991bbd0f8f672}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!is\+\_\+connected@{is\+\_\+connected}}
+\index{is\+\_\+connected@{is\+\_\+connected}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{is\+\_\+connected()}{is\_connected()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Http\+Client\+::is\+\_\+connected (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Return whether or not the client is currently connected. 
+
+\begin{DoxyReturn}{Returns}
+Return whether or not the client is currently connected 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_ac6f264effcb5e9dc5804b3582467eb98}\label{class_vessel_1_1_networking_1_1_http_client_ac6f264effcb5e9dc5804b3582467eb98}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!is\+\_\+https@{is\+\_\+https}}
+\index{is\+\_\+https@{is\+\_\+https}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{is\+\_\+https()}{is\_https()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Http\+Client\+::is\+\_\+https (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns whether or not the connection uses H\+T\+T\+PS (secure) 
+
+\begin{DoxyReturn}{Returns}
+Returns whether or not the connection uses H\+T\+TP (secure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a3a32bbeadd12e311c4934c2841c1122d}\label{class_vessel_1_1_networking_1_1_http_client_a3a32bbeadd12e311c4934c2841c1122d}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!make\+\_\+test\+\_\+str@{make\+\_\+test\+\_\+str}}
+\index{make\+\_\+test\+\_\+str@{make\+\_\+test\+\_\+str}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{make\+\_\+test\+\_\+str()}{make\_test\_str()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Http\+Client\+::make\+\_\+test\+\_\+str (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})}
+
+
+
+Makes a test string of length bytes. 
+
+\begin{DoxyReturn}{Returns}
+Returns a test string of length bytes 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_http_client_a5aa9df2a1026a4aa10b6e4e51931ba04}\label{class_vessel_1_1_networking_1_1_http_client_a5aa9df2a1026a4aa10b6e4e51931ba04}} 
+\index{Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}!send\+\_\+http\+\_\+request@{send\+\_\+http\+\_\+request}}
+\index{send\+\_\+http\+\_\+request@{send\+\_\+http\+\_\+request}!Vessel\+::\+Networking\+::\+Http\+Client@{Vessel\+::\+Networking\+::\+Http\+Client}}
+\subsubsection{\texorpdfstring{send\+\_\+http\+\_\+request()}{send\_http\_request()}}
+{\footnotesize\ttfamily int Vessel\+::\+Networking\+::\+Http\+Client\+::send\+\_\+http\+\_\+request (\begin{DoxyParamCaption}\item[{const \hyperlink{class_vessel_1_1_networking_1_1_http_request}{Http\+Request} \&}]{request }\end{DoxyParamCaption})}
+
+
+
+Sends a new H\+T\+TP request and writes to the socket. 
+
+\begin{DoxyReturn}{Returns}
+H\+T\+TP status code 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/network/http\+\_\+client.\+hpp\end{DoxyCompactItemize}

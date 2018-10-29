@@ -120,7 +120,10 @@
 			    <label>Last Name</label>
 			    <input type="text" id="last_name" name="last_name" placeholder="Last Name" value="{{ $user->last_name }}" required>
 			  </div>
-				<div class="four wide column"></div>
+				<div class="four wide column field">
+					<label>User Name</label>
+					<input type="text" id="user_name" name="user_name" placeholder="User Name" value="{{ $user->user_name }}" required>
+				</div>
 			</div>
 			<div class="row">
 				<div class="four wide column field">

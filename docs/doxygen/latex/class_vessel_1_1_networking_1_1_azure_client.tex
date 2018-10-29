@@ -1,0 +1,140 @@
+\hypertarget{class_vessel_1_1_networking_1_1_azure_client}{}\section{Vessel\+:\+:Networking\+:\+:Azure\+Client Class Reference}
+\label{class_vessel_1_1_networking_1_1_azure_client}\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+Inheritance diagram for Vessel\+:\+:Networking\+:\+:Azure\+Client\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_vessel_1_1_networking_1_1_azure_client}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_af23230f150558566932d144f335b983f}\label{class_vessel_1_1_networking_1_1_azure_client_af23230f150558566932d144f335b983f}} 
+{\bfseries Azure\+Client} (const \hyperlink{struct_vessel_1_1_types_1_1_storage_provider}{Storage\+Provider} \&provider)
+\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_a1618ca5045621c283d09b9deaf69d467}\label{class_vessel_1_1_networking_1_1_azure_client_a1618ca5045621c283d09b9deaf69d467}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_azure_client_a1618ca5045621c283d09b9deaf69d467}{init\+\_\+upload} (const \hyperlink{class_vessel_1_1_file_1_1_backup_file}{Backup\+File} \&file)
+\begin{DoxyCompactList}\small\item\em Initializes the Azure upload. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_a3cc612beede266147a30d4cf1b02ed0e}\label{class_vessel_1_1_networking_1_1_azure_client_a3cc612beede266147a30d4cf1b02ed0e}} 
+bool \hyperlink{class_vessel_1_1_networking_1_1_azure_client_a3cc612beede266147a30d4cf1b02ed0e}{init\+\_\+block} ()
+\begin{DoxyCompactList}\small\item\em Initializes a multi block upload. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_azure_client_aea048602d61d1701883483b394c7a4d8}{upload} ()
+\begin{DoxyCompactList}\small\item\em Uploads a single file to the Azure Storage A\+PI. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_azure_client_ae1b65c7d173d3592f0ab8b3fab80bebc}{upload\+\_\+part} (int part\+\_\+number)
+\begin{DoxyCompactList}\small\item\em Uploads a blob block. \end{DoxyCompactList}\item 
+bool \hyperlink{class_vessel_1_1_networking_1_1_azure_client_abfcd51780d84a5b4f7735fd18bca08ec}{complete\+\_\+multipart\+\_\+upload} (int total\+\_\+parts)
+\begin{DoxyCompactList}\small\item\em Completes a multipart (block) upload. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_azure_client_a103016ab4521dacb9e6b7c24a2c3496a}{get\+\_\+block\+\_\+list} ()
+\begin{DoxyCompactList}\small\item\em Returns the block list for the current blob. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_a65eb07517634e97d9a180eb4d429bce2}\label{class_vessel_1_1_networking_1_1_azure_client_a65eb07517634e97d9a180eb4d429bce2}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_azure_client_a65eb07517634e97d9a180eb4d429bce2}{remote\+\_\+signing} (bool flag)
+\begin{DoxyCompactList}\small\item\em Enables or disables remote signing the request. Local key file is used for local. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_azure_client_aabdd68349e22f2124804d725bde09123}{last\+\_\+request\+\_\+id} ()
+\begin{DoxyCompactList}\small\item\em Returns the last Azure request id. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_azure_client_a74e4cfe536c3099aadf1c8df785f53d4}{get\+\_\+upload\+\_\+id} ()
+\begin{DoxyCompactList}\small\item\em Returns the upload ID for Azure Blob Upload. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_a73021b3608871fe36a0172d0481f0e53}\label{class_vessel_1_1_networking_1_1_azure_client_a73021b3608871fe36a0172d0481f0e53}} 
+void \hyperlink{class_vessel_1_1_networking_1_1_azure_client_a73021b3608871fe36a0172d0481f0e53}{set\+\_\+upload\+\_\+id} (const std\+::string \&upload\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Sets the upload/request id of the current Azure Blob upload. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_vessel_1_1_networking_1_1_azure_client_ae2c4d287ee5c326380c426a91dae7b23}{get\+\_\+padded\+\_\+block\+\_\+id} (const std\+::string \&id)
+\begin{DoxyCompactList}\small\item\em Pads the block id (integer part number) by leading zeroes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_abfcd51780d84a5b4f7735fd18bca08ec}\label{class_vessel_1_1_networking_1_1_azure_client_abfcd51780d84a5b4f7735fd18bca08ec}} 
+\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}!complete\+\_\+multipart\+\_\+upload@{complete\+\_\+multipart\+\_\+upload}}
+\index{complete\+\_\+multipart\+\_\+upload@{complete\+\_\+multipart\+\_\+upload}!Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+\subsubsection{\texorpdfstring{complete\+\_\+multipart\+\_\+upload()}{complete\_multipart\_upload()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Azure\+Client\+::complete\+\_\+multipart\+\_\+upload (\begin{DoxyParamCaption}\item[{int}]{total\+\_\+parts }\end{DoxyParamCaption})}
+
+
+
+Completes a multipart (block) upload. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the operation was successful 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_a103016ab4521dacb9e6b7c24a2c3496a}\label{class_vessel_1_1_networking_1_1_azure_client_a103016ab4521dacb9e6b7c24a2c3496a}} 
+\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}!get\+\_\+block\+\_\+list@{get\+\_\+block\+\_\+list}}
+\index{get\+\_\+block\+\_\+list@{get\+\_\+block\+\_\+list}!Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+block\+\_\+list()}{get\_block\_list()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Azure\+Client\+::get\+\_\+block\+\_\+list (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the block list for the current blob. 
+
+\begin{DoxyReturn}{Returns}
+Returns the block list for the current blob 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_ae2c4d287ee5c326380c426a91dae7b23}\label{class_vessel_1_1_networking_1_1_azure_client_ae2c4d287ee5c326380c426a91dae7b23}} 
+\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}!get\+\_\+padded\+\_\+block\+\_\+id@{get\+\_\+padded\+\_\+block\+\_\+id}}
+\index{get\+\_\+padded\+\_\+block\+\_\+id@{get\+\_\+padded\+\_\+block\+\_\+id}!Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+padded\+\_\+block\+\_\+id()}{get\_padded\_block\_id()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Azure\+Client\+::get\+\_\+padded\+\_\+block\+\_\+id (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{id }\end{DoxyParamCaption})}
+
+
+
+Pads the block id (integer part number) by leading zeroes. 
+
+\begin{DoxyReturn}{Returns}
+R\+Pads the block id (integer part number) by leading zeroes 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_a74e4cfe536c3099aadf1c8df785f53d4}\label{class_vessel_1_1_networking_1_1_azure_client_a74e4cfe536c3099aadf1c8df785f53d4}} 
+\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}!get\+\_\+upload\+\_\+id@{get\+\_\+upload\+\_\+id}}
+\index{get\+\_\+upload\+\_\+id@{get\+\_\+upload\+\_\+id}!Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+upload\+\_\+id()}{get\_upload\_id()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Azure\+Client\+::get\+\_\+upload\+\_\+id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the upload ID for Azure Blob Upload. 
+
+\begin{DoxyReturn}{Returns}
+Returns the upload ID for the Azure Blob Upload 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_aabdd68349e22f2124804d725bde09123}\label{class_vessel_1_1_networking_1_1_azure_client_aabdd68349e22f2124804d725bde09123}} 
+\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}!last\+\_\+request\+\_\+id@{last\+\_\+request\+\_\+id}}
+\index{last\+\_\+request\+\_\+id@{last\+\_\+request\+\_\+id}!Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+\subsubsection{\texorpdfstring{last\+\_\+request\+\_\+id()}{last\_request\_id()}}
+{\footnotesize\ttfamily std\+::string Vessel\+::\+Networking\+::\+Azure\+Client\+::last\+\_\+request\+\_\+id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Returns the last Azure request id. 
+
+\begin{DoxyReturn}{Returns}
+Returns the last Azure request id 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_aea048602d61d1701883483b394c7a4d8}\label{class_vessel_1_1_networking_1_1_azure_client_aea048602d61d1701883483b394c7a4d8}} 
+\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}!upload@{upload}}
+\index{upload@{upload}!Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+\subsubsection{\texorpdfstring{upload()}{upload()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Azure\+Client\+::upload (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Uploads a single file to the Azure Storage A\+PI. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the upload was successful, or false if there was an error 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_vessel_1_1_networking_1_1_azure_client_ae1b65c7d173d3592f0ab8b3fab80bebc}\label{class_vessel_1_1_networking_1_1_azure_client_ae1b65c7d173d3592f0ab8b3fab80bebc}} 
+\index{Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}!upload\+\_\+part@{upload\+\_\+part}}
+\index{upload\+\_\+part@{upload\+\_\+part}!Vessel\+::\+Networking\+::\+Azure\+Client@{Vessel\+::\+Networking\+::\+Azure\+Client}}
+\subsubsection{\texorpdfstring{upload\+\_\+part()}{upload\_part()}}
+{\footnotesize\ttfamily bool Vessel\+::\+Networking\+::\+Azure\+Client\+::upload\+\_\+part (\begin{DoxyParamCaption}\item[{int}]{part\+\_\+number }\end{DoxyParamCaption})}
+
+
+
+Uploads a blob block. 
+
+\begin{DoxyReturn}{Returns}
+Returns true if the operation was success and false otherwise 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/kyle/cpp/bv-\/backup/include/vessel/azure/azure\+\_\+client.\+hpp\end{DoxyCompactItemize}
