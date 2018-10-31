@@ -10,7 +10,7 @@
 	* https://cloud.google.com/storage/
 * Vessel
 	* Uploads via Vessel REST API to on-premise storage via NFS or CIFS/SMB/Samba mounted storage
-	
+
 # Other Storage
 
 ...
