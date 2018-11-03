@@ -20,8 +20,8 @@ int main(int argc, char** argv)
     desc.add_options()
         ("help", "Display supported options")
         ("client-token", boost::program_options::value<std::string>(), "Sets the client token")
-        ("with-file-logging", boost::program_options::value<std::string>(), "Enables saving log output to flat files") //TODO
-        ("with-sql-logging", boost::program_options::value<std::string>(), "Enables saving log output to SQLite database") //TODO
+        ("with-file-logging", boost::program_options::value<std::string>(), "Enables saving log output to flat files")
+        ("no-sql-logging", boost::program_options::value<std::string>(), "Disables saving log output to SQLite database")
         ("with-http-logging", boost::program_options::value<std::string>(), "Enables the logging of HTTP requests and responses")
         ("deployment-key", boost::program_options::value<std::string>(), "Sets the deployment key")
         ("scan-dir", boost::program_options::value<std::string>(), "Sets the initial scanning directory")
@@ -40,6 +40,18 @@ int main(int argc, char** argv)
     if ( vm.count("with-http-logging") )
     {
         HttpClient::http_logging(true);
+    }
+
+    //Disable SQL Logging
+    if ( vm.count("no-sql-logging") )
+    {
+        Log::sql_logging(false);
+    }
+
+    //Disable SQL Logging
+    if ( vm.count("with-file-logging") )
+    {
+        Log::file_logging(true);
     }
 
     //Override for development
@@ -88,6 +100,7 @@ int main(int argc, char** argv)
     //Verify/install client
     if ( !vessel->has_client_token() )
     {
+        std::cout << "Trying to install client..." << '\n';
         vessel->install_client();
         vessel->refresh_client_token();
         log->add_message("Successfully installed client", "Installation");

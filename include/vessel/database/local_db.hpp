@@ -74,6 +74,12 @@ namespace Vessel{
                 */
                 std::string get_setting_str(const std::string& s);
 
+                /*! \fn bool is_open();
+                    \brief Returns true if the database is open and false otherwise
+                    \return Returns true if the database is open and false otherwise
+                */
+                bool is_open();
+
                 /*! \fn int get_setting_int(const std::string&s );
                     \brief Returns int value of a setting from the Database
                     \param s Name of the setting to retrieve
@@ -159,6 +165,7 @@ namespace Vessel{
                 sqlite3* m_db;
                 int m_err_code;
                 Log* m_log;
+                bool m_is_open;
 
                 /**
                  ** Constructor must be private for singleton factory model

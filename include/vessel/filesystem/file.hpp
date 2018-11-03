@@ -16,7 +16,6 @@
 #include <vessel/global.hpp>
 #include <vessel/log/log.hpp>
 #include <vessel/database/local_db.hpp>
-#include <vessel/compression/compress.hpp>
 #include <vessel/crypto/hash_util.hpp>
 #include <vessel/filesystem/file_exception.hpp>
 
@@ -188,7 +187,7 @@ namespace Vessel {
                     \brief
                     \return Returns whether or not the file is compressed
                 */
-                bool is_compressed();
+                //bool is_compressed();
 
                 /*! \fn static void set_chunk_size( size_t chunk_sz );
                     \brief Sets the size of chunks of bytes returned from a file part for multi part uploads
@@ -245,7 +244,7 @@ namespace Vessel {
                     \brief Creates a compressed copy of the file stored in the tmp directory
                     \return Returns a BackupFile reference to the tmp compressed copy
                 */
-                std::shared_ptr<BackupFile> get_compressed_copy();
+                //std::shared_ptr<BackupFile> get_compressed_copy();
 
                 static std::string find_mime_type(const std::string& ext);
 

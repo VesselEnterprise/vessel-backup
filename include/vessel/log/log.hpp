@@ -1,7 +1,10 @@
 #ifndef VESSELLOG_H
 #define VESSELLOG_H
 
-#define BOOST_LOG_DYN_LINK 1
+#ifndef _WIN32
+    #define BOOST_LOG_DYN_LINK 1
+#endif
+
 #define LOG_FILENAME "vessel"
 
 #include <typeinfo>
@@ -79,20 +82,20 @@ namespace Vessel {
                 void add_sql_message(const std::string& msg, const std::string& type, bool is_error=false);
                 void set_level ( unsigned int level );
                 void add_exception(const std::exception& ex);
-                void set_file_logging(bool flag);
-                void set_sql_logging(bool flag);
+                static void file_logging(bool flag);
+                static void sql_logging(bool flag);
                 void set_filename(const std::string& filename);
 
             protected:
-                ~Log();
+                ~Log() {}
 
             private:
                 Log();
                 std::string m_filename;
                 src::severity_channel_logger< Vessel::Logging::severity_level, std::string > m_logger;
                 unsigned int m_level;
-                bool m_file_logging;
-                bool m_sql_logging;
+                static bool m_file_logging;
+                static bool m_sql_logging;
                 void add_file_exception(const std::exception& ex);
                 void add_sql_exception(const std::exception& ex);
         };

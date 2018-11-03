@@ -271,8 +271,9 @@ void VesselClient::install_client()
     //Send the request
     int status = send_http_request(request);
 
-    if ( status != 200 ) //http code should always be 200
+    if ( status != 200 ) //HTTP code should always be 200
     {
+        m_log->add_error("Failed to install the client application. Please check the auth token and/or deployment key", "Client");
         throw VesselException(VesselException::NotInstalled, "Failed to install the client application. Please check the auth token and/or deployment key");
     }
 

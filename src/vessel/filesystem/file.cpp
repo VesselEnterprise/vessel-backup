@@ -1,7 +1,6 @@
 #include <vessel/filesystem/file.hpp>
 
 using namespace Vessel::File;
-using namespace Vessel::Compression;
 
 size_t BackupFile::m_chunk_size = BACKUP_CHUNK_SZ;
 
@@ -477,6 +476,7 @@ std::string BackupFile::get_file_part(unsigned int num) {
 
 }
 
+/*
 std::shared_ptr<BackupFile> BackupFile::get_compressed_copy()
 {
     const std::string tmp_file = ("tmp/" + get_file_name() + ".tmp");
@@ -488,6 +488,7 @@ std::shared_ptr<BackupFile> BackupFile::get_compressed_copy()
 
     return std::make_shared<BackupFile>(tmp_file);
 }
+*/
 
 size_t BackupFile::get_chunk_size()
 {

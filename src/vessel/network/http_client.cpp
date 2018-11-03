@@ -46,7 +46,7 @@ void HttpClient::set_defaults()
     m_verify_cert = true;
     m_connected = false;
     m_use_ssl = false;
-    m_timeout = boost::posix_time::seconds(60);
+    m_timeout = boost::posix_time::seconds(15);
     m_verify_cert = true;
     m_connected = false;
     m_content_length = 0;
@@ -138,6 +138,8 @@ void HttpClient::init_deadline_timer()
 bool HttpClient::connect()
 {
 
+    std::cout << "Trying to connect to " << m_hostname << " on port " << m_port << "..." << '\n';
+
     m_io_service.stop();
     m_io_service.reset();
 
@@ -196,6 +198,7 @@ bool HttpClient::connect()
     {
         //throw boost::system::system_error( m_conn_status ? m_conn_status : boost::asio::error::operation_aborted );
         m_connected=false;
+        m_log->add_error("Failed to connect to " + m_hostname, "HttpClient");
         throw HttpException(HttpException::ConnectFailed, std::string("Failed to connect to " + m_hostname) );
     }
 
@@ -227,14 +230,12 @@ void HttpClient::disconnect()
         }
 
         if ( disconnect_ec ) {
-            //TODO: Handle disconnect error
-            //m_log->....
+            m_log->add_error("Failed to disconnect from " + m_hostname, "HttpClient");
         }
     }
     catch ( const boost::system::system_error & e )
     {
-        std::cout << "ASIO Socket error: " << e.what() << "\n";
-        //TODO: Add Logging
+        m_log->add_error( "ASIO Socket error: " + std::string(e.what()), "HttpClient");
         m_conn_status = e.code();
     }
 
@@ -284,14 +285,14 @@ void HttpClient::handle_handshake(const boost::system::error_code& e )
         m_ssl_good=true;
         m_conn_status = e;
 
-        std::cout << "SSL Handshake successful" << "\n";
+        //std::cout << "SSL Handshake successful" << "\n";
 
     }
     else
     {
         m_ssl_good=false;
         m_conn_status = e;
-        //TODO: Add Logging
+        m_log->add_error("ASIO SSL Handshake failed: " + e.message(), "HttpClient" );
         throw HttpException(HttpException::HandshakeFailed, e.message() );
     }
 
@@ -384,7 +385,7 @@ void HttpClient::handle_response( const boost::system::error_code& e )
 
     m_response_ec = e; //Update error code
 
-    std::cout << "Handled response.." << '\n';
+    std::cout << "Reading response from server.." << '\n';
 
     if (!e)
     {
@@ -452,8 +453,7 @@ void HttpClient::handle_response( const boost::system::error_code& e )
     }
     else if ( e != boost::asio::error::eof )
     {
-        //TODO: Add Logging
-        std::cout << "ASIO Response Error: " << e << "\n";
+        m_log->add_error("ASIO Response error: " + e.message(), "HttpClient");
         m_work.reset();
     }
 
@@ -467,7 +467,7 @@ void HttpClient::read_buffer_data()
 void HttpClient::handle_read_headers( const boost::system::error_code& e )
 {
 
-    std::cout << "Handle read headers..." << '\n';
+    std::cout << "Reading response headers..." << '\n';
 
     if (!e)
     {
@@ -535,8 +535,7 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
     }
     else
     {
-        //TODO: Add Logging
-        std::cout << "ASIO Read Header Error: " << e << "\n";
+        m_log->add_error("ASIO Read Header Error: " + e.message(), "HttpClient");
         m_response_ec = e;
         m_work.reset();
     }
@@ -546,8 +545,7 @@ void HttpClient::handle_read_headers( const boost::system::error_code& e )
 void HttpClient::handle_read_content( const boost::system::error_code& e, size_t bytes_transferred )
 {
 
-    std::cout << "Read some content" << '\n';
-    //TODO: Add bytes per second / transfer speed output
+    std::cout << "Reading response body..." << '\n';
 
     if (!e || e == boost::asio::ssl::error::stream_truncated )
     {
@@ -605,10 +603,16 @@ void HttpClient::check_deadline()
         // asynchronous operations are cancelled. this allows the blocked
         // connect(), read_line() or write_line() functions to return.
         disconnect();
+        m_work.reset();
 
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         m_deadline_timer->expires_at(boost::posix_time::pos_infin);
+
+        std::cout << "Connection timed out: " << m_timeout.total_seconds() << " seconds" << '\n';
+
+        return;
+
     }
 
     // Put the actor back to sleep.
@@ -790,8 +794,7 @@ void HttpClient::handle_write_throttled( const boost::system::error_code& e, siz
     }
     else
     {
-        //TODO: Add Logging Here
-        std::cout << "ASIO Write Error: " << e.message() << "\n";
+        m_log->add_error("ASIO Write Error: " + e.message(), "HttpClient");
         m_response_ec = e;
         m_work.reset(); //No more work
     }
@@ -800,7 +803,7 @@ void HttpClient::handle_write_throttled( const boost::system::error_code& e, siz
 void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_transferred )
 {
 
-    std::cout << "Sent " << bytes_transferred << " bytes" << '\n';
+    std::cout << "Sent " << bytes_transferred << " bytes..." << '\n';
     //std::cout << "Buffer size: " << m_request_buffer->size() << " bytes" << '\n';
 
     if (!e)
@@ -818,8 +821,7 @@ void HttpClient::handle_write( const boost::system::error_code& e, size_t bytes_
     }
     else
     {
-        //TODO: Add Logging Here
-        std::cout << "ASIO Write Error: " << e.message() << "\n";
+        m_log->add_error("ASIO Write Error: " + e.message(), "HttpClient");
         m_response_ec = e;
         m_work.reset(); //No more work
     }

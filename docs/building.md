@@ -17,9 +17,8 @@
 
 ### Required Libraries
 
-* libdl (Linux)
-* pthreads
-* LibArchive
+* libdl (Linux for dynamic linking)
+* pthread
 * Boost
   * system
   * filesystem
@@ -31,3 +30,6 @@
 * sqlite3
 * OpenSSL
 * CryptoPP
+* ZLib
+* lws2_32 (Windows)
+* lwsock32 (Windows)

@@ -303,7 +303,6 @@ void AwsS3Client::init_amz_date()
 bool AwsS3Client::upload()
 {
 
-    //TODO: Migrate to using HttpRequest
     HttpRequest request;
     request.set_method("PUT");
     request.set_url("/" + encode_uri( get_file_uri_path() ));

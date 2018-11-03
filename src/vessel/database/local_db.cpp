@@ -6,23 +6,37 @@ LocalDatabase::LocalDatabase()
 {
 
     //Database logging
-    m_log = &Vessel::Logging::Log::get_log();
+    m_log = &Log::get_log();
+
+    //Verify database file exists
+    if ( !boost::filesystem::exists(DB_FILENAME) )
+    {
+        Log::sql_logging(false);
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
+        throw DatabaseException(DatabaseException::DatabaseNotFound, "Database file could not be opened");
+    }
 
     m_err_code = this->open_db(DB_FILENAME);
 
-    if ( m_err_code ) {
-        m_log->add_message( "SQLite Error: " + get_last_err(), "Database" );
+    if ( m_err_code != SQLITE_OK ) {
+        Log::sql_logging(false);
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         this->close_db();
+        throw DatabaseException(DatabaseException::DatabaseNotFound, "Database file could not be opened");
     }
     else
     {
+
+        m_is_open=true;
+        m_log->sql_logging(true);
+
         //Increase cache size
         sqlite3_exec(m_db, "PRAGMA cache_size = -10000", NULL, NULL, NULL);
 
         if ( VACUUM_ON_LOAD )
         {
             if ( vacuum_db() != SQLITE_OK ) {
-                m_log->add_message( "SQLite Error: " + get_last_err(), "Database" );
+                m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
             }
         }
     }
@@ -66,7 +80,10 @@ std::string LocalDatabase::get_setting_str(const std::string & s )
     std::string query = "SELECT value FROM backup_setting WHERE name=?1";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         return "";
+    }
 
     sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
 
@@ -91,10 +108,12 @@ int LocalDatabase::get_setting_int(const std::string & s )
     std::string query = "SELECT value FROM backup_setting WHERE name=?1";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         return -1;
+    }
 
     sqlite3_bind_text(stmt, 1, s.c_str(), s.size(), 0 );
-
     sqlite3_step(stmt);
 
     int val = sqlite3_column_int(stmt, 0);
@@ -116,7 +135,10 @@ bool LocalDatabase::update_setting(const std::string& key, const T& val )
     std::string query = "UPDATE backup_setting SET value = ?2 WHERE name=?1";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         return false;
+    }
 
     sqlite3_bind_text(stmt, 1, key.c_str(), key.size(), 0 );
     sqlite3_bind_text(stmt, 2, val_s.c_str(), val_s.size(), 0 );
@@ -127,7 +149,10 @@ bool LocalDatabase::update_setting(const std::string& key, const T& val )
     sqlite3_finalize(stmt);
 
     if ( rc != SQLITE_DONE )
+    {
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         return false;
+    }
 
     return true;
 
@@ -143,7 +168,10 @@ bool LocalDatabase::update_ext_count(const std::string& ext, int total )
     std::string query = "INSERT OR REPLACE INTO backup_ext_count(`extension`,`total_count`) VALUES(?1,?2)";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         return false;
+    }
 
     sqlite3_bind_text(stmt, 1, ext.c_str(), ext.size(), 0 );
     sqlite3_bind_int(stmt, 2, total );
@@ -154,7 +182,10 @@ bool LocalDatabase::update_ext_count(const std::string& ext, int total )
     sqlite3_finalize(stmt);
 
     if ( rc != SQLITE_DONE )
+    {
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         return false;
+    }
 
     return true;
 
@@ -174,7 +205,10 @@ void LocalDatabase::clean_dirs()
     std::string query = "SELECT directory_id,path FROM backup_directory";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK )
+    {
+        m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         return;
+    }
 
     while ( sqlite3_step(stmt) == SQLITE_ROW )
     {
@@ -191,14 +225,14 @@ void LocalDatabase::clean_dirs()
             std::string q = "DELETE FROM backup_directory WHERE directory_id=?1";
 
             if ( sqlite3_prepare_v2(m_db, q.c_str(), -1, &st, NULL ) != SQLITE_OK ) {
-                m_log->add_message("Failed to remove directory from database: " + dir, "Database Cleaner");
+                m_log->add_error("Failed to remove directory from database: " + dir, "Database Cleaner");
                 continue;
             }
 
             sqlite3_bind_int(st, 1, directory_id );
 
             if ( sqlite3_step(st) != SQLITE_DONE ) {
-                m_log->add_message("Failed to remove directory from database: " + dir, "Database Cleaner");
+                m_log->add_error("Failed to remove directory from database: " + dir, "Database Cleaner");
             }
 
             //Cleanup
@@ -221,7 +255,7 @@ void LocalDatabase::clean_files()
     std::string query = "SELECT bd.path,bf.filename,bf.file_id FROM backup_file AS bf INNER JOIN backup_directory AS bd ON bf.directory_id = bd.directory_id";
 
     if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
-        m_log->add_message("Failed to clean files", "Database Cleaner");
+        m_log->add_error("Failed to clean files", "Database Cleaner");
         return;
     }
 
@@ -372,12 +406,18 @@ void LocalDatabase::update_client_settings(const std::string& s )
     doc.Parse( s.c_str() );
 
     if ( !doc.IsObject() )
+    {
+        m_log->add_error("Failed to update client settings", "Client");
         return;
+    }
 
     const Value& settings = doc["response"]["settings"];
 
     if ( !settings.IsObject() )
+    {
+        m_log->add_error("Failed to update client settings", "Client");
         return;
+    }
 
     //Iterate and update settings
     for (Value::ConstMemberIterator itr = settings.MemberBegin(); itr != settings.MemberEnd(); ++itr )
@@ -433,7 +473,7 @@ void LocalDatabase::purge_file( unsigned char* file_id )
     {
         sqlite3_stmt* st;
         if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &st, NULL ) != SQLITE_OK ) {
-            m_log->add_message("Failed to remove file from database: " + file_id_s, "Database Cleaner");
+            m_log->add_error("Failed to remove file from database: " + file_id_s, "Database Cleaner");
             continue;
         }
 
@@ -443,7 +483,7 @@ void LocalDatabase::purge_file( unsigned char* file_id )
             m_log->add_message("File has been purged: " + file_id_s, "Database Cleaner");
         }
         else {
-            m_log->add_message("File could not be purged: " + file_id_s, "Database Cleaner");
+            m_log->add_error("File could not be purged: " + file_id_s, "Database Cleaner");
         }
 
         //Cleanup
@@ -514,4 +554,9 @@ std::map<std::string,int> LocalDatabase::get_stats()
 
     return stats;
 
+}
+
+bool LocalDatabase::is_open()
+{
+    return m_is_open;
 }

@@ -17,7 +17,8 @@ namespace Vessel {
                     NoError = 0,
                     InvalidQuery,
                     InvalidStatement,
-                    NoResults
+                    NoResults,
+                    DatabaseNotFound
                 };
 
                 DatabaseException(ErrorCode e, const std::string& msg) : _code(e)

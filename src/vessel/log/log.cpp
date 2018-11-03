@@ -3,7 +3,11 @@
 using namespace Vessel::Logging;
 using namespace Vessel::Database;
 
-Log::Log() : m_logger(keywords::channel = LOG_FILENAME), m_level(error), m_sql_logging(true)
+//Static defaults
+bool Log::m_sql_logging = true;
+bool Log::m_file_logging = false;
+
+Log::Log() : m_logger(keywords::channel = LOG_FILENAME), m_level(info)
 {
 
     m_filename = LOG_FILENAME;
@@ -37,30 +41,25 @@ Log::Log() : m_logger(keywords::channel = LOG_FILENAME), m_level(error), m_sql_l
 
 }
 
-Log::~Log()
-{
-
-}
-
-void Log::set_file_logging(bool flag)
+void Log::file_logging(bool flag)
 {
     m_file_logging = flag;
 }
 
-void Log::set_sql_logging(bool flag)
+void Log::sql_logging(bool flag)
 {
     m_sql_logging = flag;
 }
 
 void Log::add_message(const std::string& msg, const std::string& type )
 {
-    BOOST_LOG_SEV( m_logger, static_cast<Vessel::Logging::severity_level>(m_level) ) << logging::add_value(category, type) << msg;
+    if ( m_file_logging) BOOST_LOG_SEV( m_logger, static_cast<Vessel::Logging::severity_level>(info) ) << logging::add_value(category, type) << msg;
     if ( m_sql_logging ) add_sql_message(msg, type);
 }
 
 void Log::add_error(const std::string& msg, const std::string& type )
 {
-    BOOST_LOG_SEV( m_logger, static_cast<Vessel::Logging::severity_level>(m_level) ) << logging::add_value(category, type) << msg;
+    if ( m_file_logging) BOOST_LOG_SEV( m_logger, static_cast<Vessel::Logging::severity_level>(error) ) << logging::add_value(category, type) << msg;
     if ( m_sql_logging ) add_sql_message(msg, type, true);
 }
 
@@ -89,7 +88,7 @@ void Log::add_http_message(const std::string& request, const std::string& respon
 
     sqlite3_stmt* stmt;
 
-    bool is_error = (status == 200) ? false : true;
+    bool is_error = (status == 200 || status == 201) ? false : true;
 
     std::string query = "INSERT INTO backup_log (message,payload,code,error,type) VALUES(?1,?2,?3,?4,'http')";
 
