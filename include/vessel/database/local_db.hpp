@@ -19,7 +19,7 @@
 #include <vessel/database/db_exception.hpp>
 #include <vessel/types.hpp>
 #include <vessel/log/log.hpp>
-#include <vessel/version.hpp>
+#include <vessel/vessel/app_manager.hpp>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -31,7 +31,6 @@
 #endif
 
 #define VACUUM_ON_LOAD 1
-#define DB_FILENAME "local.db"
 
 using namespace Vessel::Types;
 using namespace Vessel::Exception;
@@ -74,11 +73,11 @@ namespace Vessel{
                 */
                 std::string get_setting_str(const std::string& s);
 
-                /*! \fn bool is_open();
+                /*! \fn static bool is_open();
                     \brief Returns true if the database is open and false otherwise
                     \return Returns true if the database is open and false otherwise
                 */
-                bool is_open();
+                static bool is_open();
 
                 /*! \fn int get_setting_int(const std::string&s );
                     \brief Returns int value of a setting from the Database
@@ -165,7 +164,8 @@ namespace Vessel{
                 sqlite3* m_db;
                 int m_err_code;
                 Log* m_log;
-                bool m_is_open;
+                static bool m_is_open;
+                std::string m_user_home_dir;
 
                 /**
                  ** Constructor must be private for singleton factory model

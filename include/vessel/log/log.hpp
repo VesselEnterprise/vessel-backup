@@ -7,6 +7,7 @@
 
 #define LOG_FILENAME "vessel"
 
+#include <mutex>
 #include <typeinfo>
 
 #include <boost/log/core.hpp>
@@ -80,22 +81,23 @@ namespace Vessel {
                 void add_error( const std::string& msg, const std::string& type );
                 void add_http_message( const std::string& request, const std::string& response, int status );
                 void add_sql_message(const std::string& msg, const std::string& type, bool is_error=false);
-                void set_level ( unsigned int level );
                 void add_exception(const std::exception& ex);
                 static void file_logging(bool flag);
                 static void sql_logging(bool flag);
-                void set_filename(const std::string& filename);
 
             protected:
                 ~Log() {}
 
             private:
                 Log();
-                std::string m_filename;
                 src::severity_channel_logger< Vessel::Logging::severity_level, std::string > m_logger;
                 unsigned int m_level;
                 static bool m_file_logging;
                 static bool m_sql_logging;
+                std::mutex m_log_mutex;
+                std::string m_log_path;
+
+
                 void add_file_exception(const std::exception& ex);
                 void add_sql_exception(const std::exception& ex);
         };

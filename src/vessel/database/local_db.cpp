@@ -2,21 +2,25 @@
 
 using namespace Vessel::Database;
 
+bool LocalDatabase::m_is_open = false;
+
 LocalDatabase::LocalDatabase()
 {
 
     //Database logging
     m_log = &Log::get_log();
 
+    std::string db_path = AppManager::get().get_db_path();
+
     //Verify database file exists
-    if ( !boost::filesystem::exists(DB_FILENAME) )
+    if ( !boost::filesystem::exists(db_path) )
     {
         Log::sql_logging(false);
         m_log->add_error( "SQLite Error: " + get_last_err(), "Database" );
         throw DatabaseException(DatabaseException::DatabaseNotFound, "Database file could not be opened");
     }
 
-    m_err_code = this->open_db(DB_FILENAME);
+    m_err_code = this->open_db(db_path);
 
     if ( m_err_code != SQLITE_OK ) {
         Log::sql_logging(false);
@@ -27,7 +31,7 @@ LocalDatabase::LocalDatabase()
     else
     {
 
-        m_is_open=true;
+        m_is_open = true;
         m_log->sql_logging(true);
 
         //Increase cache size
@@ -282,16 +286,7 @@ void LocalDatabase::update_global_settings()
 {
 
     //Update user home folder
-    #ifdef _WIN32
-        /* This sometimes returns incorrect results in Windows systems
-        std::string home_drive = std::getenv("HOMEDRIVE");
-        std::string home_path = std::getenv("HOMEPATH");
-        */
-        std::string user_folder = std::getenv("USERPROFILE");
-        this->update_setting("home_folder", user_folder );
-    #elif __unix
-        this->update_setting("home_folder", std::getenv("HOME") );
-    #endif
+    update_setting("home_folder", AppManager::get().get_user_dir() );
 
     //Update host name
     char hbuf[128];
@@ -308,7 +303,7 @@ void LocalDatabase::update_global_settings()
         unsigned long userlen = sizeof(username_buf);
         GetUserName(username_buf, static_cast<unsigned long*>(&userlen) );
         std::string username(username_buf);
-    #elif __unix
+    #else
         struct passwd *pws;
         pws = getpwuid(geteuid());
         std::string username = pws->pw_name;
@@ -332,7 +327,6 @@ void LocalDatabase::update_global_settings()
 
         if ( GetVersionEx((POSVERSIONINFOA)&os_bits) != 0 )
         {
-            //std::cout << "Success" << std::endl;
             switch (os_bits.dwMajorVersion)
             {
                 case 10:
@@ -373,13 +367,7 @@ void LocalDatabase::update_global_settings()
             }
         }
 
-        /*
-        std::cout << "Major version: " << os_bits.dwMajorVersion << std::endl;
-        std::cout << "Minor version: " << os_bits.dwMinorVersion << std::endl;
-        std::cout << "OS: " << os << std::endl;
-        */
-
-    #elif __unix
+    #else
         utsname os_bits;
         uname(&os_bits);
         std::string domain = os_bits.domainname;
@@ -394,7 +382,7 @@ void LocalDatabase::update_global_settings()
     this->update_setting("host_domain", domain);
 
     //Update client application version
-    this->update_setting("client_version", Vessel::Version::FULLVERSION_STRING);
+    this->update_setting("client_version", APP_VERSION);
 
 }
 

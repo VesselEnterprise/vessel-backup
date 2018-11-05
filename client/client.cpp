@@ -56,6 +56,10 @@ int main(int argc, char** argv)
 
     //Override for development
     HttpClient::http_logging(true);
+    Log::file_logging(true);
+
+    //Prepare application
+    AppManager::get().prepare();
 
     //Create new instance of local database
     LocalDatabase* db = &LocalDatabase::get_database();

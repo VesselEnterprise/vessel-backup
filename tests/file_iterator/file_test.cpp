@@ -22,7 +22,6 @@ int main()
     fi->scan();
     ldb->clean();
 
-    log->set_level( Vessel::Logging::info );
     log->add_message("This is some test text", "File Backup");
 
     delete fi;
