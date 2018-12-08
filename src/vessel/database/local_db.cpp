@@ -164,6 +164,7 @@ bool LocalDatabase::update_setting(const std::string& key, const T& val )
 
 template bool LocalDatabase::update_setting<std::string>(const std::string& key, const std::string& val );
 template bool LocalDatabase::update_setting<int>(const std::string& key, const int& val );
+template bool LocalDatabase::update_setting<unsigned long>(const std::string& key, const unsigned long& val );
 
 bool LocalDatabase::update_ext_count(const std::string& ext, int total )
 {
@@ -467,10 +468,13 @@ void LocalDatabase::purge_file( unsigned char* file_id )
 
         sqlite3_bind_blob(st, 1, file_id, file_id_size, 0);
 
-        if ( sqlite3_step(st) == SQLITE_DONE ) {
-            m_log->add_message("File has been purged: " + file_id_s, "Database Cleaner");
+        if ( sqlite3_step(st) == SQLITE_DONE )
+        {
+            //m_log->add_message("File has been purged: " + file_id_s, "Database Cleaner");
+            std::cout << "File has been purged: " << file_id_s << '\n';
         }
-        else {
+        else
+        {
             m_log->add_error("File could not be purged: " + file_id_s, "Database Cleaner");
         }
 
@@ -547,4 +551,53 @@ std::map<std::string,int> LocalDatabase::get_stats()
 bool LocalDatabase::is_open()
 {
     return m_is_open;
+}
+
+void LocalDatabase::prune_logs()
+{
+
+    unsigned long secs = get_setting_int("prune_log_days") * 86400;
+
+    unsigned long start_time = ((unsigned long)std::time(nullptr)) - secs;
+
+    sqlite3_stmt* stmt;
+    std::string query = "DELETE FROM backup_log WHERE logged_at <= ?1";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
+        m_log->add_error("Failed to clean files", "Database Cleaner");
+        return;
+    }
+
+    sqlite3_bind_int(stmt, 1, start_time);
+
+    if ( sqlite3_step(stmt) != SQLITE_DONE )
+    {
+        m_log->add_error("Failed to prune log entries: " + get_last_err(), "Logging");
+    }
+
+    sqlite3_finalize(stmt);
+
+}
+
+void LocalDatabase::prune_logs(unsigned long start_time, unsigned long end_time)
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "DELETE FROM backup_log WHERE logged_at >= ?1 AND logged_at <= ?2";
+
+    if ( sqlite3_prepare_v2(m_db, query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
+        m_log->add_error("Failed to clean files", "Database Cleaner");
+        return;
+    }
+
+    sqlite3_bind_int(stmt, 1, start_time);
+    sqlite3_bind_int(stmt, 2, end_time);
+
+    if ( sqlite3_step(stmt) != SQLITE_DONE )
+    {
+        m_log->add_error("Failed to prune log entries: " + get_last_err(), "Logging");
+    }
+
+    sqlite3_finalize(stmt);
+
 }

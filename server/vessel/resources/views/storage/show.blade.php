@@ -19,6 +19,14 @@
 			$('#provider_type').dropdown('set selected', '{{ $provider->provider_type }}');
 			$('.provider-active').checkbox('{{ $provider->active ? 'check' : 'uncheck' }}');
 
+			$('#provider-form').change(function() {
+				var server = $('input[name="server"]').val();
+				var storagePath = $('input[name="storage_path"]').val();
+				$('#file-path-example').text(server + storagePath + '/<user_id>/path/to/example.jpg');
+			});
+
+			$('#provider-form').trigger('change');
+
 		});
 	</script>
 @endsection
@@ -32,7 +40,7 @@
 		<div class="sub header">View or Manage Storage Provider for uploads</div>
 	</h2>
 
-	<form class="ui form" action="{{ route('storage.update', ['id' => $provider->uuid_text]) }}" method="POST">
+	<form id="provider-form" class="ui form" action="{{ route('storage.update', ['id' => $provider->uuid_text]) }}" method="POST">
 		@csrf
 		<input type="hidden" name="_method" value="put" />
 
@@ -84,12 +92,7 @@
 			<div class="eight wide column">
 				<div class="field">
 					<label>Server</label>
-					<div class="ui labeled input">
-						<div class="ui label">
-					 		https://
-				 		</div>
-						<input name="server" id="server" type="text" value="{{ $provider->server }}" placeholder="Enter URL">
-					</div>
+					<input name="server" id="server" type="text" value="{{ $provider->server }}" placeholder="Enter URL">
 				</div>
 			</div>
 
@@ -138,6 +141,17 @@
 				<div class="field">
 					<label>Description</label>
 					<textarea name="description" id="description" rows="4">{{ $provider->description }}</textarea>
+				</div>
+			</div>
+
+			<div class="sixteen wide column">
+				<div class="ui info message">
+					<div>
+						<b>Example Full Path to Uploaded Files:</b>
+					</div>
+					<div id="file-path-example">
+						https://vessel-backup.s3-us-east-2.amazonaws.com
+					</div>
 				</div>
 			</div>
 

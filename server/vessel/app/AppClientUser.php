@@ -18,5 +18,6 @@ class AppClientUser extends Model
 		}
 
 		protected $table = 'app_client_user';
+		protected $fillable = ['client_id', 'user_id'];
 
 }

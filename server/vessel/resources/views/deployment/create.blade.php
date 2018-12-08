@@ -16,6 +16,7 @@
 			$('.menu .item').tab();
 
 			$('#expires_at').calendar();
+			$('.never-expires').checkbox();
 
 		});
 	</script>
@@ -58,6 +59,15 @@
 				<div class="field">
 					<label>Deployment Key</label>
 					<input name="deployment_key" id="deployment_key" type="text" value="{{ $deploymentKey }}" placeholder="">
+				</div>
+			</div>
+
+			<div class="eight wide column">
+				<div class="field">
+					<div class="ui checkbox never-expires">
+					  <input type="checkbox" name="never_expires" id="never_expires">
+					  <label>Never Expires</label>
+					</div>
 				</div>
 			</div>
 

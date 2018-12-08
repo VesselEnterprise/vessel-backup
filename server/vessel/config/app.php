@@ -166,6 +166,9 @@ return [
 				Laravel\Scout\ScoutServiceProvider::class,
 				TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
 
+				//Agent Detection
+				Jenssegers\Agent\AgentServiceProvider::class,
+
     ],
 
     /*
@@ -215,7 +218,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Form' => Collective\Html\FormFacade::class,
-        'Html' => Collective\Html\HtmlFacade::class
+        'Html' => Collective\Html\HtmlFacade::class,
+				'Agent' => Jenssegers\Agent\Facades\Agent::class,
 
     ],
 

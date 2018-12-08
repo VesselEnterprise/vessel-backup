@@ -414,7 +414,7 @@ std::string AwsS3Client::upload_part(int part, const std::string& upload_id )
     send_http_request(request);
 
     //Parse the ETag from the response
-    return parse_etag();
+    return get_header("ETag");
 
 }
 
@@ -492,32 +492,6 @@ std::string AwsS3Client::parse_upload_id(const std::string& response)
     */
 
     return upload_id;
-
-}
-
-std::string AwsS3Client::parse_etag()
-{
-
-    std::string etag;
-
-    //Find the ETag in the response header
-    std::istringstream iss(get_headers());
-    std::string header;
-
-    while ( getline(iss, header) && header != "\r" )
-    {
-        if ( header.find("ETag: ") != std::string::npos ) {
-            etag = header.substr(6); //Everything after "ETag: "
-            break;
-        }
-    }
-
-    //Replace any remaining spaces or carriage returns
-    boost::algorithm::replace_all(etag, " ", "");
-    boost::algorithm::replace_all(etag, "\r", "");
-    boost::algorithm::replace_all(etag, "\n", "");
-
-    return etag;
 
 }
 
@@ -681,7 +655,7 @@ void AwsS3Client::set_storage_provider( const StorageProvider& provider )
 void AwsS3Client::build_file_uri_path()
 {
 
-    m_uri_file_path = m_user_id + m_file.get_parent_path() + "/" + m_file.get_file_name();
+    m_uri_file_path = BackupFile::trim_path( m_storage_provider.storage_path + "/" + m_user_id + m_file.get_parent_path() + "/" + m_file.get_file_name() );
 
     #ifdef _WIN32
         boost::replace_all(m_uri_file_path, "\\", "/");

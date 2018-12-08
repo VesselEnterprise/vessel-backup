@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include <cryptopp/sha.h>
 #include <cryptopp/files.h>
 #include <cryptopp/filters.h>
@@ -261,6 +262,12 @@ namespace Vessel {
                 */
                 void update_last_backup();
                 static void update_last_backup(std::shared_ptr<unsigned char> file_id);
+
+                /*! \fn static std::string strip_slashes(const std::string& str);
+                    \brief Removes slashes from a file path
+                    \return Removes slashes from a file path
+                */
+                static std::string trim_path(const std::string& str);
 
             private:
                 boost::filesystem::path m_file_path; //!< Boost::FileSystem path of the file

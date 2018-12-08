@@ -27,6 +27,7 @@ Route::post('/client/install', 'api\AppClientController@install')->middleware('v
 Route::get('/upload/{id}', 'api\UploadController@show')->middleware('verifyClientToken');
 Route::post('/upload/{id}/complete', 'api\UploadController@complete')->middleware('verifyClientToken');
 Route::delete('/upload/{id}', 'api\UploadController@destroy')->middleware('verifyClientToken');
+Route::put('/upload/{id}', 'api\UploadController@update')->middleware('verifyClientToken');
 
 //AWS S3 Uploads
 Route::post('/upload/aws', 'api\AwsUploadController@initUpload')->middleware('verifyClientToken');
@@ -39,3 +40,6 @@ Route::post('/upload/azure/sign', 'api\AzureUploadController@getSignature')->mid
 //Vessel Uploads
 Route::put('/upload/vessel/{filePath}', 'api\VesselUploadController@uploadFile')->middleware('verifyClientToken');
 Route::post('/upload/vessel/multipart/{filePath}', 'api\VesselUploadController@initMultiPartUpload')->middleware('verifyClientToken');
+
+//File
+Route::put('/file/{id}', 'api\FileController@update')->middleware('verifyClientToken');

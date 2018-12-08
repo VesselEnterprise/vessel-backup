@@ -66,7 +66,7 @@ class LoginController extends Controller
 						$user->last_login = now();
 						$user->save();
 
-            return redirect()->intended('dashboard');
+            return redirect()->intended('home');
         }
 				else {
 					return view('auth.login', ['error' => 'There was an issue with your username or password']);

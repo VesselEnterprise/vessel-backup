@@ -29,7 +29,7 @@ class FileUpload extends File
 	public $primaryKey = 'upload_id';
 	public $incrementing = false;
 	protected $table = 'file_upload';
-	protected $uuids = ['file_id','user_id'];
+	protected $uuids = ['file_id','user_id','client_id'];
 	protected $dates = ['created_at','updated_at'];
 
 }

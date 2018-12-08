@@ -18,9 +18,10 @@ class CreateFileTable extends Migration
           //Create columns
           $table->uuid('file_id')->primary();
           $table->uuid('user_id')->index();
-          $table->string('file_name', 255);
+					$table->uuid('client_id')->index();
           $table->uuid('file_path_id')->index();
 					$table->uuid('provider_id')->index();
+					$table->string('file_name', 255);
           $table->string('file_type', 16 )->index()->nullable();
           $table->unsignedBigInteger('file_size');
           //$table->binary('hash')->comment('SHA-1 hash of the file contents'); //Laravel incorrectly creates a BLOB here for MySQL

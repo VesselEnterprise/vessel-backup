@@ -34,7 +34,7 @@ void AppManager::prepare()
         }
     #else
         m_user_dir = std::getenv("HOME");
-        if ( m_user_dir.empty() || || !boost::filesystem::exists(m_user_dir) )
+        if ( m_user_dir.empty() || !boost::filesystem::exists(m_user_dir) )
         {
             struct passwd *pw = getpwuid(getuid());
             m_user_dir = pw->pw_dir;
@@ -93,11 +93,6 @@ void AppManager::prepare()
 void AppManager::increment_error()
 {
     m_runtime_errors.fetch_add(1, std::memory_order_relaxed);
-    if ( m_runtime_errors.load(std::memory_order_relaxed) >= MAX_RUNTIME_ERRORS )
-    {
-        Log::get_log().add_error("Application has exceeded runtime error limit", "AppManager");
-        throw std::runtime_error("Application has exceeded runtime error limit");
-    }
 }
 
 std::string AppManager::get_working_dir()
@@ -118,4 +113,9 @@ std::string AppManager::get_data_dir()
 std::string AppManager::get_db_path()
 {
     return m_db_path;
+}
+
+int AppManager::get_total_errors()
+{
+    return m_runtime_errors.load(std::memory_order_relaxed);
 }

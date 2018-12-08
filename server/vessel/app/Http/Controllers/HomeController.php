@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -23,9 +24,16 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-
 				$request->user()->authorizeRoles(['user', 'admin']);
 
-        return view('home');
+				//Retrieve stats to display on dashboard
+
+				$heartbeats = App\AppClient::orderBy('last_check_in', 'desc')->limit(10)->get();
+				$recentBackups = App\File::orderBy('last_backup', 'desc')->limit(10)->get();
+
+        return view('home', [
+					'heartbeats' => $heartbeats,
+					'recentBackups' => $recentBackups,
+				]);
     }
 }

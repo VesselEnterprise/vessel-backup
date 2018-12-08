@@ -44,12 +44,16 @@ namespace Vessel {
                 int get_error_count() const;
                 int increment_error();
 
+                void update_vessel_id(const std::string& id);
+                std::string get_vessel_id();
+
 
             private:
                 BackupFile m_file;
                 std::string m_upload_key;
                 std::string m_file_hash;
                 std::string m_signature;
+                std::string m_vessel_id;
                 std::shared_ptr<unsigned char> m_file_id;
                 unsigned int m_upload_id;
                 int m_total_parts;

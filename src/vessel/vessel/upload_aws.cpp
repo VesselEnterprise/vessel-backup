@@ -38,12 +38,8 @@ void AwsUpload::upload_file(FileUpload& upload)
 
     if ( should_init )
     {
-
-        //std::cout << "Upload is being initialized..." << '\n';
-
         //Initialize the upload with the Vessel API
-        init_upload(file);
-
+        upload.update_vessel_id( init_upload(file) );
     }
 
     //Initialize the AWS upload
@@ -61,7 +57,12 @@ void AwsUpload::upload_file(FileUpload& upload)
 
     //Upload Single File
     if ( total_parts == 1 ) {
-        m_client->upload();
+
+        //If upload was successful, mark as completed w Vessel API
+        if ( m_client->upload() )
+        {
+            get_vessel_client()->complete_upload( upload.get_vessel_id() );
+        }
     }
     //Upload Multipart
     else {
@@ -122,7 +123,13 @@ void AwsUpload::upload_file(FileUpload& upload)
         if ( should_complete )
         {
             std::string complete_etag = m_client->complete_multipart_upload(etags, upload.get_upload_key() );
-            std::cout << "Multipart upload was successful with ETag " << complete_etag << '\n';
+
+            if ( !complete_etag.empty() )
+            {
+                get_vessel_client()->complete_upload( upload.get_vessel_id() );
+                std::cout << "Multipart upload was successful with ETag " << complete_etag << '\n';
+            }
+
         }
 
     }
@@ -134,10 +141,11 @@ void AwsUpload::complete_upload()
 
 }
 
-void AwsUpload::init_upload(const BackupFile& file)
+std::string AwsUpload::init_upload(const BackupFile& file)
 {
 
     std::cout << "Uploading " << file.get_file_name() << "..." << '\n';
-    get_vessel_client()->init_upload(file);
+
+    return get_vessel_client()->init_upload(file);
 
 }

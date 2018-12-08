@@ -127,7 +127,7 @@ int main(int argc, char** argv)
         tpool.create_thread( [&]() { io_service.run(); });
     }
 
-    //Manage Heartbeat, Stat Calculation
+    //Manage Heartbeat, Stat Calculation, App Runtime
     io_service.post([&](){
         for(;;)
         {
@@ -157,9 +157,26 @@ int main(int argc, char** argv)
             //Free memory before sleep
             stat_manager.reset();
 
+            //Prune logs
+            try
+            {
+                db->prune_logs();
+            }
+            catch( const std::exception& ex )
+            {
+                log->add_exception(ex);
+            }
+
+            //Check for Runtime errors
+            if ( AppManager::get().get_total_errors() >= MAX_RUNTIME_ERRORS )
+            {
+                log->add_error("Application has exceeded runtime error limit", "AppManager");
+                throw std::runtime_error("Application has exceeded runtime error limit"); //Stop Application
+            }
+
             std::cout << "Sleeping!" << '\n';
 
-            boost::this_thread::sleep( boost::posix_time::seconds(5) );
+            boost::this_thread::sleep( boost::posix_time::seconds(30) ); //900
             std::cout << "Restarting heartbeat after 15 minutes..." << '\n';
 
         }
@@ -204,7 +221,7 @@ int main(int argc, char** argv)
             {
                 //Rebuild the queue if no uploads are remaining
                 if ( queue_manager->get_total_pending() == 0 ) {
-                    //queue_manager->rebuild_queue();
+                    queue_manager->rebuild_queue();
                 }
             }
             catch( const std::exception& ex )
@@ -236,7 +253,7 @@ int main(int argc, char** argv)
 
             try
             {
-                //upload_manager->run_uploader();
+                upload_manager->run_uploader();
             }
             catch( const std::exception& ex )
             {

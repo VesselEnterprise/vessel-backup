@@ -2,7 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Deployment;
+use App;
+use Carbon\Carbon;
 use Closure;
 
 class VerifyDeploymentKey
@@ -21,9 +22,15 @@ class VerifyDeploymentKey
 					return response()->json(['error' => 'Not authorized'], 403);
 				}
 
-				$result = Deployment::where('deployment_key', $request->bearerToken() )->whereDate('expires_at', '>=', now() );
+				$result = App\Deployment::where([
+					['deployment_key', '=', $request->bearerToken()],
+					['expires_at', '>=', Carbon::now()->toDateTimeString()]
+				])->orWhere([
+					['deployment_key', '=', $request->bearerToken()],
+					['never_expires', '=', 1]
+				])->first();
 
-				if ( $result->count() <= 0 ) {
+				if ( !$result ) {
 					return response()->json(['error' => 'Not authorized'], 403);
 				}
 

@@ -22,7 +22,7 @@ void FileUpload::init()
     }
 
     sqlite3_stmt* stmt;
-    std::string query = "SELECT file_id,total_parts,byte_offset,chunk_size,hash,signature,weight,last_modified,upload_id,upload_key FROM backup_upload WHERE " + where + "=?1";
+    std::string query = "SELECT file_id,total_parts,byte_offset,chunk_size,hash,signature,weight,last_modified,upload_id,upload_key,vessel_id FROM backup_upload WHERE " + where + "=?1";
 
     if ( sqlite3_prepare_v2(LocalDatabase::get_database().get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
         Log::get_log().add_error("Failed to init FileUpload: " + m_upload_id, "FileUpload");
@@ -50,6 +50,7 @@ void FileUpload::init()
         m_signature = LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 5) );
         m_weight = sqlite3_column_int(stmt, 6);
         m_last_modified = sqlite3_column_int(stmt, 7);
+        m_vessel_id = LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 10) );
         m_exists = true;
 
     }
@@ -220,4 +221,33 @@ int FileUpload::increment_error()
 
     return (get_error_count() + 1);
 
+}
+
+void FileUpload::update_vessel_id(const std::string& id)
+{
+
+    sqlite3_stmt* stmt;
+    std::string query = "UPDATE backup_upload SET vessel_id = ?1 WHERE upload_id=?2";
+
+    if ( sqlite3_prepare_v2(LocalDatabase::get_database().get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
+        Log::get_log().add_error("Unable to set Vessel ID for FileUpload: " + LocalDatabase::get_database().get_last_err(), "File Upload");
+    }
+
+    sqlite3_bind_text(stmt, 1, id.c_str(), id.size(), 0 );
+    sqlite3_bind_int(stmt, 2, m_upload_id );
+
+    if ( sqlite3_step(stmt) != SQLITE_DONE ) {
+        Log::get_log().add_error("Unable to set Vessel ID for FileUpload: " + LocalDatabase::get_database().get_last_err(), "File Upload");
+    }
+
+    m_vessel_id = id;
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+}
+
+std::string FileUpload::get_vessel_id()
+{
+    return m_vessel_id;
 }

@@ -6,6 +6,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator;
 
+use App\FileUpload;
+use App\Observers\FileUploadObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -17,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 				Paginator::defaultView('pagination::semantic-ui');
+				FileUpload::observe(FileUploadObserver::class);
     }
 
     /**

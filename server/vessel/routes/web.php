@@ -11,10 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
 
 /** Authentication Routes **/
@@ -62,3 +59,10 @@ Route::post('/deployment/delete', 'DeploymentController@destroyMultiple')->name(
 
 /** Search Routes **/
 Route::get('/search/{str}', 'SearchController@search');
+Route::post('/search/logs', 'SearchController@searchLog');
+
+/** Monitoring Routes **/
+Route::resource('log', 'AppLogController');
+
+/** Download Routes **/
+Route::get('/download/{id}', 'DownloadController@downloadFile')->middleware('auth');

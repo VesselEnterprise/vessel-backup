@@ -8,3 +8,4 @@ php artisan tntsearch:import App\\Setting
 php artisan tntsearch:import App\\AppClient
 php artisan tntsearch:import App\\Setting
 php artisan tntsearch:import App\\StorageProvider
+php artisan tntsearch:import App\\AppLogEntry

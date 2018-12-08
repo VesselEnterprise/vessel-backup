@@ -70,12 +70,7 @@
 			<div class="eight wide column">
 				<div class="field">
 					<label>Server</label>
-					<div class="ui labeled input">
-						<div class="ui label">
-					 		https://
-				 		</div>
-						<input name="server" id="server" type="text" placeholder="Enter URL">
-					</div>
+					<input name="server" id="server" type="text" placeholder="Enter URL">
 				</div>
 			</div>
 

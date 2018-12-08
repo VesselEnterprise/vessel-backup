@@ -5,14 +5,8 @@ namespace App\Http\Controllers;
 use App;
 use Illuminate\Http\Request;
 
-class SearchController extends Controller
+class AppLogController extends Controller
 {
-
-		public function __construct()
-		{
-				$this->middleware('auth');
-		}
-
     /**
      * Display a listing of the resource.
      *
@@ -20,7 +14,9 @@ class SearchController extends Controller
      */
     public function index()
     {
-        //
+			$logs = App\AppLogEntry::orderBy('logged_at', 'desc')->paginate(25);
+
+			return view('log.list', ['logs' => $logs]);
     }
 
     /**
@@ -52,7 +48,9 @@ class SearchController extends Controller
      */
     public function show($id)
     {
-        //
+			$entry = App\AppLogEntry::findOrFail($id);
+
+			return view('log.show', ['entry' => $entry]);
     }
 
     /**
@@ -88,43 +86,4 @@ class SearchController extends Controller
     {
         //
     }
-
-		public function search(Request $request, $searchText) {
-
-			$results = [
-				'users' => App\User::search($searchText)->get(),
-			 	'files' => App\File::search($searchText)->get(),
-			 	'settings' => App\Setting::search($searchText)->get(),
-				'providers' => App\StorageProvider::search($searchText)->get(),
-			 	'clients' => App\AppClient::search($searchText)->get()
-			];
-
-			foreach ( $results as $key => $arr ) {
-				foreach ( $arr as $k2 => $val ) {
-					$arr[$k2] = $arr[$k2]->toSearchableArray();
-				}
-			}
-
-			return $results;
-
-		}
-
-		public function searchLog(Request $request) {
-
-			$searchText = $request->input('search_text');
-
-			$results = App\AppLogEntry::search($searchText)->orderBy('logged_at', 'desc')->paginate(25);
-
-			/*
-			foreach ( $results as $key => $arr ) {
-				foreach ( $arr as $k2 => $val ) {
-					$arr[$k2] = $arr[$k2]->toSearchableArray();
-				}
-			}
-			*/
-
-			return view('log.list', ['logs' => $results]);
-
-		}
-
 }

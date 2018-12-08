@@ -67,7 +67,7 @@ namespace Vessel
             std::shared_ptr<LocalDatabase> m_database;
             std::shared_ptr<AwsS3Client> m_client;
 
-            void init_upload(const BackupFile& file);
+            std::string init_upload(const BackupFile& file);
 
     };
 

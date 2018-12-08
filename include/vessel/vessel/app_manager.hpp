@@ -77,6 +77,11 @@ namespace Vessel
             */
             std::string get_working_dir();
 
+            /*! \fn int get_total_errors();
+                \return Returns the total runtime errors for the current app context
+            */
+            int get_total_errors();
+
         private:
             std::string m_user_dir;
             std::string m_data_dir;

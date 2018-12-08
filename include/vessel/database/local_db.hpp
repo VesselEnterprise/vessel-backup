@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <ctime>
 #include <fstream>
 #include <sqlite3.h>
 #include <algorithm>
@@ -159,6 +160,18 @@ namespace Vessel{
                     \return Returns a vector of stat key/value pairs
                 */
                 std::map<std::string,int> get_stats();
+
+                /*! \fn void prune_logs();
+                    \brief Deletes log entries from local database older then prune_log_days (setting) ago
+                */
+                void prune_logs();
+
+                /*! \fn void prune_logs(unsigned long start_range, unsigned long end_range);
+                    \param start_range Unix Timestamp
+                    \param end_range Unix Timestamp
+                    \brief Deletes log entries between a start and end time range
+                */
+                void prune_logs(unsigned long start_range, unsigned long end_range);
 
             private:
                 sqlite3* m_db;

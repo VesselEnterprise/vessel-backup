@@ -711,11 +711,11 @@ void HttpClient::write_socket( const std::string& http_request )
 
         if ( !m_use_ssl )
         {
-            m_socket->async_write_some( boost::asio::buffer(m_request_data->substr(0,bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+            boost::asio::async_write(*m_socket, boost::asio::buffer(m_request_data->substr(0, bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
         }
         else
         {
-            m_ssl_socket->async_write_some( boost::asio::buffer(m_request_data->substr(0,bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+            boost::asio::async_write(*m_ssl_socket, boost::asio::buffer(m_request_data->substr(0, bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
         }
     }
     else
@@ -745,6 +745,7 @@ void HttpClient::handle_write_throttled( const boost::system::error_code& e, siz
 
     std::cout.precision(2);
     std::cout << "Wrote " << bytes_transferred << " bytes" << '\n';
+    std::cout << "Total Request Size " << m_token_bucket->total_bytes() << " bytes" << '\n';
     std::cout << "Total Bytes Transferred " << total_bytes_transferred << " bytes" << '\n';
     std::cout << "Transfer rate: " << std::fixed << transfer_rate << "bps" << '\n';
     std::cout << "Bytes Remaining: " << bytes_remaining << '\n';
@@ -772,21 +773,21 @@ void HttpClient::handle_write_throttled( const boost::system::error_code& e, siz
             //Determine the amount of time we need to sleep to meet max_transfer_speed
             if ( transfer_rate > m_max_transfer_speed )
             {
-                double sleep_time_secs = ( (transfer_rate*1.0) / (m_token_bucket->max_transfer_speed()*1.0) );
+                double sleep_time_secs = ( (transfer_rate*1.0) / (m_token_bucket->max_transfer_speed()*1.0) ); //Add some padding
                 long sleep_time_ms = sleep_time_secs * 1000;
                 std::cout << "Bandwidth has been exceeded - limiting transfer speed - waiting " << sleep_time_secs << " seconds..." << '\n';
                 boost::this_thread::sleep_for( boost::chrono::milliseconds(sleep_time_ms) );
             }
 
-            size_t bytes_to_read = ((total_bytes_transferred + m_max_transfer_speed) > m_request_data->size()) ? bytes_remaining : m_max_transfer_speed;
+            size_t bytes_to_read = ((total_bytes_transferred + m_max_transfer_speed) >= m_request_data->size()) ? bytes_remaining : m_max_transfer_speed;
 
             if ( !m_use_ssl )
             {
-                m_socket->async_write_some( boost::asio::buffer(m_request_data->substr(bytes_transferred, bytes_to_read)), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+                boost::asio::async_write(*m_socket, boost::asio::buffer(m_request_data->substr(total_bytes_transferred, bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
             }
             else
             {
-                m_ssl_socket->async_write_some( boost::asio::buffer(m_request_data->substr(bytes_transferred, bytes_to_read)), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
+                boost::asio::async_write(*m_ssl_socket, boost::asio::buffer(m_request_data->substr(total_bytes_transferred, bytes_to_read), bytes_to_read), boost::bind(&HttpClient::handle_write_throttled, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ));
             }
 
         }

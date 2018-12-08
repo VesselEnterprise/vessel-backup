@@ -53,7 +53,7 @@ class StorageController extends Controller
 			$provider->server = $request->input('server');
 			$provider->access_id = $request->input('access_id');
 			$provider->access_key = $request->input('access_key');
-			$provider->storage_path = $request->input('storage_path');
+			$provider->storage_path = trim($request->input('storage_path'), "/\\");
 			$provider->region = $request->input('region');
 			$provider->priority = $request->input('priority');
 			$provider->description = $request->input('description');
@@ -103,7 +103,7 @@ class StorageController extends Controller
 				$provider->server = $request->input('server');
 				$provider->access_id = $request->input('access_id');
 				$provider->access_key = $request->input('access_key');
-				$provider->storage_path = $request->input('storage_path');
+				$provider->storage_path = trim( $request->input('storage_path'), "/\\");
 				$provider->region = $request->input('region');
 				$provider->priority = $request->input('priority');
 				$provider->description = $request->input('description');

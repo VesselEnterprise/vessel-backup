@@ -4,10 +4,12 @@ namespace App\Http\Controllers\api;
 
 use App;
 use Validator;
+use Laravel\Horizon\Tags;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AppClientController extends Controller
 {
@@ -77,9 +79,13 @@ class AppClientController extends Controller
 				return response()->json(['error' => 'Invalid deployment key'], 400);
 			}
 
-			//return Carbon::now()->toDateTimeString();
-
-			$deployment = App\Deployment::where('deployment_key', $deployment_key)->whereDate('expires_at', '>=', now() )->firstOrFail();
+			$deployment = App\Deployment::where([
+				['deployment_key', '=', $deployment_key],
+				['expires_at', '>=', Carbon::now()->toDateTimeString()]
+			])->orWhere([
+				['deployment_key', '=', $deployment_key],
+				['never_expires', '=', 1]
+			])->firstOrFail();
 
 			//Find associated user
 			$userName = $request->input('user_name');
@@ -117,14 +123,25 @@ class AppClientController extends Controller
 			$appClient->save();
 
 			//Associate User with client
-			DB::table('app_client_user')->insert([
-				'client_id' => $appClient->client_id,
-				'user_id' => $user->user_id
-			]);
+			$clientUser = App\AppClientUser::firstOrNew(
+				['client_id' => $appClient->client_id],
+				['user_id' => $user->user_id]
+			);
+			if ( !$clientUser->exists ) {
+				$clientUser->client_id = $appClient->client_id;
+				$clientUser->user_id = $user->user_id;
+				$clientUser->save();
+			}
 
 			//Get storage providers
 			$providers = App\StorageProvider::where('active', true)->get();
 			$appSettings = App\AppSetting::all();
+
+			//Implement User Settings
+			$userSettings = $user->settings;
+			foreach($userSettings as $key => $val) {
+				$appSettings[$key] = $val;
+			}
 
 			return response()->json([
 				'app_client' => $appClient,
@@ -166,7 +183,37 @@ class AppClientController extends Controller
 					]);
 			}
 
-			return response()->json(['message' => '♥']);
+			//Process Client Tags
+			$clientLogs = $request->input('logs');
+
+			foreach($clientLogs as $key => $value) {
+				$logEntry = new App\AppLogEntry();
+				$logEntry->client_id = $client->client_id;
+				$logEntry->user_id = $user->user_id;
+				$logEntry->message = $clientLogs[$key]['message'];
+				$logEntry->exception = $clientLogs[$key]['exception'];
+				$logEntry->payload = $clientLogs[$key]['payload'];
+				$logEntry->code = $clientLogs[$key]['code'];
+				$logEntry->error = $clientLogs[$key]['error'];
+				$logEntry->type = $clientLogs[$key]['type'];
+				$logEntry->logged_at = Carbon::createFromTimestampUTC($clientLogs[$key]['logged_at']);
+				$logEntry->save();
+			}
+
+			//Return Current App Settings and Storage Providers
+			$appSettings = App\AppSetting::all();
+			$userSettings = $user->settings;
+			foreach($userSettings as $key => $val) {
+				$appSettings[$key] = $val;
+			}
+
+			$providers = App\StorageProvider::where('active', true)->get();
+
+			return response()->json([
+				'message' => '♥',
+				'app_settings' => $appSettings,
+				'storage_providers' => $providers
+			]);
 
 		}
 

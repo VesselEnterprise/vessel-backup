@@ -14,6 +14,9 @@
 			$('.menu .item').tab();
 
 		});
+		function downloadFile() {
+			window.open('{{ url("/download/{$file->file_id_text}") }}', '_blank');
+		}
 	</script>
 @endsection
 
@@ -67,7 +70,7 @@
 				<div class="ui list">
 				  <div class="item">
 				    <i class="folder icon"></i>
-				    <div class="content">
+				    <div class="content" style="word-break: break-word;">
 				      <div class="description">{{ $file->filePath->file_path }}</div>
 				      <div class="list">
 								<div class="item">
@@ -120,7 +123,7 @@
 
 	<div class="ui left aligned fluid stackable grid container">
 		<div class="sixteen wide column">
-			<button class="ui large primary button">
+			<button class="ui large primary button" onclick="downloadFile()">
 				<i class="download icon"></i>
 				Download
 			</button>

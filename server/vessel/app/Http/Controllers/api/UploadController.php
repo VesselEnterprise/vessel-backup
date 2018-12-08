@@ -12,6 +12,12 @@ class UploadController extends Controller
 		public function initUpload(Request $request)
 		{
 
+			$client = App\AppClient::where('token', $request->bearerToken() )->first();
+
+			if ( !$client ) {
+				return response()->json(['error' => 'Bad client'], 400);
+			}
+
 			//Find the Associated User Id
 			$user = App\User::where(['user_name' => $request->input('user_name')])->first();
 
@@ -56,6 +62,7 @@ class UploadController extends Controller
 
 			if ( !$file->exists ) {
 				$file->user_id = $user->user_id;
+				$file->client_id = $client->client_id;
 				$file->file_name = $request->input('file_name');
 				$file->file_path_id = $filePath->path_id;
 				$file->file_type = $request->input('file_type');
@@ -69,6 +76,7 @@ class UploadController extends Controller
 			$upload = new App\FileUpload;
 			$upload->file_id = $file->file_id;
 			$upload->user_id = $user->user_id;
+			$upload->client_id = $client->client_id;
 			$upload->parts = 0;
 			$upload->total_bytes = $file->file_size;
 			$upload->hash = $fileHash;
@@ -122,7 +130,11 @@ class UploadController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        //Get Upload from DB
+				$fileUpload = App\FileUpload::withUuid($id)->firstOrFail();
+				$fileUpload->uploaded = $request->input('uploaded');
+				$fileUpload->save();
+
     }
 
     /**

@@ -13,6 +13,8 @@
 #include <vessel/filesystem/directory.hpp>
 
 namespace fs = boost::filesystem;
+
+using namespace Vessel::File;
 using namespace Vessel::Logging;
 using namespace Vessel::Database;
 

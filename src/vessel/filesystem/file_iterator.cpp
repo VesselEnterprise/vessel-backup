@@ -60,7 +60,7 @@ void FileIterator::scan()
 
     if ( !fs::exists( m_current_dir.get_path() ) )
     {
-        m_log->add_message("Error: Scan failed. " + m_current_dir.get_path() + " does not exist", "File Scanner");
+        m_log->add_error("Error: Scan failed. " + m_current_dir.get_path() + " does not exist", "File Scanner");
         return;
     }
     else
@@ -97,7 +97,8 @@ void FileIterator::scan()
                     //Check if this directory needs to be skipped
                     if ( this->skip_dir(*m_itr, m_itr.level() ) )
                     {
-                        m_log->add_message("Skipped directory exception: " + p.string(), "File Scanner");
+                        //m_log->add_message("Skipped directory exception: " + p.string(), "File Scanner");
+                        std::cout << "Skipped directory exception: " << p.string() << '\n';
                         m_itr.no_push();
                         continue;
                     }
@@ -121,26 +122,29 @@ void FileIterator::scan()
                 {
 
                     //Create new file object
-                    File::BackupFile bf(p);
+                    BackupFile bf(p);
 
                     //If Last Write Time is before last scan, skip
                     if ( bf.get_last_modified() <= last_scan_time )
                     {
-                        m_log->add_message("Skipped file. Last modified is before last scan time: " + p.string(), "File Scanner");
+                        //m_log->add_message("Skipped file. Last modified is before last scan time: " + p.string(), "File Scanner");
+                        std::cout << "Skipped file. Last modified is before last scan time: " << p.string() << '\n';
                         continue;
                     }
 
                     //Skip empty files
                     if ( bf.get_file_size() == 0 )
                     {
-                        m_log->add_message("Skipped file. File is empty: " + p.string(), "File Scanner");
+                        //m_log->add_message("Skipped file. File is empty: " + p.string(), "File Scanner");
+                        std::cout << "Skipped file. File is empty: " << p.string() << '\n';
                         continue;
                     }
 
                     //Check if we should ignore the file
                     if ( is_ignore_ext( bf.get_file_type() ) )
                     {
-                        m_log->add_message("Skipped file. File extension is excluded: " + p.string(), "File Scanner");
+                        //m_log->add_message("Skipped file. File extension is excluded: " + p.string(), "File Scanner");
+                        std::cout << "Skipped file. File extension is excluded: " << p.string() << '\n';
                         continue;
                     }
 
@@ -158,7 +162,7 @@ void FileIterator::scan()
                     bf.set_directory_id( m_current_dir.get_directory_id() );
                     add_file(bf);
 
-                    std::cout << "Added file " << p.filename().string() << '\n';
+                    std::cout << "Added file " << p.filename().string() << " to database" << '\n';
 
                     //Start a new transaction
                     if ( ++total_inserts >= max_inserts )
@@ -171,13 +175,14 @@ void FileIterator::scan()
                 }
                 else
                 {
-                    m_log->add_message( p.string() + " exists , but is not a regular file or directory", "File Scanner");
+                    //m_log->add_message( p.string() + " exists , but is not a regular file or directory", "File Scanner");
+                    std::cout << p.string() << " exists , but is not a regular file or directory" << '\n';
                 }
 
             }
             catch ( const fs::filesystem_error& e )
             {
-                m_log->add_message("Scan Error: " + std::string(e.what()), "File Scanner");
+                m_log->add_error("Scan Error: " + std::string(e.what()), "File Scanner");
             }
 
         }
@@ -189,7 +194,7 @@ void FileIterator::scan()
     catch (const fs::filesystem_error& e)
     {
         //ERROR LOGGING HERE
-        m_log->add_message("Scan Error: " + std::string(e.what()), "File Scanner");
+        m_log->add_error("Scan Error: " + std::string(e.what()), "File Scanner");
         m_itr.no_push();
         ++m_itr;
         m_ldb->end_transaction();

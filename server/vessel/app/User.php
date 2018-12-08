@@ -41,8 +41,14 @@ class User extends Authenticatable
 			return $this->belongsToMany('App\AppClient', 'app_client_user', 'user_id', 'client_id');
 		}
 
-		public function settings() {
+		public function settings()
+		{
 			return $this->hasMany('App\UserSetting', 'user_id', 'user_id');
+		}
+
+		public function logs()
+		{
+			return $this->hasMany('App\AppLogEntry', 'user_id', 'user_id');
 		}
 
 		//Credit for role authorization funcs: https://medium.com/@ezp127/laravel-5-4-native-user-authentication-role-authorization-3dbae4049c8a

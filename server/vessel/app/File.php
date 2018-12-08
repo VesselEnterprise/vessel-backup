@@ -29,6 +29,10 @@ class File extends Model
 			return $this->hasOne('App\FilePath', 'path_id', 'file_path_id');
 		}
 
+		public function client() {
+			return $this->hasOne('App\AppClient', 'client_id', 'client_id');
+		}
+
 		protected $fillable = [
 			'file_id', 'file_name', 'file_path_id', 'file_type', 'file_size', 'hash', 'uploaded', 'encrypted', 'compressed', 'last_backup'
 		];
@@ -56,7 +60,7 @@ class File extends Model
 		public $primaryKey = 'file_id';
 		public $incrementing = false;
 		protected $table = 'file';
-		protected $uuids = ['user_id','file_path_id','provider_id'];
+		protected $uuids = ['user_id','file_path_id','provider_id','client_id'];
 		protected $dates = ['created_at','updated_at','last_backup'];
 
 }

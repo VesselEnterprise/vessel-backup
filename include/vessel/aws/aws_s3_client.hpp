@@ -239,12 +239,6 @@ namespace Vessel {
                 */
                 std::string parse_upload_id( const std::string& response );
 
-                /*! \fn std::string parse_etag();
-                    \brief Returns the etag for a file part upload returned from the S3 API
-                    \return Returns the etag for a file part upload returned from the S3 API
-                */
-                std::string parse_etag();
-
                 /*! \fn void read_key_file();
                     \brief If remote signing is disabled, reads the AWS credentials from an aws.key file
                 */

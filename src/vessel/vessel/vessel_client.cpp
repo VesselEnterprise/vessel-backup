@@ -24,11 +24,6 @@ VesselClient::VesselClient( const std::string& host ) : HttpClient(host)
 
 }
 
-VesselClient::~VesselClient()
-{
-
-}
-
 std::string VesselClient::get_provider_endpoint(const std::string& provider_type )
 {
 
@@ -78,8 +73,6 @@ std::string VesselClient::init_upload ( const BackupFile& bf )
     //
     writer.EndObject();
 
-    std::string payload = strbuf.GetString();
-
     //Create a new HTTP request
     std::string endpoint = "/upload/" + get_provider_endpoint( provider.provider_type );
 
@@ -87,7 +80,7 @@ std::string VesselClient::init_upload ( const BackupFile& bf )
     r.set_auth_header("Bearer " + m_client_token);
     r.accept("application/json");
     r.set_content_type("application/json");
-    r.set_body(strbuf.GetString());
+    r.set_body( strbuf.GetString() );
     r.set_method("POST");
     r.set_url(m_api_path + endpoint);
 
@@ -116,6 +109,37 @@ std::string VesselClient::init_upload ( const BackupFile& bf )
 
 }
 
+void VesselClient::complete_upload( const std::string& upload_id )
+{
+
+    //Write some JSON
+    StringBuffer strbuf;
+    Writer<StringBuffer> writer(strbuf);
+
+    writer.StartObject();
+    writer.Key("uploaded");
+    writer.Bool(true);
+    writer.EndObject();
+
+    //Create a new HTTP request
+    HttpRequest r;
+    r.set_auth_header("Bearer " + m_client_token);
+    r.accept("application/json");
+    r.set_content_type("application/json");
+    r.set_body( strbuf.GetString() );
+    r.set_method("PUT");
+    r.set_url(m_api_path + "/upload/" + upload_id);
+
+    //Send the init request
+    send_http_request(r);
+
+    //Parse the upload ID from the response
+    if ( get_http_status() != 200 ) {
+        m_log->add_error("Failed to mark file as uploaded: (Upload Id=" + upload_id + ")", "File Upload");
+    }
+
+}
+
 bool VesselClient::upload_file_part( Vessel::File::BackupFile * bf, int part_number=1 )
 {
     //TODO
@@ -126,7 +150,7 @@ void VesselClient::heartbeat()
 {
 
     //UNIX Timestamp of Last Heartbeat
-    long last_heartbeat = m_ldb->get_setting_int("last_heartbeat");
+    unsigned long last_heartbeat = m_ldb->get_setting_int("last_heartbeat");
 
     //Write some JSON
     StringBuffer strbuf;
@@ -162,10 +186,62 @@ void VesselClient::heartbeat()
 
     writer.EndObject();
 
+    //Sent recent log output to server
+    writer.Key("logs");
+    writer.StartArray();
+
+    std::string query = "SELECT message,type,exception,payload,code,error,logged_at FROM backup_log WHERE logged_at >= ?1";
+    sqlite3_stmt* stmt;
+
+    if ( sqlite3_prepare_v2(m_ldb->get_handle(), query.c_str(), -1, &stmt, NULL ) != SQLITE_OK ) {
+        m_log->add_error("Failed to retrieve recent logs for heartbeat: " + m_ldb->get_last_err(), "Heartbeat");
+    }
+    else
+    {
+
+        sqlite3_bind_int(stmt, 1, last_heartbeat);
+
+        while ( sqlite3_step(stmt) == SQLITE_ROW )
+        {
+            writer.StartObject();
+            //
+            writer.Key("type");
+            writer.String( LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 1) ).c_str() );
+            //
+            writer.Key("message");
+            writer.String( LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 0) ).c_str() );
+            //
+            writer.Key("exception");
+            writer.String( LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 2) ).c_str() );
+            //
+            writer.Key("payload");
+            writer.String( LocalDatabase::get_sqlite_str( sqlite3_column_text(stmt, 3) ).c_str() );
+            //
+            writer.Key("code");
+            writer.Int( (int)sqlite3_column_int(stmt, 4) );
+            //
+            writer.Key("error");
+            writer.Int( (int)sqlite3_column_int(stmt, 5) );
+            //
+            writer.Key("logged_at");
+            writer.Uint( (unsigned long)sqlite3_column_int(stmt, 6) );
+            //
+            writer.EndObject();
+        }
+
+    }
+
+    //Cleanup
+    sqlite3_finalize(stmt);
+
+    writer.EndArray();
+
     //
     writer.EndObject();
 
     std::string payload = strbuf.GetString();
+
+    //std::cout << "Sending payload: " << '\n' << payload << '\n';
 
     //Send the Heartbeat Request
 
@@ -179,13 +255,22 @@ void VesselClient::heartbeat()
 
     send_http_request(r);
 
-    std::cout << "Sent HTTP Request!" << '\n';
+    std::time_t response_time = (unsigned long)std::time(nullptr);
 
     int status_code = get_http_status();
 
     if ( status_code != 200 ) {
         Log::get_log().add_error("Heartbeat failed with status code: " + std::to_string(status_code), "Heartbeat");
     }
+
+    //Prune logs if they were sent successfully
+    if ( status_code == 200 )
+    {
+        m_ldb->prune_logs(last_heartbeat, response_time-1 );
+    }
+
+    //Update Last Heartbeat
+    m_ldb->update_setting<unsigned long>("last_heartbeat", (unsigned long)std::time(nullptr) );
 
 }
 

@@ -59,13 +59,17 @@ namespace Vessel {
             public:
 
                 VesselClient( const std::string& hostname );
-                ~VesselClient();
 
                 /*! \fn std::string init_upload( const Vessel::File::BackupFile& bf );
                     \brief Initialize a new file upload with the Vessel REST API
                     \return Returns the Vessel file id from the API
                 */
                 std::string init_upload( const Vessel::File::BackupFile& bf );
+
+                /*! \fn void complete_upload( const std::string& upload_id );
+                    \brief Marks an upload as completed via the Vessel API
+                */
+                void complete_upload( const std::string& upload_id );
 
                 /*! \fn upload_file_part( Vessel::File::BackupFile * bf, int part_number );
                     \brief Sends part of a file (or the entire file) to the server with metadata

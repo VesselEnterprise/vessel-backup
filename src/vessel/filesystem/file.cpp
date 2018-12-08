@@ -599,3 +599,13 @@ std::string BackupFile::get_chunk(size_t offset, size_t length)
     return chunk;
 
 }
+
+std::string BackupFile::trim_path(const std::string& str)
+{
+
+    std::string path = boost::trim_left_copy_if(str, boost::is_any_of("/\\"));
+    boost::trim_right_if(path, boost::is_any_of("/\\"));
+
+    return path;
+
+}

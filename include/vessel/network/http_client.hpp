@@ -193,6 +193,7 @@ namespace Vessel {
 
                 std::shared_ptr<TokenBucket> m_token_bucket;
                 std::shared_ptr<std::string> m_request_data;
+                std::shared_ptr<boost::asio::const_buffer> m_request_buffer;
 
 
                 void parse_url(const std::string& host );
