@@ -30,10 +30,14 @@ class HomeController extends Controller
 
 				$heartbeats = App\AppClient::orderBy('last_check_in', 'desc')->limit(10)->get();
 				$recentBackups = App\File::orderBy('last_backup', 'desc')->limit(10)->get();
+        $recentErrors = App\AppLogEntry::where('error', true)->orderBy('logged_at', 'desc')->limit(10)->get();
+        $storageProviders = App\StorageProvider::orderBy('provider_name')->get();
 
         return view('home', [
 					'heartbeats' => $heartbeats,
 					'recentBackups' => $recentBackups,
+          'recentErrors' => $recentErrors,
+          'storageProviders' => $storageProviders
 				]);
     }
 }

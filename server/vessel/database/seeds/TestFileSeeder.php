@@ -14,7 +14,7 @@ class TestFileSeeder extends Seeder
     {
         //Create 50,000 files
         for ( $i=0; $i < 1; $i++) {
-          $files = factory(File::class,10000)->create();
+          $files = factory(File::class,50000)->create();
         }
     }
 }

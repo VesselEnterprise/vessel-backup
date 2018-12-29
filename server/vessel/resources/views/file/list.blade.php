@@ -46,10 +46,10 @@
 			        </div>
 						</td>
 						<td><a href="{{ route('file.show', $file->file_id_text) }}">{{ $file->file_name }}</a></td>
-						<td><a href="{{ route('user.show', $file->user_id_text) }}">{{ $file->user->first_name }} {{ $file->user->last_name }}</a></td>
+						<td><a href="{{ route('user.show', $file->user_id_text) }}">{{ isset($file->user) ? $file->user->first_name : "" }} {{ isset($file->user) ? $file->user->last_name : "" }}</a></td>
 						<td>{{ $file->file_type }}</td>
 						<td>{{ $file->file_size }}</td>
-						<td><a href="{{ route('storage.show', $file->provider_id_text) }}">{{ $file->storageProvider->provider_name }}</a></td>
+						<td><a href="{{ route('storage.show', $file->provider_id_text) }}">{{ isset($file->storageProvider) ? $file->storageProvider->provider_name : "" }}</a></td>
 						<td>{{ $file->hash }}</td>
 						<td>{{ $file->last_backup }}</td>
 					</tr>

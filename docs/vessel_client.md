@@ -1,7 +1,24 @@
 # Vessel Client
 
-## Client Requirements
+## Installation
 
+### Standalone
+
+TODO
+
+### Deployment
+
+TODO
+
+## Client Configuration
+
+TODO
+
+## Client Deployment
+
+It is recommended to create a deployment when the client must be pushed to multiple machines.
+
+## Client Requirements
 
 Minimum recommended system requirements:
 

@@ -12,6 +12,6 @@ class TestAppClientSeeder extends Seeder
      */
     public function run()
     {
-        $clients = factory(AppClient::class,100)->create();
+        $clients = factory(AppClient::class,10000)->create();
     }
 }
