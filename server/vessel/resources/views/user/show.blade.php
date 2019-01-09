@@ -125,9 +125,8 @@
 
 		<div class="ui stackable top attached tabular menu">
 			<a class="item active" data-tab="first">Basic Information</a>
-			<a class="item" data-tab="second">Security</a>
-			<a class="item" data-tab="third">App Settings</a>
-			<a class="item" data-tab="fourth">Stats</a>
+			<a class="item" data-tab="second">App Settings</a>
+			<a class="item" data-tab="third">Stats</a>
 		</div>
 
 		<div class="ui padded bottom attached tab segment active" data-tab="first">
@@ -205,6 +204,7 @@
 
 		</div>
 
+		<!--
 		<div class="ui padded bottom attached tab segment" data-tab="second">
 
 			<div class="ui stackable grid container">
@@ -220,8 +220,9 @@
 			</div>
 
 		</div>
+	-->
 
-		<div class="ui padded bottom attached tab segment" data-tab="third">
+		<div class="ui padded bottom attached tab segment" data-tab="second">
 
 			<div class="ui stackable grid container">
 				<div class="ui cards">
@@ -230,7 +231,7 @@
 						<div class="card">
 					    <div class="content">
 					      <div class="header">
-					        {{ $userSetting->setting->name }}
+					        {{ $userSetting->setting->display_name }}
 									<i class="circular right floated edit icon"></i>
 					      </div>
 					      <div class="meta">
@@ -252,7 +253,7 @@
 			</div>
 
 		</div>
-		<div class="ui padded bottom attached tab segment" data-tab="fourth">
+		<div class="ui padded bottom attached tab segment" data-tab="third">
 			<div class="ui center aligned stackable grid container">
 
 				<div class="sixteen wide column">
@@ -319,7 +320,7 @@
 									<p></p>
 					      </div>
 					      <div class="description">
-					        <span><b>5000</b></span>
+					        <span><b>{{ $stats->totalFiles }}</b></span>
 					      </div>
 					    </div>
 					  </div>

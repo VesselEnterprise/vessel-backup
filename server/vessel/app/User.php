@@ -87,6 +87,11 @@ class User extends Authenticatable
 			return $this->hasMany('App\StorageProviderUser', 'user_id', 'user_id');
 		}
 
+    public function getFullName()
+    {
+      return ($this->first_name . " " . $this->last_name);
+    }
+
 		public function getKey()
     {
         return $this->user_id_text;

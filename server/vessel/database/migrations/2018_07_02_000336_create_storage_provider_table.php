@@ -31,6 +31,7 @@ class CreateStorageProviderTable extends Migration
 						$table->index('provider_name');
 						$table->index('provider_type');
 						$table->boolean('active')->default(true);
+            $table->boolean('default')->default(false);
             //$table->timestamps();
         });
     }

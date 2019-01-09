@@ -88,7 +88,7 @@
 				          <input name="selectedIds[]" type="checkbox" value="{{ $setting->id }}"><label></label>
 				        </div>
 							</td>
-							<td><a href="{{ route('user_setting.show', $setting->id) }}">{{ $setting->setting->name }}</td>
+							<td><a href="{{ route('user_setting.show', $setting->id) }}">{{ $setting->setting->display_name }}</td>
 							<td>{{ $setting->user->first_name }} {{ $setting->user->last_name}}</td>
 							<td>{{ $setting->value }}</td>
 						</tr>

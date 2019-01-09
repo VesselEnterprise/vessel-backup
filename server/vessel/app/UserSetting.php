@@ -8,8 +8,6 @@ use Spatie\BinaryUuid\HasBinaryUuid;
 class UserSetting extends Model
 {
 
-		use HasBinaryUuid;
-
 		public function user() {
 			return $this->belongsTo('App\User', 'user_id', 'user_id');
 		}
@@ -19,6 +17,8 @@ class UserSetting extends Model
 		}
 
     protected $table = 'app_setting_user';
+		protected $primaryKey = 'setting_id';
+		public $incrementing = true;
 		protected $fillable = ['setting_id', 'user_id'];
 		protected $uuids = ['user_id'];
 }

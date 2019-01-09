@@ -3,10 +3,7 @@
 namespace App;
 namespace App\Http\Controllers;
 
-use App\Auth;
-use App\User;
-use App\Role;
-use App\AppSettingUser;
+use App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Spatie\BinaryUuid\HasBinaryUuid;
@@ -30,7 +27,7 @@ class UserController extends Controller
     public function index()
     {
 
-				$users = User::paginate(25);  //DB::table('users')->paginate(1);
+				$users = App\User::paginate(25);  //DB::table('users')->paginate(1);
 
 				return view('user.list', ['users' => $users]);
     }
@@ -53,7 +50,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user = new User();
+        $user = new App\User();
 				$user->email = $request->input('email');
 				$user->user_name = $request->input('user_name');
 				$user->first_name = $request->input('first_name');
@@ -72,7 +69,7 @@ class UserController extends Controller
 				//$user->id = $user->getLastInsertId();
 
 				//Assign the default user role
-				$user->roles()->attach( Role::where('name', 'user')->first() );
+				$user->roles()->attach( App\Role::where('name', 'user')->first() );
 
 				//Generate an API token
 				$token = $user->createToken('Vessel API');
@@ -91,10 +88,15 @@ class UserController extends Controller
      */
     public function show($id)
     {
-				$user = User::withUuid($id)->first();
+				$user = App\User::withUuid($id)->first();
 				$userSettings = $user->settings;
+				$totalFiles = App\File::where('user_id', $user->user_id)->count();
 
-        return view('user.show', ['user' => $user, 'userSettings' => $userSettings]);
+				$stats = (object)[
+					'totalFiles' => $totalFiles
+				];
+
+        return view('user.show', ['user' => $user, 'userSettings' => $userSettings, 'stats' => $stats]);
     }
 
     /**

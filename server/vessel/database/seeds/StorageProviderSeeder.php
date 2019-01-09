@@ -23,7 +23,8 @@ class StorageProviderSeeder extends Seeder
 						'access_id' => '<your-access-id>',
 						'storage_path' => '/backup',
 						'provider_type' => 'aws_s3',
-						'active' => false
+						'active' => false,
+            'default' => true
 					],
 					[
 						'provider_id' => HasBinaryUuid::encodeUuid( Uuid::generate() ),
@@ -35,7 +36,8 @@ class StorageProviderSeeder extends Seeder
 						'access_id' => '<your-account>',
 						'storage_path' => '/backup',
 						'provider_type' => 'azure_blob',
-						'active' => false
+						'active' => false,
+            'default' => false
 					],
 				];
 

@@ -84,7 +84,7 @@
 		    <label>Setting</label>
 				<select name="setting" id="setting" class="ui dropdown" required>
 					@foreach($settings as $setting)
-						<option class="item" value="{{ $setting->setting_id }}">{{ $setting->name }}</option>
+						<option class="item" value="{{ $setting->setting_id }}">{{ $setting->display_name }}</option>
 					@endforeach
 				</select>
 		  </div>

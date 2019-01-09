@@ -16,6 +16,7 @@ class CreateAppSettingTable extends Migration
         Schema::create('app_setting', function (Blueprint $table) {
             $table->increments('setting_id');
 						$table->string('name', 32)->unique();
+            $table->string('display_name', 60);
 						$table->string('value', 255);
 						$table->text('description');
 						$table->string('data_type', 32);
