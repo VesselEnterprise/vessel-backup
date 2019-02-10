@@ -9,12 +9,6 @@ use Illuminate\Http\Request;
 class StorageController extends Controller
 {
 
-		public function __construct()
-		{
-				$this->middleware('auth');
-				$this->middleware('authorizeRole:admin');
-		}
-
     /**
      * Display a listing of the resource.
      *
@@ -57,6 +51,16 @@ class StorageController extends Controller
 			$provider->region = $request->input('region');
 			$provider->priority = $request->input('priority');
 			$provider->description = $request->input('description');
+			$provider->active = filter_var($request->input('active'), FILTER_VALIDATE_BOOLEAN);
+			$provider->default = filter_var($request->input('default'), FILTER_VALIDATE_BOOLEAN);
+
+			//Check for Key file
+			$keyFile = $request->file('key_file');
+			if ( $request->hasFile('key_file') ) {
+				$filePath = $keyFile->store('keys');
+				$provider->key_file = $filePath;
+			}
+
 			$provider->save();
 
 			return $this->index()->with(['success' => $provider->provider_name . ' was successfully added']);
@@ -108,6 +112,15 @@ class StorageController extends Controller
 				$provider->priority = $request->input('priority');
 				$provider->description = $request->input('description');
 				$provider->active = filter_var($request->input('active'), FILTER_VALIDATE_BOOLEAN);
+				$provider->default = filter_var($request->input('default'), FILTER_VALIDATE_BOOLEAN);
+
+				//Check for Key file
+				$keyFile = $request->file('key_file');
+				if ( $request->hasFile('key_file') ) {
+					$filePath = $keyFile->store('keys');
+					$provider->key_file = $filePath;
+				}
+
 				$provider->save();
 
 				return $this->index()->with(['success' => 'Storage Provider ' . $provider->provider_name . ' was updated successfully']);

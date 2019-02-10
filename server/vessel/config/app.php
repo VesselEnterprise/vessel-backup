@@ -169,6 +169,9 @@ return [
 				//Agent Detection
 				Jenssegers\Agent\AgentServiceProvider::class,
 
+				//Adlldap2
+				Adldap\Laravel\AdldapServiceProvider::class,
+
     ],
 
     /*
@@ -220,6 +223,7 @@ return [
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
 				'Agent' => Jenssegers\Agent\Facades\Agent::class,
+				'Adldap' => Adldap\Laravel\Facades\Adldap::class,
 
     ],
 

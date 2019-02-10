@@ -1,0 +1,1 @@
+dpkg-deb -b linux vessel_1.0.0_all.deb

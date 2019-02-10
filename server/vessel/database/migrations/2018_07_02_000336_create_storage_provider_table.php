@@ -16,7 +16,10 @@ class CreateStorageProviderTable extends Migration
         Schema::create('storage_provider', function (Blueprint $table) {
             $table->uuid('provider_id');
 						$table->primary('provider_id');
+						$table->boolean('active')->default(true);
+            $table->boolean('default')->default(false);
 						$table->string('provider_name', 36)->unique();
+						$table->string('key_file', 255);
 						$table->text('description')->nullable();
 						$table->string('server');
 						$table->string('region')->nullable();
@@ -26,12 +29,11 @@ class CreateStorageProviderTable extends Migration
 						$table->string('storage_path', 255)->nullable();
 						$table->string('provider_type', 32);
 						$table->integer('priority')->default(0);
+						$table->unsignedBigInteger('total_size_bytes');
 						$table->timestamp('created_at')->useCurrent();
 						$table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
 						$table->index('provider_name');
 						$table->index('provider_type');
-						$table->boolean('active')->default(true);
-            $table->boolean('default')->default(false);
             //$table->timestamps();
         });
     }

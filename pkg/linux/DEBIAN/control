@@ -1,0 +1,6 @@
+Package: vessel
+Version: 1.0.0-1
+Architecture: amd64
+Maintainer: Kyle Ketterer <reminisc3@gmail.com>
+Depends: libssl1.1, libcrypto++6, libboost-all-dev, libarchive13, libsqlite3-0, libcrypto++6, lib32z1|lib64z1, libc6, libstdc++6, libgcc1
+Description: Vessel Backup Client

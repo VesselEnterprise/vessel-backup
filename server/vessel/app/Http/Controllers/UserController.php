@@ -58,6 +58,7 @@ class UserController extends Controller
 				$user->password = Hash::make( $request->input('password') );
 				$user->title = $request->input('title');
 				$user->office = $request->input('office');
+				$user->phone = $request->input('phone');
 				$user->mobile = $request->input('mobile');
 				$user->address = $request->input('address');
 				$user->city = $request->input('city');

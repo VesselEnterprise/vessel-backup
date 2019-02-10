@@ -26,6 +26,10 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+
+				//Run the LDAP Import Daily
+				$schedule->command('ldap:import')->daily()->sendOutputTo(storage_path() . '/logs/ldap.log');
+
     }
 
     /**

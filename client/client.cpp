@@ -1,6 +1,6 @@
 /**
  ** Vessel Backup Client
- ** Copyright Kyle Ketterer 2017-2018
+ ** Copyright Kyle Ketterer 2017-2019
  **
 **/
 
@@ -19,6 +19,7 @@ int main(int argc, char** argv)
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
         ("help", "Display supported options")
+        ("install", "Start the install helper routine")
         ("client-token", boost::program_options::value<std::string>(), "Sets the client token")
         ("with-file-logging", boost::program_options::value<std::string>(), "Enables saving log output to flat files")
         ("no-sql-logging", boost::program_options::value<std::string>(), "Disables saving log output to SQLite database")
@@ -31,6 +32,7 @@ int main(int argc, char** argv)
     boost::program_options::store( boost::program_options::parse_command_line(argc, argv, desc), vm);
     boost::program_options::notify(vm);
 
+    //Display help / program options
     if (vm.count("help")) {
         std::cout << desc << "\n";
         return 1;
@@ -48,7 +50,7 @@ int main(int argc, char** argv)
         Log::sql_logging(false);
     }
 
-    //Disable SQL Logging
+    //Enable File Logging
     if ( vm.count("with-file-logging") )
     {
         Log::file_logging(true);
@@ -100,6 +102,45 @@ int main(int argc, char** argv)
 
     //Create new instance of Vessel client
     std::shared_ptr<VesselClient> vessel = std::make_shared<VesselClient>(vessel_host);
+
+    //Start the install helper routine
+    if ( vm.count("install") ) {
+
+        std::cout << "Welcome to install. Please note this will clear the existing client deployment key and token. Press enter to continue...";
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+
+        //Clear existing deployment key & client token in database
+        db->update_setting<std::string>("deployment_key", "");
+        db->update_setting<std::string>("client_token", "");
+
+        std::string deployment_key = db->get_setting_str("deployment_key");
+        std::string client_token = db->get_setting_str("client_token");
+
+        //Ask user to enter deployment key OR client token
+        if ( deployment_key.empty() && client_token.empty() )
+        {
+            std::cout << "Enter Deployment Key:" << '\n';
+            std::getline(std::cin, deployment_key);
+
+            if ( deployment_key.empty() )
+            {
+                std::cout << "Enter Client Token:" << '\n';
+                std::getline(std::cin, client_token);
+            }
+        }
+
+        if ( !deployment_key.empty() )
+        {
+            db->update_setting<std::string>("deployment_key", deployment_key );
+        }
+
+        if ( !client_token.empty() )
+        {
+            db->update_setting<std::string>("client_token", client_token );
+            vessel->refresh_client_token();
+        }
+
+    }
 
     //Verify/install client
     if ( !vessel->has_client_token() )
@@ -176,11 +217,13 @@ int main(int argc, char** argv)
 
             std::cout << "Sleeping!" << '\n';
 
-            boost::this_thread::sleep( boost::posix_time::seconds(30) ); //900
+            boost::this_thread::sleep( boost::posix_time::seconds(10) ); //900
             std::cout << "Restarting heartbeat after 15 minutes..." << '\n';
 
         }
     });
+
+    return 0;
 
     //Add a new thread to the pool which scans the filesystem on intervals
     io_service.post([&](){

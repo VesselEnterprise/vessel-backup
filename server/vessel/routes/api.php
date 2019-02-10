@@ -37,6 +37,10 @@ Route::post('/upload/aws/sign', 'api\AwsUploadController@getSigningKey')->middle
 Route::post('/upload/azure', 'api\AzureUploadController@initUpload')->middleware('verifyClientToken');
 Route::post('/upload/azure/sign', 'api\AzureUploadController@getSignature')->middleware('verifyClientToken');
 
+//Google Uploads
+Route::post('/upload/google', 'api\GoogleUploadController@initUpload')->middleware('verifyClientToken');
+Route::post('/upload/google/sign', 'api\GoogleUploadController@getSignature')->middleware('verifyClientToken');
+
 //Vessel Uploads
 Route::put('/upload/vessel/{filePath}', 'api\VesselUploadController@uploadFile')->middleware('verifyClientToken');
 Route::post('/upload/vessel/multipart/{filePath}', 'api\VesselUploadController@initMultiPartUpload')->middleware('verifyClientToken');

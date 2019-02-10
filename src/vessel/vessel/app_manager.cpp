@@ -9,6 +9,10 @@ AppManager::AppManager() : m_runtime_errors(0)
 
 void AppManager::prepare()
 {
+
+    //Set the executable path
+    m_exe_path = get_exe_path();
+
     //Determine user folder and appdata dirs
     #ifdef _WIN32
         m_user_dir = std::getenv("USERPROFILE");
@@ -70,20 +74,41 @@ void AppManager::prepare()
 
     m_db_path = m_data_dir + PATH_SEPARATOR() + DB_FILENAME;
 
-    //Verify DB exists in user data directory
+    //If the DB hasn't been copied to the user dir, find and copy it
     if ( !boost::filesystem::exists(m_db_path) )
     {
-        //Copy database template from working dir to data dir
-        try
+        //Verify DB exists in user data directory
+        bool db_copied=false;
+        std::string db_file = DB_FILENAME;
+        std::string last_copy_err;
+        std::vector<std::string> dirs_to_check { "/var/lib/vessel/" + db_file, (m_exe_path + PATH_SEPARATOR() + db_file), db_file };
+
+        for ( std::vector<std::string>::iterator itr = dirs_to_check.begin(); itr != dirs_to_check.end(); ++itr )
         {
-            boost::filesystem::copy(DB_FILENAME, m_db_path);
+            //Copy database template to data dir
+            if ( boost::filesystem::exists(*itr) )
+            {
+                //DB File Exists in Working Dir
+                try
+                {
+                    //First, try to copy the DB from exe path
+                    boost::filesystem::copy(*itr, m_db_path);
+                    Log::get_log().add_message("Copied Vessel database file to: " + m_db_path, "AppManager");
+                    db_copied = true;
+                    break;
+                }
+                catch(const boost::filesystem::filesystem_error& ex)
+                {
+                    Log::file_logging(true); //Force file logging here
+                    last_copy_err = "Fatal error: Failed to copy database file to user data dir (" + std::string(ex.what()) + ")";
+                    Log::get_log().add_error(last_copy_err, "AppManager");
+                }
+            }
         }
-        catch(const boost::filesystem::filesystem_error& ex)
+
+        if ( !db_copied ) //Fatal error
         {
-            Log::file_logging(true); //Force file logging here
-            std::string errmsg = "Fatal error: Failed to copy database file to user data dir (" + std::string(ex.what()) + ")";
-            Log::get_log().add_error(errmsg, "AppManager");
-            throw std::runtime_error(errmsg);
+            throw std::runtime_error(last_copy_err.c_str());
         }
 
     }
@@ -113,6 +138,11 @@ std::string AppManager::get_data_dir()
 std::string AppManager::get_db_path()
 {
     return m_db_path;
+}
+
+std::string AppManager::get_exe_path()
+{
+    return boost::dll::program_location().parent_path().string();
 }
 
 int AppManager::get_total_errors()

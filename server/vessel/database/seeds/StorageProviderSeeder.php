@@ -39,6 +39,19 @@ class StorageProviderSeeder extends Seeder
 						'active' => false,
             'default' => false
 					],
+					[
+						'provider_id' => HasBinaryUuid::encodeUuid( Uuid::generate() ),
+						'provider_name' => 'Google Cloud Storage (GCS) Example Provider',
+						'description' => 'An example storage provider configuration for Google Cloud Storage',
+						'server' => 'https://www.googleapis.com/storage/v1/b/<your-bucket>',
+						'region' => 'East US',
+						'bucket_name' => '<your-bucket>',
+						'access_id' => '<service-account-name>',
+						'storage_path' => '/backup',
+						'provider_type' => 'google',
+						'active' => false,
+            'default' => false
+					]
 				];
 
 				DB::table('storage_provider')->insert($providers);

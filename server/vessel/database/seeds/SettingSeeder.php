@@ -21,54 +21,6 @@ class SettingSeeder extends Seeder
 					'data_type' => 'string'
 				),
 				array(
-					'setting_name' => 'ldap_server',
-					'display_name' => 'LDAP Server',
-					'value' => '',
-					'description' => 'LDAP server used for importing users and computers',
-					'category' => 'LDAP',
-					'data_type' => 'string'
-				),
-				array(
-					'setting_name' => 'ldap_user',
-					'display_name' => 'LDAP Username',
-					'value' => 'vessel',
-					'description' => 'LDAP username used for connecting to LDAP server',
-					'category' => 'LDAP',
-					'data_type' => 'string'
-				),
-				array(
-					'setting_name' => 'ldap_port',
-					'display_name' => 'LDAP Port',
-					'value' => '389',
-					'description' => 'Port used to connect to the LDAP server',
-					'category' => 'LDAP',
-					'data_type' => 'integer'
-				),
-				array(
-					'setting_name' => 'ldap_pwd',
-					'display_name' => 'LDAP Password',
-					'value' => 'vessel',
-					'description' => 'LDAP user password used to connect to LDAP server',
-					'category' => 'LDAP',
-					'data_type' => 'string'
-				),
-				array(
-					'setting_name' => 'ldap_user_tree',
-					'display_name' => 'LDAP User DN',
-					'value' => 'OU=Users,DC=some,DC=org',
-					'description' => 'Base DN of where to search for LDAP user objects',
-					'category' => 'LDAP',
-					'data_type' => 'string'
-				),
-				array(
-					'setting_name' => 'ldap_pc_tree',
-					'display_name' => 'LDAP Computer DN',
-					'value' => 'OU=Computers,DC=some,DC=org',
-					'description' => 'Base DN of where to search for LDAP computers',
-					'category' => 'LDAP',
-					'data_type' => 'string'
-				),
-				array(
 					'setting_name' => 'file_version_size',
 					'display_name' => 'Maximum file size for file versioning',
 					'value' => '5242880',

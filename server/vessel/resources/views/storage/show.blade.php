@@ -18,6 +18,7 @@
 			//$('#provider_type').val('{{ $provider->provider_type }}');
 			$('#provider_type').dropdown('set selected', '{{ $provider->provider_type }}');
 			$('.provider-active').checkbox('{{ $provider->active ? 'check' : 'uncheck' }}');
+			$('.provider-default').checkbox('{{ $provider->default ? 'check' : 'uncheck' }}');
 
 			$('#provider-form').change(function() {
 				var server = $('input[name="server"]').val();
@@ -40,13 +41,13 @@
 		<div class="sub header">View or Manage Storage Provider for uploads</div>
 	</h2>
 
-	<form id="provider-form" class="ui form" action="{{ route('storage.update', ['id' => $provider->uuid_text]) }}" method="POST">
+	<form id="provider-form" class="ui form" action="{{ route('storage.update', ['id' => $provider->uuid_text]) }}" method="POST" enctype="multipart/form-data">
 		@csrf
-		<input type="hidden" name="_method" value="put" />
+		@method("PUT")
 
 		<div class="ui stackable grid container segment">
 
-			<div class="sixteen wide column">
+			<div class="eight wide column">
 				<div class="field">
 					<div class="ui toggle checkbox provider-active">
 					  <input type="checkbox" name="active" id="active">
@@ -57,13 +58,22 @@
 
 			<div class="eight wide column">
 				<div class="field">
+					<div class="ui toggle checkbox provider-default">
+					  <input type="checkbox" name="default" id="default">
+					  <label>Default</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="eight wide column">
+				<div class="field">
 					<label>Select Provider Type</label>
 					<select name="provider_type" id="provider_type" class="ui dropdown">
-						<option class="item" value="vessel">Vessel</option>
+						<option value="vessel">Vessel</option>
 						<option value="aws_s3">AWS S3</option>
 						<option value="azure_blob">Azure Blob Storage</option>
 						<option value="google">Google Cloud Storage</option>
-						<option value="user_remote">User Remote</option>
+						<!-- <option value="user_remote">User Remote</option> -->
 					</select>
 				</div>
 			</div>
@@ -96,6 +106,7 @@
 				</div>
 			</div>
 
+			@if($provider->provider_type != "google")
 			<div class="eight wide column">
 				<div class="field">
 					<label>Access ID</label>
@@ -122,6 +133,26 @@
 					<p>The Access Key is stored encrypted in the database using the application private key</p>
 				</div>
 			</div>
+			@endif()
+
+			@if($provider->provider_type == "google")
+			<div class="eight wide column">
+				<div class="field">
+					<label>Key File</label>
+					<div class="ui icon input">
+						<input type="file" name="key_file" id="key_file">
+						<i class="key icon"></i>
+					</div>
+				</div>
+				<div class="ui bottom attached info message">
+					<i class="close icon"></i>
+					<div class="header">
+						Service Account Private Key
+					</div>
+					<p>Please select the JSON file for the service account key. See <a href="https://cloud.google.com/iam/docs/creating-managing-service-account-keys" target="_blank">Creating and Managing Service Account Keys</a> for more information</p>
+				</div>
+			</div>
+			@endif()
 
 			<div class="eight wide column">
 				<div class="field">

@@ -5,6 +5,7 @@
 #include <string>
 #include <atomic>
 #include <boost/filesystem.hpp>
+#include <boost/dll.hpp>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -72,10 +73,15 @@ namespace Vessel
             */
             std::string get_db_path();
 
-            /*! \fn std::string get_appdata_dir();
-                \return Returns the user data directory for the application ( /.vessel )
+            /*! \fn std::string get_working_dir();
+                \return Returns the current working path
             */
             std::string get_working_dir();
+
+            /*! \fn std::string get_exe_path();
+                \return Returns the current executable path
+            */
+            std::string get_exe_path();
 
             /*! \fn int get_total_errors();
                 \return Returns the total runtime errors for the current app context
@@ -87,6 +93,7 @@ namespace Vessel
             std::string m_data_dir;
             std::string m_db_path;
             std::string m_log_dir;
+            std::string m_exe_path;
 
             AppManager(); //Private constructor for singleton model
 

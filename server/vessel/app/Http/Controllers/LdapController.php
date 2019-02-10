@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App;
 use Illuminate\Http\Request;
 
-class SettingController extends Controller
+class LdapController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      *
@@ -15,8 +14,9 @@ class SettingController extends Controller
      */
     public function index()
     {
-        $settings = App\Setting::all();
-				return view('setting.list', ['settings' => $settings]);
+        $ldapServers = App\LdapServer::paginate(10);
+
+				return view('ldap.list', ['ldapServers' => $ldapServers]);
     }
 
     /**
@@ -48,8 +48,8 @@ class SettingController extends Controller
      */
     public function show($id)
     {
-        $setting = App\Setting::find($id);
-				return view('setting.show', ['setting' => $setting]);
+        $ldapServer = App\LdapServer::findOrFail($id);
+				return view('ldap.show', ['ldapServer' => $ldapServer]);
     }
 
     /**
@@ -72,16 +72,23 @@ class SettingController extends Controller
      */
     public function update(Request $request, $id)
     {
-			$setting = App\Setting::find($id);
-			$setting->value = $request->input('value');
-			$setting->save();
-			return $this->index()->with(['success' => 'Setting was updated successfully']);
-    }
+        $ldapServer = App\LdapServer::findOrFail($id);
+				$ldapServer->name = $request->input('name');
+				$ldapServer->server = $request->input('server');
+				$ldapServer->port = $request->input('port');
+				$ldapServer->username = $request->input('username');
+				$ldapServer->dn = $request->input('dn');
+				$ldapServer->type = $request->input('type');
 
-		public function updateAll(Request $request)
-		{
-				//
-		}
+				if ( !empty($request->input('password')) ) {
+					$ldapServer->password = $request->input('password');
+				}
+
+				$ldapServer->save();
+
+				return $this->index()->with(['success' => 'LDAP server was updated successfully']);
+
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -93,4 +100,12 @@ class SettingController extends Controller
     {
         //
     }
+
+		public function import(Request $request, $id) {
+
+			$ldapServer = App\LdapServer::findOrFail($id);
+			$ldapServer->import();
+
+		}
+
 }

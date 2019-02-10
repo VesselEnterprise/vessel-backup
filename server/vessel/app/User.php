@@ -8,6 +8,7 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\BinaryUuid\HasBinaryUuid;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
+use Adldap\Laravel\Traits\HasLdapUser;
 
 class User extends Authenticatable
 {
@@ -15,6 +16,7 @@ class User extends Authenticatable
     use HasBinaryUuid;
     use HasApiTokens;
 		use Searchable;
+		use HasLdapUser;
 
     public function getKeyName()
     {

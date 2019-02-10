@@ -123,7 +123,7 @@
 
 	<div class="ui left aligned fluid stackable grid container">
 		<div class="sixteen wide column">
-			<button class="ui large primary button" onclick="downloadFile()">
+			<button type="button" class="ui large primary button" onclick="downloadFile()">
 				<i class="download icon"></i>
 				Download
 			</button>

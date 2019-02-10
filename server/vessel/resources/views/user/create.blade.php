@@ -110,7 +110,7 @@
 
 	<form method="POST" action="{{ route('user.store') }}" class="ui form segment">
 		@csrf
-		<div class="ui centered stackable grid container">
+		<div class="ui stackable grid container">
 			<div class="left floated row">
 			  <div class="four wide column field">
 			    <label>First Name</label>
@@ -147,6 +147,12 @@
 				<div class="four wide column field">
 					<label>Office</label>
 					<input type="text" name="office" id="office" placeholder="Office" value="{{ old('office') }}">
+				</div>
+			</div>
+			<div class="row">
+				<div class="four wide column field">
+					<label>Business Phone</label>
+					<input type="text" name="phone" id="phone" placeholder="Business Phone" value="{{ old('phone') }}">
 				</div>
 				<div class="four wide column field">
 					<label>Mobile Phone</label>

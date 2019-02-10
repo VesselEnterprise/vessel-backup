@@ -135,6 +135,7 @@
 								</span>
 								<div class="menu">
 									<a class="item" href="{{ route('setting.index') }}">Manage Settings</a>
+									<a class="item" href="{{ route('ldap.index') }}">LDAP</a>
 									<a class="item" href="">Email and Alerts</a>
 									<a class="item" href="">Network and Bandwidth</a>
 									<a class="item" href="">Encryption</a>

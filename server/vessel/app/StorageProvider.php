@@ -24,9 +24,7 @@ class StorageProvider extends Model
 			try {
 				$decrypted = decrypt($value);
 			}
-			catch (DecryptException $e) {
-				//
-			}
+			catch (\Illuminate\Contracts\Encryption\DecryptException $e) {}
 
 			return $decrypted;
 

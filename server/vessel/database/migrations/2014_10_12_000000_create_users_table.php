@@ -31,6 +31,7 @@ class CreateUsersTable extends Migration
             $table->string('zip', 32)->nullable();
             $table->string('title', 100)->nullable();
             $table->string('office', 100)->nullable();
+						$table->string('phone', 32)->nullable();
             $table->string('mobile', 32)->nullable();
             $table->timestamp('last_login')->nullable();
 						$table->timestamp('last_backup')->nullable();

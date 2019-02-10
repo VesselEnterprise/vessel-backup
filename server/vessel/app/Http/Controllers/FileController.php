@@ -11,12 +11,6 @@ use Laravel\Scout\Searchable;
 class FileController extends Controller
 {
 
-		public function __construct()
-		{
-				$this->middleware('auth');
-				$this->middleware('authorizeRole:admin');
-		}
-
     /**
      * Display a listing of the resource.
      *

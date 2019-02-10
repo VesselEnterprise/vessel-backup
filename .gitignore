@@ -120,3 +120,6 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+# Vessel
+server/http.old

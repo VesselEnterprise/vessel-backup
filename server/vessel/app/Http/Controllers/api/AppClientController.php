@@ -207,7 +207,7 @@ class AppClientController extends Controller
 				$appSettings[$key] = $val;
 			}
 
-			$providers = App\StorageProvider::where('active', true)->get();
+			$providers = App\StorageProvider::where('active', true)->orderBy('priority')->get();
 
 			return response()->json([
 				'message' => '♥',
