@@ -42,7 +42,6 @@ namespace Vessel {
             public:
 
                 AzureClient(const StorageProvider& provider);
-                ~AzureClient();
 
                 /*! \fn void init_upload(const BackupFile& file);
                     \brief Initializes the Azure upload

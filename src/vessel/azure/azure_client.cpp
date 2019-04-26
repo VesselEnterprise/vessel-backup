@@ -12,11 +12,6 @@ AzureClient::AzureClient(const StorageProvider& provider) : HttpClient(provider.
     m_chunk_size = BackupFile::get_chunk_size();
 }
 
-AzureClient::~AzureClient()
-{
-
-}
-
 void AzureClient::build_headers()
 {
 

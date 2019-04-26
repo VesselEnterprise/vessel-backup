@@ -38,7 +38,7 @@ class GoogleUploadController extends UploadController
 		//Get the Storage Provider config
 		$storageProvider = App\StorageProvider::withUuid($providerId)->firstOrFail();
 
-		$objectParams = [];
+		$objectParams = [
 			'method' => 'PUT',
       'contentMd5' => $contentMd5
 		];
@@ -52,7 +52,7 @@ class GoogleUploadController extends UploadController
 		}
 
 		$storageClient = new StorageClient([
-			'keyFilePath' => $storageProvider->key_file
+			'keyFilePath' => storage_path() . "/app/" . $storageProvider->key_file
 			//'keyFile' => <json contents>
 		]);
 
